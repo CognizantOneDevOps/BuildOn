@@ -1,0 +1,67 @@
+<div flex layout="column" style="margin: 20px;">
+
+	<md-card class="cardOne"> <md-card-header class="carscmdHead">
+		<md-card-header-text> <span class="md-title">Select Source Control Management </span> </md-card-header-text> </md-card-header> <!-- <md-card-content> -->
+	<div class="scmRadiodiv">
+			<md-radio-group layout="row" ng-change='newValue(selection.value)' ng-model="selection.value"  formControlName="selection" class="scmradioLabel">  
+			<md-radio-button flex="15" style="padding-bottom:18px;outline:none" class="md-primary radioButtonTop" value="github">GitLab</md-radio-button>
+			<!-- <md-radio-button flex="15" style="padding-bottom:18px;outline:none" class="md-primary radioButtonTop" value="svn">SVN</md-radio-button> -->
+			<md-radio-button flex="15" style="padding-bottom:18px;outline:none" class="md-primary radioButtonTop" value="bitbucket">BitBucket</md-radio-button>
+	 		<!-- <md-radio-button flex="15" style="padding-bottom:18px;outline:none" class="md-primary radioButtonTop" value="mftfs">MS TFS</md-radio-button> -->
+			</md-radio-group>		
+</div>
+		<!-- </md-card-content> -->
+	</md-card>
+	<md-list ng-repeat="r in rows track by $index">	
+	<form name="gitForm"  novalidate>
+		<md-card class="cardMulti" style="margin-top:13px;">	 
+			<md-card-header class="carscmdHead" style="background-color: #5bbec3;"> 
+				<md-card-header-text>
+				<span class="md-title">Configure Source Control Management</span> 
+				</md-card-header-text> 
+			</md-card-header> 
+		 	<!-- <md-card-content>-->
+			<md-switch ng-model="r.setDefault" class="defaultIcn scmswitchLabel" ng-true-value="1" ng-false-value="0" md-no-ink aria-label="Switch No Ink" ng-change="changeSwitchmode($index)"> Set as Default </md-switch>          
+			<div layout-gt-sm="row">
+				<md-input-container class="md-block gitInputcontainer">      
+		          <label class="labelCss">SCM URL</label>
+		          <input ng-model="r.url" required md-no-asterisk style="width:98%" class="inputBoxCont scminputContTextCss" placeholder="Please input SCM URL">
+		        </md-input-container>
+				<div class="alert alert-success scm_success_msg" ng-if="msgSuccess=='true' &&  num  == $index">Connection Success</div> 
+		        <div class="alert alert-danger scm_success_msg" ng-if="msgSuccess=='false' && num  == $index">Failed</div>
+		        
+				</div>
+		<md-progress-circular class="scm_progress_bar" md-diameter="30" md-mode="indeterminate" ng-show="scmTestprogress == 'load' &&  num  == $index" ></md-progress-circular>
+        <md-progress-circular class="scm_progress_bar" md-diameter="30" md-mode="indeterminate" ng-show="scmSaveprogress == 'load' &&  num  == $index" ></md-progress-circular>
+				<div layout="row"  style="display: -webkit-inline-box; width: 50%;">		        
+		          <md-input-container class="md-block gitInputcontainer">
+		            <label class="labelCss">OAuth Token </label>
+		            <input type="password"   ng-model="r.oauthtoken" required  md-no-asterisk style="width:90%" class="inputBoxCont scminputContTextCss" placeholder="Please input OAuth Token">
+		          </md-input-container>
+		
+ 		          <md-input-container class="md-block gitInputcontainer">
+		          <!--  <span ng-show="!password.length"><label class="labelCss">Password</label></span>
+		            <input type="password" ng-model="r.password"  required  md-no-asterisk style="width:90%" class="inputBoxCont scminputContTextCss" placeholder="Please input Password">
+		            -->  
+		          </md-input-container>       
+		            
+		          <md-dialog-actions layout="row" class="" layout-align="center center" style="margin-right:76px;">
+		               <md-button  class="md-raised md-primary gitBtn" ng-click="testConnection($index)">Test Connection</md-button> 		                  
+		               <md-button  class="md-raised md-primary gitsaveBtn"  ng-disabled="gitForm.$invalid"  ng-click="save($index)" style="margin-left:15px !important;">Save</md-button>
+			      </md-dialog-actions>	
+			 	  
+			      <!-- <md-switch ng-model="setDefault" class="defaultIcn" aria-label="Set Default" md-no-ink aria-label="Switch No Ink" ng-change="onChange(setDefault,$index)"> Set as Default </md-switch> -->
+			      <!-- <md-switch ng-model="r.setDefault" class="defaultIcn" ng-true-value="1" ng-false-value="0" md-no-ink aria-label="Switch No Ink" ng-change="changeSwitchmode($index)"> Set as Default </md-switch> -->
+			    </div>
+		        <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>		 
+				<md-icon layout aria-label="Add" ng-if="$index === 0" ng-click="addRows($index)"  aria-label="Add" md-svg-src="dist/icons/svg/landingPage/Add_icon.svg" class="addmoreBtn"><md-tooltip md-direction="bottom"> Add</md-tooltip></md-icon>
+				<md-icon  layout aria-label="Add" ng-if="$index> 0" ng-click="removeRow($index,r)" aria-label="Delete" md-svg-src="dist/icons/svg/landingPage/Delete_icon.svg" class="addmoreBtn"><md-tooltip md-direction="bottom"> Delete</md-tooltip></md-icon>
+				
+				</section>
+			<!-- </md-card-content> -->
+		</md-card>
+		<!-- </md-list-item> -->
+	</form>
+	</md-list>
+	
+</div>

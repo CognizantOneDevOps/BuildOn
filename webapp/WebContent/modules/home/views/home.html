@@ -1,0 +1,81 @@
+<div flex style="{{mainOuterheight}}">
+<div class="home_header" layout="row"  layout-align="space-between start">
+	<div layout="row" layout-align="start center">
+		<md-icon style="margin-left:13px;" md-svg-src="dist/icons/svg/landingPage/Build_on_Logo.svg" ng-style="{height: '90px', width: '252px'}"></md-icon>
+	</div>
+	<div layout="row" layout-align="center center" layout-margin class="home_right_section"> 	
+		<div title="Hi {{name}}" class="home_right_text">Hi {{name}}</div>
+		<div class="verticallineHelp"></div>
+		<div title="Logout" class="logout" ng-click="logout()">
+			<md-icon layout md-svg-src="dist/icons/svg/landingPage/Logout_icon.svg" class="logout_img"></md-icon>	
+		</div>		
+	</div>
+</div>
+	<div>
+		<md-dialog-content style="max-width:800px;max-height:810px;">
+			<md-tabs id="maintab" md-dynamic-height md-stretch-tabs class="mainTabBorder" md-selected="selectedTab" > 
+				<md-tab ng-click="changeTab('scm' , '0')" md-on-select="addSelectedImage('scm')" md-on-deselect="removeSelectedImage('scm')"> 
+					<md-tab-label>
+						<md-icon style="margin-top: -7px;" md-svg-src="{{imageurl1}}" ng-style="{height: '20px', width: '20px'}"></md-icon> 
+						<span class="iconMrgn">SCM</span> 
+					</md-tab-label> 
+					<md-tab-body> 
+					 <md-content style="{{mainContentMinHeight}}" class="content_cls"> 
+						<div layout-align="center center" ng-if="templateName == 'scm'" ng-include="'modules/home/views/scm.html'" ng-controller="scmController as scmController"></div>
+					</md-content>	
+					</md-tab-body> 
+				</md-tab> 
+				<md-tab ng-click="changeTab('buildon' , '1')" md-on-select="addSelectedImage('buildon')" md-on-deselect="removeSelectedImage('buildon')"> 
+					<md-tab-label>
+						<md-icon style="margin-top: -7px;" md-svg-src="{{imageurl2}}" ng-style="{height: '20px', width: '20px'}"></md-icon> 
+						<span class="iconMrgn">BuildOn</span> 
+					</md-tab-label> 
+					<md-tab-body> 
+					<md-content style="{{mainContentMinHeight}}" class="content_cls"> 
+						<div layout-align="center center" ng-if="templateName == 'buildon'" ng-include="'modules/build/views/build.html'" ng-controller="BuildController as buildController"></div>
+					</md-content>	
+					</md-tab-body> 
+				</md-tab> 
+				<md-tab ng-click="changeTab('preference' , '2')" md-on-select="addSelectedImage('preference')" md-on-deselect="removeSelectedImage('preference')"> 
+					<md-tab-label>
+						<md-icon style="margin-top: -7px;" md-svg-src="{{imageurl3}}" ng-style="{height: '20px', width: '20px'}"></md-icon> 
+						<span class="iconMrgn">Preference</span> 
+					</md-tab-label> 
+					<md-tab-body> 
+					<md-content style="{{mainContentMinHeight}}" class="content_cls"> 
+						<div layout-align="center center" ng-if="templateName == 'preference'" ng-include="'modules/preference/views/preference.html'" ng-controller="preferenceController as preferenceController"></div>
+					</md-content>	
+					</md-tab-body> 
+				</md-tab> 
+				<md-tab ng-if="showIndividualreport == true" ng-click="changeTab('ind_build_report' , '3')" md-on-select="addSelectedImage('ind_build_report')" md-on-deselect="removeSelectedImage('ind_build_report')" > 
+					<md-tab-label>
+						<md-icon style="margin-top: -7px;" md-svg-src="{{imageurl4}}" ng-style="{height: '20px', width: '20px'}"></md-icon> 
+						<span class="iconMrgn">Individual Build Report</span> 
+					</md-tab-label> 
+					<md-tab-body>
+					<md-content style="{{mainContentMinHeight}}" class="content_cls"> 
+						<div layout-align="center center" ng-if="templateName == 'ind_build_report'" ng-include="'modules/reports/views/individual.html'" ng-controller="individualController as individualController"></div>
+					</md-content>	 
+					</md-tab-body> 
+				</md-tab> 
+				<md-tab ng-click="changeTab('historical_report' , '4')" md-on-select="addSelectedImage('historical_report')" md-on-deselect="removeSelectedImage('historical_report')"> 
+					<md-tab-label>
+						<md-icon style="margin-top: -7px;" md-svg-src="{{imageurl5}}" ng-style="{height: '20px', width: '20px'}"></md-icon> 
+						<span class="iconMrgn">Historical Reports</span> 
+					</md-tab-label> 
+					<md-tab-body> 
+					<md-content style="{{mainContentMinHeight}}" class="content_cls"> 
+						<div layout-align="center center" ng-if="templateName == 'historical_report'" ng-include="'modules/reports/views/historical.html'" ng-controller="historicalController as historicalController"></div>
+					</md-content>	
+					</md-tab-body> 
+				</md-tab> 
+			</md-tabs> 
+		</md-dialog-content>
+	</div>
+	<div layout="column">
+		<div layout="column" layout-align="end end" style="height: 52px; border-top: 1px solid #b2b2b2;">
+			<md-icon layout md-svg-src="dist/icons/svg/landingPage/Footer_logo.svg" class="footer_icn"></md-icon>
+		</div>
+		<div layout class="gradStrip" flex></div>
+	</div>
+</div>

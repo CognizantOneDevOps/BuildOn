@@ -1,0 +1,30 @@
+<md-dialog aria-label="Edit Jenkinsfile">
+<div class="carscmdHead">
+	<span class="md-title">Edit Jenkinsfile</span> 
+	<md-button class="md-icon-button clseBtn" ng-click="cancel()"> 
+	 <md-icon md-svg-src="dist/icons/svg/close.svg" style="width: 15px; height: 15px;" aria-label="Close dialog"></md-icon>
+	</md-button>
+</div><md-dialog-content>
+<div class="md-dialog-content" style="padding-right: 25px; padding-bottom: 9px;">
+	<div layout="column">
+		<Section>
+			<!-- <Select ng-model = "mode" ng-options = "m for m in {{modes}}" ng-change = "modeChanged ()"> </select> -->
+			<div flex layout="column", layout-align="center center">
+			<md-progress-circular md-mode="indeterminate" md-diameter="20" ng-show="show"> </md-progress-circular>
+			</div>	
+			<div ui-ace="aceOption"   ng-model="yamlContent"	style="width: 700px; height: 385px;"></div>
+		</Section>
+		<md-dialog-actions layout="row" layout-align="center center">
+		<md-progress-circular md-mode="indeterminate" md-diameter="15" ng-show="imgshow"> </md-progress-circular>
+		<!-- <md-button  class="md-raised md-primary gitBtn yamlEditorbtn" ng-disabled="isDisabledSave" ng-click="save()">Save</md-button> --> 
+		<!-- <md-button type="submit" class="md-raised md-primary gitBtn yamlEditbtn" ng-click="testClick()">Validate</md-button> -->
+		<md-button type="submit" class="md-raised md-primary gitBtn yamlEditorbtn" ng-disabled="isDisabledSave" ng-click="save()">Check In</md-button> 
+		<md-progress-circular md-mode="indeterminate" md-diameter="15" ng-show="imgshowbuild"> </md-progress-circular>
+		<!-- <md-button  class="md-raised md-primary gitBtn yamlEditorbtn"  ng-click="buildon()">BuildOn Without Commit</md-button> -->
+			<!-- <md-button  class="md-raised md-primary gitBtn yamlEditorbtn" ng-disabled="isDisabled"  ng-click="buildon()">Build On</md-button> -->
+		</md-dialog-actions>
+	</div>
+</div>
+</md-dialog-content> </md-dialog>
+
+

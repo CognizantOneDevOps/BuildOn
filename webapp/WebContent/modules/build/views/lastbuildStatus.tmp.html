@@ -1,0 +1,12 @@
+<md-dialog aria-label="Last Build Status">
+	<div class="carscmdHead">
+		<span class="md-title">{{graph_title}}</span>
+		<md-button class="md-icon-button clseBtn" ng-click="cancel()">
+		<md-icon md-svg-src="dist/icons/svg/close.svg"
+			style="width: 15px; height: 15px;" aria-label="Close dialog"></md-icon>
+		</md-button>
+	</div>
+	<md-dialog-content>
+		<canvas id="chartdiv" style="width: 1000px; height: 400px;" />
+	</md-dialog-content> 
+</md-dialog>

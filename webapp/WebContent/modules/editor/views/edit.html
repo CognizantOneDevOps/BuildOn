@@ -1,0 +1,41 @@
+<md-dialog aria-label="Edit Jenkinsfile">
+<form ng-cloak>
+	<md-toolbar>
+	<div class="md-toolbar-tools">
+		<h2>Edit Jenkinsfile</h2>
+		<span flex></span>
+		<md-button class="md-icon-button" ng-click="cancel()"> <md-icon
+			md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+		</md-button>
+	</div>
+	</md-toolbar>
+
+	<md-dialog-content>
+	<div class="md-dialog-content">
+		<div layout="column">
+			<Section>
+				<div ui-ace="aceOption" ng-model="aceModel"></div>
+				<Select ng-model="mode" ng-options="m for m in modes"
+					ng-change="modeChanged ()">
+				</select>
+			</Section>
+			<div layout="row">
+				<div class="col-md-6">
+					<button class="button1">Save</button>
+				</div>
+				<div class="col-md-6">
+					<button>Validate</button>
+				</div>
+				<div class="col-md-6">
+					<button>Checkin</button>
+				</div>
+				<div class="col-md-6">
+					<button ng-click="build()">build</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	</md-dialog-content>
+</form>
+</md-dialog>
+

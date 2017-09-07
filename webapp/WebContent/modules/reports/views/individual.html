@@ -1,0 +1,124 @@
+<div flex layout="column" style="margin: 15px;">
+	<md-card class="cardOne"> 
+		<md-card-header class="carscmdHead">
+			<md-card-header-text> <span class="md-title">Individual Build Metadata</span> 
+		</md-card-header-text> </md-card-header>
+		<!-- FIRST HEADER --> 
+	<md-card-title class="individual_md_title"> 
+		<md-card-title-text>
+			<span class="">Project : <span>{{details.Project}}</span> </span>
+		</md-card-title-text>
+		<md-card-title-text>
+			<span class="">Branch : <span>{{details.Branch}}</span> </span>
+		</md-card-title-text>
+ 		<md-card-title-text>	
+		<span class="">Trigger From : <span>{{details.TRIGGER_FROM}}</span> </span>
+		</md-card-title-text>
+		<md-card-title-text style="border-right: 0px">
+			<span class="">BuildOn Jenkinsfile : <span>{{details.jenkinsfile}}</span></span> 
+		</md-card-title-text> 
+	</md-card-title>
+	<!--  SECOND HEADER -->
+	<md-card-title class="individual_md_sub_title"> 
+		<md-card-title-text>
+			<span>Initiated by : <span>{{details.Initiatedby}}</span> </span>
+			<span>Job Id : <span>{{details.JobId}}</span> </span>
+		</md-card-title-text>
+		<md-card-title-text>
+			<!-- <span>Commit ID : <span>{{details.CommitID}}</span> --> </span>
+			<!-- <span>Commit Msg : <span>{{details.CommitMsg}}</span> </span> -->
+			 <span>Estimated time : <span>{{details.Estimatedtime}}</span> </span> 
+		</md-card-title-text>
+		<md-card-title-text  style="border-right: 0px;">
+			<span>Began on : <span>{{details.Beginon}}</span> </span>
+			<!-- <span>Estimated time : <span>{{details.Estimatedtime}}</span> </span> -->
+			<!-- <span>Status :<span ng-class="details.status" >{{details.status}}</span> -->
+			<span>Status :<span>{{details.status}}</span>
+		</md-card-title-text>
+	</md-card-title>
+	<!--  THIRD HEADER -->
+<!-- 	 <md-card-actions layout="row" layout-align="end center">
+    	<md-button class="md-raised yamlEditBtn"  ng-click="abortProcess()">Abort</md-button>
+    	<md-button class="md-raised md-primary buildOnBtnCss" ng-click="restart()">Restart</md-button>
+    </md-card-actions>
+ -->    
+	
+	<!-- <md-card-content>
+	<table class="individual_table">
+		<tr>
+			<td><span>Project :</span></td>
+			<td><span>Branches :</span></td>
+			<td><span>Select Image :</span></td>
+			
+		</tr>
+	</table> 
+	</md-card-content> --> </md-card>
+	<md-card class="individual_tab"> 	
+    <md-tabs md-dynamic-height md-border-bottom class="individual_mdtabs">
+      <md-tab label="Pipeline" class="individual_mdtab"  style="background-position: left;" ng-click="individualTab('pipeline')">
+       <!-- <md-content class="md-padding">       
+           <div ng-repeat="i in items track by $index">{{i}}</div></md-content> -->         
+           <md-content class="md-padding" ng-if="activeTabname == 'pipeline'">
+           <div ng-if ="pipelineData == 'nojobs'"><p>Currently no running jobs</p></div>
+ 	  <div ng-if ="pipelineData == '0'"><p>Loading Jobs, please wait..</p></div>
+        	<div ng-if ="pipelineData != 'nojobs' &&  pipelineData != '0'" class="outer_led-box">           
+			  	 <div class="led-gray"></div>
+			  	 <p>Not Started</p>
+			  	 <div class="led-blue-legends"></div>
+			  	 <p>InProgress</p>
+			  	 <div class="led-green"></div>
+			  	 <p>Success</p>
+			  	 <div class="led-yellow"></div>
+			  	 <p>Aborted</p>
+			  	 <div class="led-red"></div>
+			  	 <p>Failure</p>		 
+		   </div>			        
+          <div ng-if ="pipelineData != 'nojobs' && pipelineData != '0'" ng-repeat="jsonopdata in pipelineData track by $index">
+			  <div class="box box1 shadow1">
+			  <div class="led-box">
+			  	 <div class="led-gray" ng-if="jsonopdata.status == 'NOTSTARTED'"></div>			  	 
+			  	 <div class="led-blue" ng-if="jsonopdata.status == 'INPROGRESS'"></div>  
+			  	 <div class="led-green" ng-if="jsonopdata.status == 'SUCCESS'"></div>
+			  	 <div class="led-yellow" ng-if="jsonopdata.status == 'ABORTED'"></div>
+				 <div class="led-red" ng-if="jsonopdata.status == 'FAILURE'"></div>
+				 </div>				 
+			  	 <div class="block" ng-if="!$last"></div>		  	  
+			  	 <div class="individual_pipeline_text"><label>{{jsonopdata.jobname}}</label></div>				  				   
+			  </div>
+			</div>			 
+			 
+<md-progress-circular ng-show="piplelineShow" style="display: inline;width: 30px;height: 30px;left: 500px;" md-diameter="30" md-mode="indeterminate"></md-progress-circular> 
+			</md-content>  
+        
+      </md-tab>
+      <md-tab label="Infra Logs" ng-click="individualTab('infralogs')" md-selected>
+      	  <md-content class="md-padding" ng-if="activeTabname == 'infralogs'">
+        	 <!-- <div><p>{{infralogsdata}}</p></div> -->
+        	 <div id="infraLogData" style="max-height:350px;overflow:auto;"></div> 
+<md-progress-circular ng-show="infralogShow" style="display: inline;width: 30px;height: 30px;left: 572px; bottom:16px;" md-diameter="30" md-mode="indeterminate"></md-progress-circular>
+
+         </md-content>
+      </md-tab>
+      <md-tab label="CI Logs" ng-click="individualTab('cilogs')">
+        <md-content class="md-padding" ng-if="activeTabname == 'cilogs'">
+         <!--  <div><p>{{cilogData}}</p></div> -->
+         <div id="ciLogData" style="max-height:350px;overflow:auto;"></div> 
+<md-progress-circular ng-show="cilogShow" style="display: inline;width: 30px;height: 30px;left: 572px; bottom:16px;" md-diameter="30" md-mode="indeterminate"></md-progress-circular>
+
+        </md-content>
+      </md-tab>
+<!--  <md-tab label="Test Logs" ng-click="individualTab('testlogs')">
+        <md-content class="md-padding"  style="max-height: 350px; overflow: scroll;" ng-if="activeTabname == 'testlogs'">
+          <h1 class="md-display-2">Test Logs</h1>
+          <p>Integer turpis erat, porttitor vitae mi faucibus, laoreet interdum tellus. Curabitur posuere molestie dictum. Morbi eget congue risus, quis rhoncus quam. Suspendisse vitae hendrerit erat, at posuere mi. Cras eu fermentum nunc. Sed id ante eu orci commodo volutpat non ac est. Praesent ligula diam, congue eu enim scelerisque, finibus commodo lectus.</p>
+        </md-content>
+      </md-tab>
+      <md-tab label="Others" ng-click="individualTab('otherlogs')">
+        <md-content class="md-padding"  style="max-height: 350px; overflow: scroll;" ng-if="activeTabname == 'otherlogs'">
+          <h1 class="md-display-2">Others</h1>
+          <p>Integer turpis erat, porttitor vitae mi faucibus, laoreet interdum tellus. Curabitur posuere molestie dictum. Morbi eget congue risus, quis rhoncus quam. Suspendisse vitae hendrerit erat, at posuere mi. Cras eu fermentum nunc. Sed id ante eu orci commodo volutpat non ac est. Praesent ligula diam, congue eu enim scelerisque, finibus commodo lectus.</p>
+        </md-content>
+      </md-tab>   -->    
+    </md-tabs>
+  </md-card>
+</div>

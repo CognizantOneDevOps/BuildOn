@@ -1,0 +1,14 @@
+.theadCss {
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: #3c3c3c !important;
+	background-color: #d6f0f1;
+}
+.tdCss {
+	font-family: proxima_novaregular !important;
+	font-size: 14px !important;
+	color: #3c3c3c !important;
+}
+.table-bordered > thead > tr > th, .table-bordered > thead > tr > td {
+	border-bottom-width: 1px;
+}

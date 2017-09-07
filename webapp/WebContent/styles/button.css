@@ -1,0 +1,55 @@
+.buttondemoBasicUsage section {
+  background: #f7f7f7;
+  border-radius:5px;
+  text-align: center;
+  margin: 1em;
+  position: relative !important;
+  padding-bottom: 10px; }
+.buttondemoBasicUsage md-content {
+  margin-right: 7px; }
+.buttondemoBasicUsage section .md-button {
+  margin-top: 16px;
+  margin-bottom: 16px; }
+.buttondemoBasicUsage .label {
+  position: absolute;
+  bottom: 5px;
+  left: 7px;
+  font-size: 14px;
+  opacity: 0.54;
+ }
+
+  .buttonView{
+  /*background-color: #5262bc !important;*/
+  white-space: normal;
+  text-transform: initial;
+	width:16% ! important;
+	text-decoration:none ! important;
+  margin-left: 30px;
+  line-height:normal;
+  min-height: 40px !important;
+}
+
+.orphanCommitColor{
+  background-color: #808080 !important;
+}
+
+.continuousBuildColor{
+  background-color: #ffad32 !important;
+}
+
+.deploymentWithOutCodeQuality{
+  background-color: #ff1919 !important;
+}
+
+.continuousDeployment{
+  background-color: #198c19 !important;
+}
+
+md-switch.md-checked .md-bar {
+    background-color: lightgreen; /* set selected bar color */
+}
+md-switch.md-checked .md-thumb {
+    background-color: lightgreen; /* selected switch color */
+}
+
+

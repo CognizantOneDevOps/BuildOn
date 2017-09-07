@@ -1,0 +1,9 @@
+/*footer css*/
+.gradStrip {
+  background: #51b2ce; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left, #51b2ce , #66b25a); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, #51b2ce , #66b25a); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, #51b2ce , #66b25a); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, #51b2ce , #66b25a); /* Standard syntax */
+  height: 10px;
+}

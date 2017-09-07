@@ -1,0 +1,79 @@
+<style>
+     ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+	}
+	li {
+    float: left;
+    border: 1px solid #000;
+    border-bottom-width: 0;
+    margin: 3px 3px 0px 3px;
+    padding: 5px 5px 0px 5px;
+    background-color: #CCC;
+   /*  color: #696969; */
+	}
+	#mainView {
+    border: 1px solid black;
+	clear: both;
+	padding: 0 1em;
+	}
+	.active {
+    background-color: #FFF;
+    color: #000;
+	}
+</style>
+
+<div class="bordercont" layout-align="center center" >
+<div layout="row"  flex>
+	<div layout="column" style="padding:10px;" >
+		Commit ID: efescr1		Commint Msg: Defect No #123			JobID: 1123	
+	</div>
+	<div class="col-md-6" style="padding:10px;" >
+		<button ng-click="prefer()"> Abort</button>
+	</div>
+	<div class="col-md-6" style="padding:10px;" >	
+		<button> Restart</button>
+	</div>
+</div>
+
+	<div layout="row"  flex>
+	
+			<div id="tabs" >
+	        <ul>
+	            <li ng-repeat="tab in tabs" 
+	                ng-class="{active:isActiveTab(tab.url)}" 
+	                ng-click="onClickTab(tab)">{{tab.title}}</li>
+	        </ul>
+	        <div id="mainView">
+	            <div ng-include="currentTab"></div>
+	        </div>
+	    	</div>
+	    	<script type="text/ng-template" id="pipeline.html">
+				<div id="viewOne">
+				<p>Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet. Nunc.</p>
+				</div>
+			</script>
+		
+			<script type="text/ng-template" id="Infralogs.html">
+				<div id="viewTwo">
+				<p>Curabitur vulputate, ligula lacinia scelerisque tempor, lacus lacus ornare ante, ac egestas est urna sit amet arcu. Class aptent taciti sociosqu.</p>
+				</div>
+			</script>
+		
+			<script type="text/ng-template" id="CI.html">
+				<div id="viewThree">
+				<p>In pellentesque faucibus vestibulum. Nulla facilisi. Duis aliquet egestas purus in blandit. Curabitur vulputate, ligula lacinia scelerisque tempor, lacus lacus ornare ante, ac egestas est urna sit amet arcu. Class aptent taciti sociosqu.</p>
+				</div>
+			</script>
+	</div>
+
+
+
+
+	
+	
+
+
+
+</div>
