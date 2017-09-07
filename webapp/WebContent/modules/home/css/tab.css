@@ -1,0 +1,131 @@
+.md-tab {
+	font-size: 14px;
+	text-align: center;
+	line-height: 24px;
+	padding: 12px 24px;
+	transition: background-color 0.35s cubic-bezier(0.35, 0, 0.25, 1);
+	cursor: pointer;
+	white-space: nowrap;
+	position: relative;
+	text-transform: initial !important;
+	float: left;
+	font-weight: 500;
+	box-sizing: border-box;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-family: proxima_novasemibold !important;
+}
+
+md-tabs.md-default-theme .md-tab.md-active, md-tabs .md-tab.md-active,
+	md-tabs.md-default-theme .md-tab.md-active md-icon, md-tabs .md-tab.md-active md-icon,
+	md-tabs.md-default-theme .md-tab.md-focused, md-tabs .md-tab.md-focused,
+	md-tabs.md-default-theme .md-tab.md-focused md-icon, md-tabs .md-tab.md-focused md-icon
+	{
+	color: #0782a3 !important;
+	background: #f1f1f1;
+}
+
+md-tabs.md-default-theme md-ink-bar, md-tabs md-ink-bar {
+	color: #ffffff !important;
+	background: #ffffff !important;
+}
+
+md-ink-bar {
+	height: 0px;
+}
+
+.subTabCss {
+	margin-left: -20px;
+	margin-top: -1px;
+}
+
+.iconLablCss {
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	/*color: #666666 !important;*/
+}
+
+md-tabs .md-tab {
+	color: #414141 !important;
+	background: #f1f1f1;
+	font-size: 16px;
+	font-family: proxima_novaregular !important;
+	margin-right: 10px;
+	width: 239px;
+	height: 50px;
+	background-image: linear-gradient(to left, #30d3b6 1%, #30d3b6 50%, #1586af 100%);
+	background-size: 100% 2px;
+	background-position: 0% 0%, 0% 100%;
+	background-repeat: no-repeat;
+	margin-bottom: 10px;
+}
+
+.iconMrgn {
+	margin-left: 5px;
+	margin-top: 32px;
+}
+
+md-pagination-wrapper {
+	height: 48px;
+	display: block;
+	transition: -webkit-transform 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+	transition: transform 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+	position: absolute;
+	width: 999999px !important;
+	left: 30px;
+	-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+}
+
+md-tabs-canvas {
+	position: relative;
+	overflow: hidden;
+	display: block;
+	height: 60px;
+}
+
+#subtab md-tabs-canvas {
+	background-color: #dff1f6 !important;
+}
+
+md-tabs-wrapper {
+	display: block;
+	position: relative;
+	-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+	max-height: 48px;
+}
+
+md-tabs.mainTabBorder .md-tab.md-active {
+	font-family: proxima_novasemibold !important;
+	border-bottom: none;
+	margin-right: 10px;
+	border-bottom: none;
+	font-size: 16px;
+	background-image: linear-gradient(to left, #30d3b6 1%, #30d3b6 50%, #1586af 100%);
+	background-size: 100% 2px;
+	background-position: 0% 0%, 0% 100%;
+	background-repeat: no-repeat;
+	height:60px;
+}
+
+.setSubTabBorder md-tabs-wrapper {
+	border: #addbe8 1px solid;
+	border-left: none;
+	border-right: none;
+}
+
+md-tabs.subTabCss.setSubTabBorder .md-tab.md-active {
+	border: none;
+}
+
+.mainTabBorder md-tabs-wrapper {
+	/*     border: #addbe8 1px solid; */
+	border-left: none;
+	border-right: none;
+	border-top: none;
+}
+
+#maintab md-tabs-canvas {
+	padding-bottom: 1px;
+}

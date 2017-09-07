@@ -1,0 +1,283 @@
+.scrollable-nav-content {
+    position: absolute;
+    top: 136px;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height:auto;
+    overflow: scroll;
+  }
+
+  md-sidenav {
+    box-sizing: border-box;
+    position: absolute;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    z-index: 60;
+    width: 248px;
+    max-width: 320px;
+    bottom: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.scrollable-nav-content{
+  position: absolute;
+    top: 70px;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    overflow: auto;
+}
+
+.addOrgButton{
+  right: 20px;
+  bottom: 30px;
+  left: auto;
+  position: absolute;
+}
+
+.roleAvatar {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    /*border: 1px solid gray;
+    border-radius: 50%;
+    display: inline-block;
+    overflow: hidden;*/
+    margin: 0px;
+    vertical-align: middle;
+    zoom: 0.70;
+    transform: translateZ(0);
+    -webkit-transform: scale(0.70);
+    -moz-transform: scale(0.70);
+}
+
+.roleTitle {
+    font-size: 15px;
+    font-weight: 500;
+    /*color: #757575;*/
+    text-transform: initial !important;
+    margin-top: 8px;
+    margin-left: 10px;
+}
+
+.invalidMsg{
+font-size: 17px;
+color: red;
+font: italic;
+font-style: italic;
+font-weight: bold;
+margin-top: -30px;
+margin-left: 85px;
+}
+.md-button-role {
+    padding: 0 0px;
+    margin: 0px 0px;
+    line-height: 0px;
+    min-height: 0px;
+}
+
+.selectedRoleAvatar {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 1px solid gray;
+  border-radius: 50%;
+  display: inline-block;
+  overflow: hidden;
+  margin: 0px;
+  vertical-align: middle;
+  zoom: 0.70;
+  transform: translateZ(0);
+  -webkit-transform: scale(0.70);
+  -moz-transform: scale(0.70);
+}
+
+.whiteframe-role-8dp {
+    margin: 25px;
+    height: 80px;
+    width: 20%;
+    background-color: #deeff5;
+}
+
+table.attributes, table.md-api-table-role {
+  padding-left:-8px;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+table.attributes  tr  td:first-child {
+  background-color: #DBEEF5;
+}
+table.attributes  tr  td:last-child {
+  padding-left: 10px;
+}
+
+table.md-api-table-role  tr  td:first-child {
+  font-weight: bold;
+}
+.md-api-table-role-user td{
+  padding: 5px 16px;
+  text-align: left;
+}
+.md-api-table-role-user th {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.md-api-table-role td,
+.md-api-table-role th {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.md-api-table-role td{}
+  vertical-align: top;
+}
+.md-api-table-role td.description *:first-child {
+  margin-top: 0;
+}
+.md-api-table-role td.description *:last-child {
+  margin-bottom: 0;
+}
+ .md-api-table-role tr:nth-child(odd) td {
+  background-color: #f1f1f1;
+}
+.md-api-table-role tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+.md-api-table-role th {
+	font-size: 15px;
+    font-weight: 500;
+    color: #757575;
+    letter-spacing: .010em;
+    line-height: 1.2em;
+	text-align: left;
+  padding-left:13px
+}
+
+.borderBottom{
+	 border-bottom:1px solid #bcbcbc;
+}
+
+
+.textFormatTable{
+	font-size: 13px;
+    color: #212121;
+	text-align: center;
+}
+.hoverme:hover
+{
+background-color:#d9d9d9;
+}
+
+.textDecoration{
+  outline: none;
+  border: 0;
+}
+
+.defaultOrgSelection{
+/*  background-color: #f2f2f2;*/
+  color:#3232ff !important;
+}
+
+.textFormatTextArea{
+	font-size: 14px;
+  color: #212121 !important;
+	text-align: left;
+}
+
+textarea::-webkit-input-placeholder {  color: #212121;}
+
+.md-dialog-role {
+    opacity: 0;
+    min-width: 62%;
+    max-width: 109%;
+    /*max-height: 124%;*/
+    position: relative;
+    overflow: auto;
+    box-shadow: 0px 7px 8px -4px rgba(0, 0, 0, 0.2), 0px 13px 19px 2px rgba(0, 0, 0, 0.14), 0px 5px 24px 4px rgba(0, 0, 0, 0.12);
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+
+  .searchIcon-alignment-roles {
+      margin-top: -17px !important;
+  }
+
+  .searchDivAlignmentRole {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+  .userSearchTextFont {
+  	font-size: 13px !important;
+      font-weight: 500;
+      color: #757575;
+      letter-spacing: .010em;
+      line-height: 1.2em;
+  	text-align: left;
+
+  }
+
+  table.attributes, table.md-api-table-role-user {
+    padding-left:-8px;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+  }
+  table.attributes  tr  td:first-child {
+    background-color: #DBEEF5;
+  }
+  table.attributes  tr  td:last-child {
+    padding-left: 10px;
+  }
+
+  table.md-api-table-role-user  tr  td:first-child {
+    font-weight: bold;
+  }
+  .md-api-table-role-user td{
+    padding: 0px 16px;
+    text-align: left;
+  }
+  .md-api-table-role-user th {
+    padding: 14px 16px;
+    text-align: left;
+  }
+
+  .md-api-table-role-user td.description *:first-child {
+    margin-top: 0;
+  }
+  .md-api-table-role-user td.description *:last-child {
+    margin-bottom: 0;
+  }
+   .md-api-table-role-user tr:nth-child(odd) td {
+    background-color: #f6f6f6;
+  }
+  .md-api-table-role-user tr:nth-child(even) td {
+    background-color: #ededed;
+  }
+  .md-api-table-role-user th {
+  	font-size: 15px;
+      font-weight: 500;
+      color: #757575;
+      letter-spacing: .010em;
+      line-height: 1.2em;
+  	text-align: left;
+    padding-left:13px
+  }
+
+md-select {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    margin: 2px 0 17px 0;
+}
+
+md-select.md-default-theme .md-select-value.md-select-placeholder, md-select .md-select-value.md-select-placeholder {
+  color: #212121;
+}

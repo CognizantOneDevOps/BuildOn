@@ -1,0 +1,708 @@
+/**Common**/
+body {
+	font-family: proxima_novaregular !important;
+    font-size: 14px;
+}
+.inputBoxCont {
+	border: 1px !important;
+	border-style: solid !important;
+	border-color: #b7b7b7 !important;
+	border-bottom-color: #cecece !important;
+	background-color: white !important;
+	text-align: left !important;
+	height: 38px !important;
+	box-sizing: initial !important;
+	padding-left: 10px !important;
+}
+
+.home_right_section {	
+	margin-right: 30px;
+    margin-top: 25px;
+}
+
+.home_header {
+	/*height: 78px;*/
+	height:97px;
+	background-color: #f8f8f8;
+	margin-bottom: 10px;
+	background-image: url(/buildon/dist/icons/others/shadow_below_header.png);
+	background-repeat: no-repeat;
+	background-position: bottom;
+}
+
+.home_right_text {
+	/* margin-right: 8px;
+	margin-top: 30px; */
+	font-family: proxima_novaregular !important;
+	color: #666666;
+	font-size: 14px;
+}
+
+
+.logout_img {
+	height: 20px;
+	width: 20px;
+	margin-right: 5px;
+	margin-left: 5px;
+	outline: none;
+	cursor: pointer;
+}
+/*footer css*/
+.gradStrip {
+	background: #51b2ce; /* For browsers that do not support gradients */
+	background: -webkit-linear-gradient(right, #30d3b6, #1586af);
+	/* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(left, #30d3b6, #1586af);
+	/* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(left, #30d3b6, #1586af);
+	/* For Firefox 3.6 to 15 */
+	background: linear-gradient(to left, #30d3b6, #1586af);
+	/* Standard syntax */
+	height: 6px;
+}
+
+.footer_icn {
+	height: 28px;
+	width: 94px;
+	margin-right: 30px;
+	margin-bottom: 11px;
+}
+
+.content_cls {
+	background-color: #f1f1f1;
+	margin-top: 10px;
+	width: 95%;
+	float: left;
+	left: 30px;
+}
+
+.carscmdHead {
+	height: 40px;
+	background-color: #59b5cd;
+	text-align: center;
+	padding: 6px;
+	color: #ffffff;
+	font-size: 18px !important;
+	font-family: proxima_novaregular !important;
+}
+
+.cardOne {
+	border: 1px solid #59b5cd !important;
+	/* border-top: none !important; */
+	box-shadow: none;
+}
+
+.cardMulti {
+	border: 1px solid #5bbec3 !important;
+	/* border-top: none !important; */
+	box-shadow: none;
+}
+
+.inputBoxContNewApplication {
+	border: 1px solid #b7b7b7 !important;
+	background-color: white !important;
+	text-align: left !important;
+	height: 36px !important;
+	box-sizing: initial !important;
+	font-family: proxima_novaregular !important;
+	font-size: 14px !important;
+	color: #666666 !important;
+	padding-left: 7px !important;
+	width: 60% !important;
+	position: absolute;
+	left: 76px;
+	bottom: 0;
+}
+
+.inputLabel {
+	position: absolute;
+	bottom: 11px;
+}
+
+.inputLabel {
+	font-size: 14px;
+	color: #666666;
+	font-family: 'proxima_novalight';
+}
+
+.yamlEditBtn {
+	color: white !important;
+	background-color: #666666 !important;
+	margin-left: 15px !important;
+	padding-left: 18px !important;
+}
+
+.yamlbtnIcon {
+	height: 15px;
+	width: 15px;
+	position: absolute;
+	right: 104px;
+	color: white;
+	z-index: 99;
+	text-align: right !important;
+}
+
+.successMsg {
+	font-size: 14px;
+	color: red;
+	font-family: 'proxima_novalight';
+}
+
+.dialogdemoBasicUsage #popupContainer {
+	position: relative;
+}
+
+.dialogdemoBasicUsage .footer {
+	width: 100%;
+	text-align: center;
+	margin-left: 20px;
+}
+
+.dialogdemoBasicUsage .footer, .dialogdemoBasicUsage .footer>code {
+	font-size: 0.8em;
+	margin-top: 50px;
+}
+
+.dialogdemoBasicUsage button {
+	width: 200px;
+}
+
+.dialogdemoBasicUsage div#status {
+	color: #c60008;
+}
+
+.dialogdemoBasicUsage .dialog-demo-prerendered md-checkbox {
+	margin-bottom: 0;
+}
+
+/* .ace_editor { position: static !important; } */
+.clseBtn {
+	float: right;
+	margin-right: -5px !important;
+	margin-top: -3px !important;
+}
+
+.yamlEditorbtn {
+	width: 0px !important;
+}
+
+.buildOnBtnCss {
+	min-height: 38px !important;
+	min-width: 115px !important;
+	font-size: 16px !important;
+	font-family: proxima_novaregular !important;
+	border-radius: 0px !important;
+	text-transform: initial !important;
+	color: white !important;
+	background-color: #02a5cf !important;
+	border-radius: 3px !important;
+	margin-top: 40px;
+}
+
+.graphLists {
+	min-height: 396px;
+	padding: 20px 0px 20px 0px;
+	padding-right: 0px;
+}
+
+.graphWhiteframe {
+	margin: 10px;
+	background-color: #e9f1f3;
+}
+
+#chartdiv div.amcharts-main-div div.amcharts-chart-div a,
+	#buildTrendsDiv div.amcharts-main-div div.amcharts-chart-div a,
+	#lastbuildDiv div.amcharts-main-div div.amcharts-chart-div a,
+	#projectbuildsDiv div.amcharts-main-div div.amcharts-chart-div a,
+	#comparebuildsDiv div.amcharts-main-div div.amcharts-chart-div a {
+	display: none !important;
+}
+
+#buildTrendsDiv div.amcharts-main-div div.amcharts-export-menu,
+	#lastbuildDiv div.amcharts-main-div div.amcharts-export-menu,
+	#projectbuildsDiv div.amcharts-main-div div.amcharts-export-menu,
+	#comparebuildsDiv div.amcharts-main-div div.amcharts-export-menu {
+	display: none !important;
+}
+
+.legend-title {
+	font-family: Verdana;
+	font-weight: bold;
+	margin-left: 20px;
+}
+
+.miniChartspan {
+	position: absolute;
+	top: 259px;
+	left: 124px;
+	font-weight: bold;
+}
+
+.miniChartDiv {
+	margin-left: 20px;
+	width: 46%;
+	height: 210px;
+	box-shadow: 0px 2px 0px #cccccc;
+	background-color: #e9f1f3;
+}
+
+/*prefrences*/
+.pref_md-select_icon {
+	width: 80%;
+	background: #fff url("../dist/icons/svg/ic_browse.svg") no-repeat 100%
+		50%;
+	background-size: 25px 25px;
+}
+.pref_md-select_icon .md-select-value  span.md-select-icon {
+	display: none;
+}
+.pref_table_heads {
+	font-family: proxima_novasemibold !important;
+	font-size: 14px;
+	color:#3c3c3c;
+	background-color: #d6f0f1;
+}
+.pref_selectbox_container {
+	width:100%;
+	margin-left: 40px;
+}
+
+/*Individual report*/
+/* .individual_table {
+	width: 100%;
+}
+
+.individual_table td {
+	padding-right: 33px;
+	padding-left: 15px;
+	border-right: 1px solid lightgray;
+} */
+.individual_md_title {
+	background-color: #e5f5f5;
+	padding: 15px 5px 15px 10px;
+	border-bottom: 1px solid #59b5cd !important;
+}
+
+.individual_md_title md-card-title-text {
+	border-right: 2px solid lightgray;
+	margin-left: 20px;
+}
+
+.individual_md_title md-card-title-text span, .individual_md_sub_title md-card-title-text span
+	{
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: #3c3c3c !important;
+}
+
+.individual_md_title md-card-title-text span span,
+	.individual_md_sub_title md-card-title-text span span {
+	font-family: proxima_novaregular !important;
+	font-size: 14px !important;
+	color: #3c3c3c !important;
+}
+
+.individual_md_sub_title {
+	padding: 15px 5px 15px 10px;
+}
+
+.individual_md_sub_title md-card-title-text {
+	border-right: 2px solid lightgray;
+	margin-left: 20px;
+}
+
+.individual_md_sub_title md-card-title-text span:first-child {
+	padding-bottom: 10px;
+}
+
+.individual_md_sub_title md-card-title-text span span.COMPLETED{
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: #008000 !important;
+}
+
+.individual_md_sub_title md-card-title-text span span.FAILURE{
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: red !important;
+}
+
+.individual_md_sub_title md-card-title-text span span.ABORTED{
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: #DAA520 !important;
+}
+
+.individual_md_sub_title md-card-title-text span span.INITIATED{
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: #949494 !important;
+}
+
+.individual_md_sub_title md-card-title-text span span.INPROGRESS{
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	color: #24E0FF !important;
+}
+
+.individual_tab {
+	border: 1px solid #cccccc !important;
+	/* border-top: none !important; */
+	box-shadow: none;
+}
+
+.individual_mdtabs md-pagination-wrapper {
+	left: 0px;
+	width: 101% !important;
+}
+
+.individual_mdtabs md-pagination-wrapper md-tab-item {
+ 	/* width: 247px;  
+	 width:412px; */
+	 width: 33.01%;
+}
+
+.individual_mdtabs md-pagination-wrapper md-tab-item.md-tab {
+	margin: 0px;
+	background-color: #ffffff;
+	border-top: 2px solid #5da9c5;
+	border-bottom: 2px solid #6fddca;
+	background-image: linear-gradient(#5da9c5, #6fddca);
+	background-size: 2px 100%;
+	background-position: 0 0, 100% 0;
+	background-position: left;
+	background-repeat: no-repeat;
+	height: 48px;
+	font-family: proxima_novaregular !important;
+	font-size: 16px !important;
+	color: #3c3c3c !important;
+}
+
+.individual_mdtabs md-pagination-wrapper md-tab-item.md-tab.md-active {
+	margin: 0px;
+	background-color: #4bbba9;
+	background-image: none;
+	border: none;
+	height: 48px;
+	color: #ffffff !important;
+}
+
+.individual_mdtabs md-tabs-wrapper md-tabs-canvas md-pagination-wrapper md-tab-item:nth-last-child(2) {
+    border-right:2px solid #67c7c8;
+}
+
+.individual_mdtabs md-tabs-wrapper md-tabs-canvas md-pagination-wrapper md-tab-item:first-child
+	{
+	background-position: left;
+}
+
+.individual_mdtab md-content {
+	max-height: 350px;
+	overflow: scroll;
+}
+
+.individual_pipeline_text {
+	font-family: proxima_novasemibold !important;
+	font-size: 14px !important;
+	width: 20% !important;	
+	display: inline-block;
+	padding:10px;
+	width: 90% !important;
+	margin-top: 0px;;
+	word-wrap: break-word;
+	/*  margin: 17px; */
+}
+
+.individual_pipeline_text label {
+	display: initial !important;
+}
+
+/* .individual_mdtabs md-tabs-wrapper md-tabs-canvas md-pagination-wrapper md-tab-item {
+	background-position: right !important;
+} */
+
+/* .individual_mdtabs md-tabs-wrapper {
+	border-right: 1px solid red !important;
+} */
+.individual_infralog_data {
+	font-family: proxima_novaregular !important;
+	font-size: 14px;
+	color: #666666;
+	padding: 10px;
+}
+
+/*** Historical page **/
+.hits_input_container md-datepicker .md-datepicker-input-container .md-datepicker-triangle-button
+	{
+	display: none;
+}
+
+.hits_input_container md-datepicker .md-datepicker-button .md-datepicker-calendar-icon
+	{
+	height: 25px;
+	width: 25px;
+	float: right;
+	left: -38px;
+}
+
+.hits_input_container md-datepicker .md-datepicker-button {
+	float: right;
+	/* background-color: #f1f1f1; */
+	border-radius: inherit;
+	top: 12px;
+	left: -7px;
+	border: 1px solid lightgray;
+	height: 0px !important;
+	padding: 6px;
+	background: #f1f1f1 url("../dist/icons/svg/ic_calender.svg") no-repeat
+		100% 50%;
+	background-size: 20px 20px;
+    background-position: center;
+}
+
+.hits_input_container md-datepicker .md-datepicker-input-container {
+	border: 1px solid lightgray;
+	height: 36px;
+}
+
+.hits_input_container md-datepicker .md-datepicker-input-container .md-input
+	{
+	border-style: none;
+	height: 36px;
+	text-align: center;
+}
+
+.hits_input_container .md-label {
+	top: 6px;
+	font-family: proxima_novasemibold !important;
+	font-size: 14px;
+	color: #3c3c3c;
+	font-weight: normal;
+}
+
+.hits_input_container .radioBtn {
+	padding: 18px 25px 18px 18px;
+	outline: none;	
+}
+
+.hits_input_container label, .hits_input_container span {
+	right: 70px;
+	font-family: proxima_novaregular !important;
+	font-size: 16px;
+	color: #666666;
+	font-weight: normal;
+}
+
+.hits_input_container md-select md-select-value.md-select-placeholder span
+	{
+	right: 70px;
+	font-family: proxima_novaregular !important;
+	font-size: 14px;
+	color: #b1b0b0;
+	font-weight: normal;
+}
+.hits_input_container md-select md-select-value.md-select-placeholder {
+	/* padding-left: 15px; */
+	border-bottom-style: none;
+	border-bottom-width: 0px; 
+}
+.hits_input_container md-select md-select-value {
+	border-bottom-style: none !important;
+	border-bottom-width: 0px !important;
+	border-bottom-color: white !important;
+	/* padding-left: 15px !important; */
+}
+
+.histBtnCss {
+	position: absolute;
+	right: 33px;
+	top: 158px;
+	min-height: 38px !important;
+	min-width: 115px !important;
+	font-size: 16px !important;
+	font-family: proxima_novaregular !important;	
+	text-transform: initial !important;
+	color: white !important;
+	background-color: #02a5cf !important;
+	border-radius: 3px !important;
+}
+
+.hits_input_container md-datepicker .md-datepicker-button md-icon svg {
+	display: none;
+}
+
+/**SCM**/
+
+.scmRadiodiv {
+	margin:20px 20px 20px 0px; 
+}
+.carscmdHead span {	
+	font-size: 18px !important;
+	font-family: proxima_novaregular !important;
+	color: #ffffff;
+	font-weight: normal !important;
+}
+.scmconfigspan {
+	float: left;
+    margin-right: 15px;
+    margin-top: 10px;
+}
+.labelCss{
+	font-size: 17px !important;
+	font-family: proxima_novaregular !important;
+	color: #666666 !important;
+	height: 25px;
+    font-weight: normal !important;    	
+}
+.gitInputcontainer {	
+	margin-left: 20px;
+    width: 54%;
+    padding: 0px;
+    margin-top: 30px
+}
+
+.gitBtn {
+	/* 	float: right;
+	margin-right: 46px; */
+	min-height: 38px !important;
+	/* min-width: 138px !important; */
+	min-width: 200px !important;
+	font-size: 16px !important;
+	font-family: proxima_novaregular !important;
+	border-radius: 3px !important;
+	text-transform: initial !important;
+	color: white !important;
+	background-color: #02a5cf !important;
+	width: 164px !important;
+}
+.gitsaveBtn {
+	/* 	float: right;
+	margin-right: 46px; */
+	min-height: 38px !important;
+	min-width: 109px !important;
+	font-size: 16px !important;
+	font-family: proxima_novaregular !important;
+	border-radius: 3px !important;
+	text-transform: initial !important;
+	color: white !important;
+	background-color: #02a5cf !important;
+	width: 109px !important;
+}
+
+
+.addmoreBtn {
+	height: 22px;
+	width: 22px;
+	margin-right: 30px;
+	margin-top: -200px;
+	position: absolute;
+	right: 5px;
+	outline: none;
+	cursor: pointer;
+}
+
+/* .defaultIcn {
+	float: right;
+	margin-top: -68px;	
+	margin-right: 20px !important;
+	position: absolute;
+    right: 53px;
+    float: right;
+    bottom: 145px;
+} */
+.defaultIcn {
+	/* float: right;
+	margin-top: -68px;	
+	margin-right: 20px !important; */
+	position: absolute;
+    right: 78px;
+    /* float: right; */
+    margin-top: 58px;
+} 
+.scm_success_msg {
+    position: relative;
+    /* right: 220px; */
+    left: 100px;
+    width: 20%;
+    text-align: center;
+    top: 27px;
+    height: 54px;
+} 
+/* .scm_progress_bar {
+	display: inline;
+    width: 30px;
+    height: 30px;    
+    position: absolute;
+    left: 1161px;
+} */
+.scm_progress_bar {
+	display: inline;
+    width: 30px;
+    height: 30px;    
+    position: absolute;
+    /* left: 1161px; */    
+    right: 125px;
+    margin-top: 104px;
+}
+.scminputContTextCss {
+    font-family: proxima_novaregular !important;
+    font-size: 14px !important;
+    color: #666666 !important;
+    padding-left: 7px !important;
+}
+md-input-container.md-input-focused:not(.md-input-has-value) md-select.md-default-theme .md-select-value, 
+md-input-container.md-input-focused:not(.md-input-has-value) md-select .md-select-value, 
+md-input-container.md-input-focused:not(.md-input-has-value) md-select.md-default-theme .md-select-value.md-select-placeholder,
+md-input-container.md-input-focused:not(.md-input-has-value) md-select .md-select-value.md-select-placeholder {
+	/* font-family: proxima_novaregular !important;
+    font-size: 14px !important; */
+    color: #666666 !important;
+    padding-bottom: 20px !important;    
+}
+
+md-input-container.md-default-theme:not(.md-input-invalid).md-input-focused label, 
+md-input-container:not(.md-input-invalid).md-input-focused label, 
+md-input-container.md-default-theme:not(.md-input-invalid).md-input-focused md-icon, 
+md-input-container:not(.md-input-invalid).md-input-focused md-icon {
+	color: #666666 !important;
+}
+
+md-select.md-default-theme .md-select-value, md-select .md-select-value {
+	border-bottom:0px !important;
+} 
+
+md-input-container.md-input-has-value .md-select-value span {
+	padding-left: 5px;
+}
+ 
+.buildlabelCss{
+	font-size: 14px !important;
+	font-family: proxima_novaregular !important;
+	color: #666666 !important;
+	height: 25px;
+    font-weight: normal !important;    	
+    margin-bottom:0px !important;
+}
+.scmradioLabel, .scmswitchLabel {
+	font-size: 14px;
+    font-family: proxima_novaregular !important;
+    color: #666666;
+}
+
+#chart-legends{	
+   /* margin-top: 9px;
+    /* position: absolute; */
+    /* left: 281px; */
+   /* margin-bottom: -31px;
+    color: #e9f1f3;*/
+   position: absolute;
+    left: 315px;
+    bottom: 27px;
+    color: #e9f1f3;
+
+}
+.chartlegendLabel {
+	padding-left: 15px;
+    padding-right: 15px;
+    margin-right: 5px;
+}

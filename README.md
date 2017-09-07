@@ -1,6 +1,6 @@
 # BuildOn
 
-# A container-based Continuous Integration (CI) solution that creates build infrastructure on-demand
+# A container-based Continuous Integration (CI) solution that creates build infrastructure on-demand.
 
 It is a time consuming and laborious process to create an ecosystem to run CI with Jenkins. This involves various activities which include setting up of software, hardware, configuring Jenkins masters and slaves, analysis and installation of the necessary software’s, installing plug-ins, and providing accesses to different users. 
 

@@ -1,0 +1,13 @@
+.whiteframe-8dp-login{
+  background-color: #F2FCE2;
+  padding-bottom: 20px;
+}
+
+.errorTextFormat{
+  font-size: 14px;
+  font-weight:bold;
+    line-height: 14px;
+    color:red;
+    margin-top:-21px;
+    margin-bottom:15px;
+}

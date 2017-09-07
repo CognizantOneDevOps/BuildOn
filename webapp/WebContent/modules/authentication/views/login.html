@@ -1,0 +1,87 @@
+<div class="gradBackground" flex>
+	<div layout="row" layout-align="center center"
+		class="wfTopAlign">
+		<div class="textPad">
+			<div class="topTxtCss" layout>
+				<div layout class=""></div>
+				<div layout class="textCss">
+					<p>A Continuous Integration solution based on containers that creates build infrastructure on demand. Build-On offers</p>
+				</div>
+			</div>
+			<div class="topTxtCss" layout>
+				<div layout class="bulletCss"></div>
+				<div layout class="textCss">
+					<p>Unlimited Scalability</p>
+				</div>
+			</div>
+			<div class="topTxtCss" layout>
+				<div layout class="bulletCss"></div>
+				<div layout class="textCss">
+					<p>Optimal Utilization</p>
+				</div>
+			</div>
+			<div class="topTxtCss" layout>
+				<div layout class="bulletCss"></div>
+				<div layout class="textCss">
+					<p>Pipeline as Code</p>
+				</div>
+			</div>
+			<div class="topTxtCss" layout>
+				<div layout class="bulletCss"></div>
+				<div layout class="textCss">
+					<p>Developer Friendly</p>
+				</div>
+			</div>
+		</div>		
+			<md-whiteframe class="md-whiteframe-3dp whiteframeCss" layout>
+			<div layout="column" layout-padding layout-align="center center" class="rgtPnlCss">
+                    <form name="loginForm" ng-submit="login()" novalidate>
+                        <div>
+                             <md-icon layout layout-align="center center" class="logo_img" md-svg-src="dist/icons/svg/login/Logo.svg" ng-style="{height: '75px', width: '252px'}"></md-icon>                                                       
+                        </div>      
+                        <div class="validCredTextCss" >Sign in with valid Credentials</div>                  
+                        <div layout="column" style="width: 360px; margin-top: 110px;">
+                            <md-input-container layout md-no-float class="md-block containerMargin">
+                                <md-icon class="actvIcoCss disableIcon" layout md-svg-src="dist/icons/svg/login/user_icon.svg" ng-style="{height: '17px', width: '17px', top: '5px'}"></md-icon>
+                                <md-icon class="actvIcoCss" ng-if="username" layout md-svg-src="dist/icons/svg/login/user_icon_active.svg" ng-style="{height: '17px', width: '17px', top: '5px'}"></md-icon>
+                                <input class="inputGreyTextCss" ng-class="{'activeCss': username != '', 'inactiveCss': username == null}" ng-model="username"
+                                    type="email" name="username" value="username" required ng-pattern="/^[a-zA-Z_0-9@.$]*$/" placeholder="Email">
+                                <md-icon class="tckCss" ng-if="username" layout md-svg-src="dist/icons/svg/login/tick_icon.svg" ng-style="{height: '20px', width: '20px'}"></md-icon>
+                                <div ng-messages="loginForm.username.$error">
+                                    <div class="wrnTxt" ng-message="required">Please enter valid username.</div>
+                                    <div class="wrnTxt" ng-message="pattern">Please enter valid characters.</div> 
+                                    <div class="wrnTxt" ng-message="email">Please enter valid email.</div> 
+                                </div>
+                            </md-input-container>
+                            <md-input-container md-no-float class="md-block">
+                                <md-icon class="disableIcon" md-svg-src="dist/icons/svg/login/password_icon.svg" ng-style="{height: '17px', width: '17px', top: '5px'}"></md-icon>
+                                <md-icon class="actvIcoCss" ng-if="password" md-svg-src="dist/icons/svg/login/password_icon_active.svg" ng-style="{height: '17px', width: '17px', top: '5px'}"></md-icon>
+                                <input ng-class="{'activeCss': password != '', 'inactiveCss': password == null}" class="inputGreyTextCss" ng-model="password"
+                                    type="password" name="password" value="password" required ng-pattern="/^[a-zA-Z_0-9@.$]*$/" placeholder="Password">
+                                <md-icon class="tckCss" ng-if="password" layout md-svg-src="dist/icons/svg/login/tick_icon.svg" ng-style="{height: '20px', width: '20px'}"></md-icon>
+                                <div ng-messages="loginForm.password.$error">
+                                    <div class="wrnTxt" ng-message="required">Please enter valid password.</div>
+                                     <div class="wrnTxt" ng-message="pattern">Please enter valid characters.</div> 
+                                </div>
+                            </md-input-container>
+                            <div id="invalidMsg" class="errTxt" ng-if="isLoginError">
+                              {{errormsg}}
+                            </div>
+                        </div>
+                        <md-dialog-actions layout="row" class="buttomMar" layout-align="center center">
+                            
+                                <md-button type="submit" ng-click="loginController.userAuthentication(username , password)" class="md-raised md-primary sigBtnCss"
+                                   ng-disabled="loginForm.$invalid" >Sign In</md-button>
+                                <span ng-show="showThrobber" style = "vertical-align: super;">
+                                <md-progress-circular style="display: inline;" md-diameter="30" md-mode="indeterminate"></md-progress-circular></span>
+                            
+                        </md-dialog-actions>
+                        <div layout layout-align="center center">
+                            <md-icon layout md-svg-src="dist/icons/svg/login/Bottom_Logo.svg" class="bottom_img" ng-style="{height: '34px', width: '297px'}"></md-icon>
+                        </div>
+                    </form>
+                </div>
+			</md-whiteframe>
+		</div>
+	</div>
+</div>

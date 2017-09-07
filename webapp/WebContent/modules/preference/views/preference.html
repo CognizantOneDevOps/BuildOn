@@ -1,0 +1,69 @@
+<div flex layout="column" style="margin: 10px;">
+	<!-- <md-card class="cardOne"> 
+		<md-card-header class="carscmdHead">
+			<md-card-header-text> 
+				<span class="md-title">Preferences</span> 
+			</md-card-header-text> 
+		</md-card-header> 
+		<md-card-content>
+		<div layout="row" layout-align="center">
+		<md-input-container class="pref_selectbox_container"> <label>Select Image</label>
+				<md-select ng-model="formData.selImages" class="pref_md-select_icon">
+					<md-option ng-value="item" ng-repeat="item in items">Item {{item}}</md-option> 
+				</md-select> 
+		</md-input-container>
+		<md-input-container class="pref_selectbox_container"> <label>Available Image</label>		
+				<md-select ng-model="formData.availImages" class="pref_md-select_icon"> 
+					<md-option ng-value="item" ng-repeat="item in items">Item {{item}}</md-option> 
+				</md-select> 
+			</md-input-container> 
+			<md-input-container class="pref_selectbox_container"> <label>Projects</label>
+				<md-select ng-model="formData.projects" class="pref_md-select_icon">
+					<md-option ng-value="item" ng-repeat="item in items">Item {{item}}</md-option> 
+				</md-select> 
+			</md-input-container> 
+			<md-dialog-actions layout="row" class="" layout-align="center center">
+		<md-button type="submit" class="md-raised md-primary buildOnBtnCss"
+			ng-click="testClick()" style="margin-top: 0px !important;">Build On</md-button> </md-dialog-actions> 
+		</div>
+		</md-card-content> 
+	</md-card> -->
+	<!-- <md-list ng-repeat="r in rows track by $index"> -->	
+	<md-card class="cardMulti" style="margin-top:13px;">	 
+		<md-card-header class="carscmdHead" style="background-color: #5bbec3;"> 
+			<md-card-header-text>
+			<span class="md-title">Webhook </span> 
+			</md-card-header-text> 
+		</md-card-header> 
+	 <md-card-content style="padding:0px !important;">	
+	<table ng-table="tableParams" class="table table-bordered">
+	<!-- <table  class="table table-bordered"> -->
+	<thead>
+            <th class="theadCss">Repository</th>
+            <th class="theadCss">Configuration</th>          
+            
+        </thead>
+	<tbody>
+      <tr ng-repeat="detail in details track by $index">
+     
+       <td class="tdCss" align="center" valign="center" >{{detail.repo}} </td>
+       <td class="tdCss" align="center" valign="center" >
+    	
+
+      <md-content layout="row" layout-align="center center">
+      OFF &nbsp;&nbsp;<md-switch ng-model="detail.hookvalue"  md-no-ink aria-label="Switch No Ink" ng-change="changeSwitchmode(detail.hookvalue,detail.repo,$index)" style="margin:0px;"> 
+      ON   </md-switch>
+      </md-content>
+      
+        
+       </td>
+       
+        <!-- <md-switch ng-model="setDefault" ng-true-value="'1'" ng-false-value="'0'" md-no-ink aria-label="Switch No Ink" ng-change="changeSwitchmode($index)" style="margin:0px;"> Set as Default </md-switch> -->
+         
+        </tr>
+       </tbody>
+      </table>
+	 </md-card-content>
+	 </md-card>
+	<!--  </md-list> -->
+</div>

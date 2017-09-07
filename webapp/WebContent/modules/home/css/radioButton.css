@@ -1,0 +1,67 @@
+md-radio-button .md-off {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0px;
+    left: 20px;
+    width: 18px;
+    height: 18px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 50%;
+    transition: border-color ease 0.28s;
+    color: #b0b0b0;
+}
+
+md-radio-button .md-on {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0px;
+    left: 20px;
+    width: 18px;
+    height: 18px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 50%;
+    transition: border-color ease 0.28s;
+}
+/*
+md-radio-group.layout-row md-radio-button {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    width: 190px;
+}
+*/
+md-radio-group.md-default-theme:not([disabled]) .md-primary .md-checked .md-off, md-radio-group:not([disabled]) .md-primary .md-checked .md-off, md-radio-group.md-default-theme:not([disabled]) .md-primary.md-checked .md-off, md-radio-group:not([disabled]) .md-primary.md-checked .md-off, md-radio-group.md-default-theme:not([disabled]).md-primary .md-checked .md-off, md-radio-group:not([disabled]).md-primary .md-checked .md-off, md-radio-group.md-default-theme:not([disabled]).md-primary.md-checked .md-off, md-radio-group:not([disabled]).md-primary.md-checked .md-off, md-radio-button.md-default-theme:not([disabled]) .md-primary .md-checked .md-off, md-radio-button:not([disabled]) .md-primary .md-checked .md-off, md-radio-button.md-default-theme:not([disabled]) .md-primary.md-checked .md-off, md-radio-button:not([disabled]) .md-primary.md-checked .md-off, md-radio-button.md-default-theme:not([disabled]).md-primary .md-checked .md-off, md-radio-button:not([disabled]).md-primary .md-checked .md-off, md-radio-button.md-default-theme:not([disabled]).md-primary.md-checked .md-off, md-radio-button:not([disabled]).md-primary.md-checked .md-off {
+    border-color: #02a5cf;
+}
+
+md-radio-group.md-default-theme:not([disabled]) .md-primary .md-on, md-radio-group:not([disabled]) .md-primary .md-on, md-radio-group.md-default-theme:not([disabled]).md-primary .md-on, md-radio-group:not([disabled]).md-primary .md-on, md-radio-button.md-default-theme:not([disabled]) .md-primary .md-on, md-radio-button:not([disabled]) .md-primary .md-on, md-radio-button.md-default-theme:not([disabled]).md-primary .md-on, md-radio-button:not([disabled]).md-primary .md-on {
+    background-color: #02a5cf;
+}
+
+md-radio-button.md-default-theme.md-checked .md-off, md-radio-button.md-checked .md-off {
+    border-color: #02a5cf;
+}
+
+md-radio-button.md-default-theme .md-on, md-radio-button .md-on {
+    background-color: #02a5cf;
+}
+
+md-radio-button.md-default-theme .md-off, md-radio-button .md-off {
+    border-color: #b0b0b0;
+}
+
+.md-checked .md-ink-ripple {
+    color: #ffffff;
+}
+
+md-radio-button.md-default-theme.md-checked .md-ink-ripple, md-radio-button.md-checked .md-ink-ripple {
+     color: #ffffff;
+}
+
+md-radio-button .md-label {
+	position: absolute;
+    bottom: 0px;
+    left: 14px;
+}

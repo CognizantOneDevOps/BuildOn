@@ -1,0 +1,86 @@
+.logout {
+	/*margin-right: 40px;
+	position: relative;
+    top: 37px;
+	font-family: proxima_novaregular;
+	color: grey;position: relative;
+	top: 0px;*/
+	outline: none;
+	cursor: pointer;
+}
+
+.md-tooltip {
+	color: white !important;
+}
+
+.verticallineHelp {
+	border-left: 1px solid grey;
+	/* margin-left: 5px;
+	margin-right: 5px; */
+	margin-left: 0px;
+	margin-right: 0px;
+	height: 10px;
+	/* margin-top: 34px; */
+}
+
+/* .gitInputcontainer {
+	margin-left: 20px;
+	width: 100%;
+}
+
+.gitBtn {
+		float: right;
+	margin-right: 46px;
+	min-height: 38px !important;
+	min-width: 138px !important;
+	min-width: 185px !important;
+	font-size: 16px !important;
+	font-family: proxima_novaregular !important;
+	border-radius: 0px !important;
+	text-transform: initial !important;
+	color: white !important;
+	background-color: #02a5cf !important;
+	width: 164px !important;
+}
+
+
+.addmoreBtn {
+	height: 22px;
+	width: 22px;
+	margin-right: 30px;
+	margin-top: -175px;
+	position: absolute;
+	right: 5px;
+	outline: none;
+	cursor: pointer;
+}
+
+.defaultIcn {
+	float: right;
+	margin-top: -68px;
+}
+.scm_success_msg {
+	position: relative;
+    right: 220px;
+    width: 20%;
+    text-align: center;
+} 
+.scm_progress_bar {
+	display: inline;
+    width: 30px;
+    height: 30px;    
+    position: absolute;
+    left: 1161px;
+} */
+.profile_img {
+	margin-right: 6px;
+    border-radius: 50%;
+    height: 25px;
+    object-fit: cover;
+    width: 25px;
+    max-width: 80px;
+    background-color: lightgray;
+    margin-top: 25px;
+    text-align: -webkit-auto;
+    padding:4px;
+}

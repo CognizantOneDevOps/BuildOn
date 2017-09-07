@@ -1,0 +1,67 @@
+<div layout="row" layout-xs="column" style="margin: 10px;">
+	<div flex-gt-xs="70">
+		<md-card class="cardOne _md"> <md-card-header
+			class="carscmdHead"> <md-card-header-text>Build
+		On </md-card-header-text> </md-card-header>		
+<md-card-content>
+		<div layout="row" layout-wrap layout-margin layout-fill
+			class="graphLists">			
+			<div ng-click="showGraph($event, 'buildTrends')" class="miniChartDiv" >				
+				 <canvas  id="buildTrendsChartjs" style="width: 100%; height: 210px;"></canvas>
+			</div>
+			<div ng-click="showGraph($event, 'lastBuild')" class="miniChartDiv" >
+				<canvas id="lastbuildDivChartjs" style="width: 100%; height: 210px;" />
+			</div>
+			<div ng-click="showGraph($event, 'projectBuilds')" class="miniChartDiv">
+				<canvas id="projectbuildsDivChartjs" style="width: 100%; height: 210px;" />
+			</div>
+			<div ng-click="showGraph($event, 'comparisonBuilds')" class="miniChartDiv">
+				<canvas id="comparebuildsDivChartjs" style="width: 100%; height: 210px;" />					
+			</div>
+
+		</div>
+<div  layout="row" layout-align="center center" id="chart-legends"></div>
+</md-card-content>
+		</md-card>
+	</div>
+	<div flex-gt-xs="30">
+	<form  novalidate name="buildform" ng-submit="buildform.$valid ">
+		<md-card class="cardMulti _md"> <md-card-header
+			class="carscmdHead" style="background-color: #5bbec3;">
+		<md-card-header-text>Build Now</md-card-header-text> </md-card-header> <md-card-content>
+
+		<label class="buildlabelCss">Repository</label>
+		<md-select ng-model="formData.selectedproject" class="inputBoxCont" style="margin-top:5px; margin-bottom: 20px;" placeholder="please select a repository"> <!-- <md-option> <em>None</em></md-option> -->
+		<md-progress-circular md-mode="indeterminate" md-diameter="15" ng-show="isLoading"> </md-progress-circular>
+		<md-option 	ng-repeat="item in items  track by $index" ng-value="item"   ng-click="select(item,'proj')"> {{item}}</md-option>
+		</md-select> 
+		<label class="buildlabelCss">Branches</label> 
+
+		<md-select ng-model="formData.selectedbranch"  class="inputBoxCont" style="margin-top:5px; margin-bottom: 20px;" placeholder="please select a branch">
+			<md-progress-circular mode="indeterminate" md-diameter="15" ng-show="isLoadingbranch"> </md-progress-circular> 
+			<md-option 	ng-repeat="branch in branches track by $index" ng-value="branch"   ng-click="select(branch,'bran')"> {{branch}}</md-option> 
+		</md-select> 
+		
+		<div layout="row">
+			
+			<md-input-container style="width:100%"> <label
+				class="labelCss">Build on Jenkinsfile</label>
+			
+				<input ng-model="yaml" class="inputBoxCont"  style="width: 90%" placeholder="Please place a Jenkinsfile">
+			 </md-input-container>
+
+   			<md-progress-circular md-mode="indeterminate"  ng-show="isLoadingtxt" md-diameter="15" ></md-progress-circular>
+    		<!-- </div> -->
+			<md-dialog-actions layout="row" class="" layout-align="center center">
+			<md-icon style="margin-left:30px" layout
+				md-svg-src="dist/icons/svg/ic_edit_24px.svg" class="yamlbtnIcon">
+			</md-icon> <md-button type="submit" class="md-raised yamlEditBtn" ng-click="showAdvanced($event)" >Edit</md-button> </md-dialog-actions>
+		</div>
+		
+   
+		<md-dialog-actions layout="row" class="" layout-align="center center">
+		<md-progress-circular md-mode="indeterminate"  ng-show="loadtab" md-diameter="12" ></md-progress-circular>
+		<md-button type="submit" class="md-raised md-primary buildOnBtnCss"  ng-click="callBuildon()"  ng-disabled="btndisable">Build On</md-button> </md-dialog-actions> </md-card-content> </md-card>
+	</form>		
+	</div>
+</div>

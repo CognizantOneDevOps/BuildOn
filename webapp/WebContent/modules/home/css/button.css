@@ -1,0 +1,23 @@
+.configureBut {
+  min-height: 40px ;
+  min-width: 150px ;
+  font-size: 14px ;
+  font-family: proxima_novasemibold;
+  border-radius: 0px;
+  text-transform: initial;
+  color: white ;
+  background-color: #00728f;
+  padding-right: 20px;
+}
+
+.backToTools {
+  min-height: 40px ;
+  min-width: 120px ;
+  font-size: 14px ;
+  font-family: proxima_novasemibold;
+  border-radius: 0px;
+  text-transform: initial;
+  color: white ;
+  background-color: #387c2c;
+}
+

@@ -1,0 +1,395 @@
+.select2-container .select2-choice {
+	width: 100% !important;
+}
+
+#treeViews {
+	margin-top: 73px;
+}
+
+#treeViews .search {
+	width: 100%;
+}
+
+.node circle {
+	fill: #fff;
+	/*stroke: steelblue;
+  stroke-width: 1.5px;*/
+}
+
+.node {
+	font: 0.8em sans-serif;
+	/* cursor: pointer; */
+}
+
+.link {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 1.5px;
+}
+
+.node:not (:hover ) .nodetext {
+	display: none;
+}
+
+.stickynode {
+	font: 18px sans-serif;
+	cursor: move;
+}
+
+.stickynode circle {
+	cursor: move;
+	fill: #fff;
+	stroke: steelblue;
+	stroke-width: 2px;
+}
+
+.stickynode:not (:hover ) .stickynodetext {
+	/*display: none;*/
+	font: 12px sans-serif;
+}
+
+.stickynode.fixed circle {
+	fill: #ccc;
+}
+
+.stickynode.fixed .stickynodetext {
+	font: 18px sans-serif;
+}
+
+.legend rect {
+	fill: white;
+	stroke: black;
+	opacity: 0.8;
+}
+
+.nodeappparent {
+	cursor: default;
+	fill: #03FFFF !important;
+}
+
+.nodeappchildparent {
+	cursor: pointer;
+	fill: #03FFFF !important;
+}
+
+.nodepkgparent {
+	cursor: default;
+	fill: #F603C1 !important;
+}
+
+.nodepkgchildparent {
+	cursor: pointer;
+	fill: #F603C1 !important;
+}
+
+.nodeinfoparent {
+	cursor: default;
+	fill: #02ff3d !important;
+}
+
+.nodeinfochildparent {
+	cursor: pointer;
+	fill: #02ff3d !important;
+}
+
+.nodeerrparent {
+	cursor: default;
+	fill: #E01638 !important;
+}
+
+.nodeerrchildparent {
+	cursor: pointer;
+	fill: #E01638 !important;
+}
+
+#applegendcircle {
+	width: 10px;
+	height: 10px;
+	background: #03FFFF;
+	-moz-border-radius: 50px;
+	-webkit-border-radius: 50px;
+	border-radius: 50px;
+	float: right;
+	position: absolute;
+	top: 82px;
+	left: 100px;
+}
+
+#pkglegendcircle {
+	width: 10px;
+	height: 10px;
+	background: #F603C1;
+	-moz-border-radius: 50px;
+	-webkit-border-radius: 50px;
+	border-radius: 50px;
+	float: right;
+	position: absolute;
+	top: 82px;
+	left: 203px;
+}
+
+#clsinfolegendcircle {
+	width: 10px;
+	height: 10px;
+	background: #02ff3d;
+	-moz-border-radius: 50px;
+	-webkit-border-radius: 50px;
+	border-radius: 50px;
+	float: right;
+	position: absolute;
+	top: 82px;
+	left: 262px;
+}
+
+#clserrorlegendcircle {
+	width: 10px;
+	height: 10px;
+	background: red;
+	-moz-border-radius: 50px;
+	-webkit-border-radius: 50px;
+	border-radius: 50px;
+	float: right;
+	position: absolute;
+	top: 82px;
+	left: 370px;
+}
+
+#applegendcircle span, #pkglegendcircle span, #clsinfolegendcircle span,
+	#clserrorlegendcircle span {
+	display: inherit;
+	margin-left: 13px;
+	font: 10px sans-serif;
+}
+
+#expandallBtn {
+	position: absolute;
+	top: 69px;
+	right: 131px;
+}
+
+#collapseallBtn {
+	position: absolute;
+	top: 69px;
+	right: 10px;
+}
+
+.svg-container {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	padding-bottom: 100%; /* aspect ratio */
+	vertical-align: top;
+	overflow: hidden;
+}
+
+.svg-content-responsive {
+	display: inline-block;
+	position: absolute;
+	top: 10px;
+	left: 0;
+}
+
+#findNext {
+	position: absolute;
+	right: 11px;
+	top: 177px;
+}
+
+#clrall {
+	position: absolute;
+	top: 177px;
+	right: 124px;
+}
+
+/*#tl_resultCounts{
+ position: absolute;
+    top: 137px; 
+}*/
+#resultCounts, #tl_resultCounts {
+	text-align: center;
+	font-size: 15px;
+	font-style: italic;
+}
+
+/**TREELIST**/
+.tl_node {
+	position: absolute;
+	list-style: none;
+	cursor: default;
+	margin: 250px 0 0 50px;
+}
+
+.tl_node span {
+	margin-right: 5px;
+}
+
+.caret {
+	font-size: 10px;
+}
+
+.filename {
+	color: black;
+}
+/*.search {
+  width: 100%;
+  left:15px;
+}*/
+.selected_cls {
+	color: #ff4136;
+	font-style: italic;
+	text-decoration: underline;
+}
+
+.selected_cls_log {
+	color: blue;
+	font-style: italic;
+	text-decoration: underline;
+}
+
+#treeViews {
+	width: 1280px;
+}
+
+#treeViews ul li span.caret {
+	color: black;
+}
+
+.tl_nodeappparent {
+	cursor: default;
+	color: #03FFFF !important;
+}
+
+.tl_nodeappchildparent {
+	cursor: pointer;
+	color: #03FFFF !important;
+}
+
+.tl_nodepkgparent {
+	cursor: default;
+	color: #F603C1 !important;
+}
+
+.tl_nodepkgchildparent {
+	cursor: pointer;
+	color: #F603C1 !important;
+}
+
+.tl_nodeinfoparent {
+	cursor: default;
+	color: #02ff3d !important;
+}
+
+.tl_nodeinfochildparent {
+	cursor: pointer;
+	color: #02ff3d !important;
+}
+
+.tl_nodeerrparent {
+	cursor: default;
+	color: #E01638 !important;
+}
+
+.tl_nodeerrchildparent {
+	cursor: pointer;
+	color: #E01638 !important;
+}
+
+#treelistBtn {
+	position: absolute;
+	top: 69px;
+	right: 236px;
+}
+
+/* Summary View */
+.summaryHead {
+	right: 697px;
+	top: 60px;
+}
+
+.border {
+	fill: none;
+	shape-rendering: crispEdges;
+	stroke: red;
+}
+
+.node {
+	cursor: pointer;
+}
+
+rect.bordered {
+	stroke: #E6E6E6;
+	stroke-width: 2px;
+}
+
+text.mono {
+	font-size: 9pt;
+	font-family: Consolas, courier;
+	fill: #aaa;
+}
+
+text.axis-workweek {
+	fill: #000;
+}
+
+text.axis-worktime {
+	fill: #000;
+}
+
+/*Dynamic Chart*/
+#a_applogsChart {
+	width: 600px;
+	height: 400px;
+	padding-left: 75px;
+}
+
+.bar {
+	fill: #CFE7E9;
+}
+
+text.label {
+	fill: #777777;
+	color: #777777;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+text.category {
+	fill: #666666;
+	font-size: 14px;
+}
+
+/**UIGRID**/
+.applogGrid {
+	
+ /* width: 500px;
+  height: 450px; */
+	width: 98%;
+	height: 500px;
+	margin-left: 10px;
+}
+.ui-grid .ui-grid-render-container-body .ui-grid-viewport {
+  overflow-x: auto !important;
+}
+
+.ui-grid-viewport .ui-grid-cell-contents {
+  word-wrap: break-word;
+  white-space: normal !important;
+}
+
+.ui-grid-row, .ui-grid-cell {
+  height: auto !important;
+}
+
+.ui-grid-row div[role=row] {
+  display: flex ;
+  align-content: stretch;
+}
+.appChart {
+	width: 300px;
+	height: 300px;
+	/*border: 1px solid #c5e6e8;*/
+	text-align: center;
+}
+.flexContainer {
+	display: flex; flex-flow: row wrap;
+	}
