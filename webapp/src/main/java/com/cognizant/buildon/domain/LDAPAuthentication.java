@@ -201,163 +201,180 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.domain;
 
-angular.module('Authentication')
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Properties;
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.LdapContext;
 
-			service.Login = function (username, password, callback) {
-
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
-
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
-			};
+/**
+ * @author 338143
+ *
+ */
+public class LDAPAuthentication {
+	private static  final Logger logger=LoggerFactory.getLogger(LDAPAuthentication.class);
+	
+	/**
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	  public static Users getEmpId(String email){
+		Users users=new Users();
+		String empID=null;
+		Properties props = readPropertyFile();
+		String ldapAdServer = props.getProperty("ldap.server");
+		String ldapSearchBase =props.getProperty("ldap.searchbase");
+		String ldapUsername = props.getProperty("ldap.user");
+		String ldapPassword = props.getProperty("ldap.password");
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername, ldapPassword);
+		String searchFilter =Constants.SEARCH_FILTER_MAIL + email + "))";
+		SearchControls searchControls = new SearchControls();
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		NamingEnumeration<SearchResult> results=null;
+		try {
+			results = ctx.search(ldapSearchBase,searchFilter,searchControls);
+		} catch (NamingException e1) {
+			logger.debug(e1.toString());
+		}
+		SearchResult searchResult = null;
+		if(results.hasMoreElements()) {
+			searchResult = (SearchResult) results.nextElement();
+		}
+		String[] attrIDs = { 
+				Constants.LDAP_GN_NAME,Constants.LDAP_MAIL,Constants.ACCOUNT_NAME
+		};
+		searchControls.setReturningAttributes(attrIDs);
+		searchFilter=Constants.LDAP_MAIL+"="+ldapUsername;
+		try {
+			 empID = searchResult.getAttributes().get(Constants.ACCOUNT_NAME).get().toString();
+			 String uname=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
+			 users.setEmail(email);
+			 users.setUname(uname);
+			 users.setId(Integer.parseInt(empID));
+		} catch (NamingException e) {
+			logger.debug( e.toString());
+		}
+		try {
+			ctx.close();
+		} catch (NamingException e) {
+			logger.debug( e.toString());
+		}
+		return users;
+
+	}
+	
+	/**
+	 * @param ldapAdServer
+	 * @param ldapUsername
+	 * @param ldapPassword
+	 * @return
+	 */
+	private static  LdapContext intializeEnvForLDAP(String ldapAdServer, String ldapUsername, String ldapPassword) {
+		Hashtable<String, Object> env = new Hashtable<String, Object>();
+		String principalName = ldapUsername + Constants.LDAP_CONCAT;
+		env.put(Context.SECURITY_AUTHENTICATION,Constants.SIMPLE);
+		if(ldapUsername != null) {
+			env.put(Context.SECURITY_PRINCIPAL,principalName);
+		}
+		if(ldapPassword != null) {
+			env.put(Context.SECURITY_CREDENTIALS,ldapPassword.trim());
+		}
+		env.put(Context.INITIAL_CONTEXT_FACTORY,Constants.LDAP_CTX_FAC);
+		env.put(Context.PROVIDER_URL,ldapAdServer);
+		env.put(Constants.LDAP_SID_BIN,Constants.LDAP_SID);
+		LdapContext ctx=null;
+		try {
+			ctx = new InitialLdapContext();
+			ctx = new InitialLdapContext(env, null);
+		} catch (NamingException e1) {
+			logger.debug(e1.toString());
+		}
+		return ctx;
+	}
+
+	/**
+	 * @return
+	 */
+	private static  Properties readPropertyFile() {
+		Properties props = new Properties();
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
+		try {
+			props.load(is);
+			is.close();
+		} catch (FileNotFoundException e1) {
+			logger.debug(e1.toString());
+		} catch (IOException e) {
+			logger.debug(e.toString());
+		}
+		return props;
+	}
+	
+	
+
+	/**
+	 * @param id
+	 * @return
+	 */
+	public static Users getEmailForLDAPUser(String id) {
+		Users users=new Users();
+		Properties props = readPropertyFile();
+		String ldapAdServer = props.getProperty("ldap.server");
+		String ldapSearchBase =props.getProperty("ldap.searchbase");
+		String ldapUsername = props.getProperty("ldap.user");
+		String ldapPassword = props.getProperty("ldap.password");
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername, ldapPassword);
+		String searchFilter = Constants.SEARCH_FILTER_ACCOUNT + id + "))";
+		SearchControls searchControls = new SearchControls();
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		NamingEnumeration<SearchResult> results=null;
+		try {
+			results = ctx.search(ldapSearchBase,searchFilter,searchControls);
+		} catch (NamingException e1) {
+			logger.debug(e1.toString());
+		}
+		SearchResult searchResult = null;
+		if(results.hasMoreElements()) {
+			searchResult = (SearchResult) results.nextElement();
+		}
+		
+		String[] attrIDs = {Constants.LDAP_GN_NAME,
+				Constants.LDAP_MAIL,
+				Constants.ACCOUNT_NAME,};
+		searchControls.setReturningAttributes(attrIDs);
+		searchFilter=Constants.ACCOUNT_NAME+"="+ldapUsername;
+		try {
 			
-			
+			 String mail = searchResult.getAttributes().get(Constants.LDAP_MAIL).get().toString();
+			 String name=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
+			 users.setEmail(mail);
+			 users.setUname(name);
+			 
+		} catch (NamingException e) {
+			logger.debug( e.toString());
+		}
+		try {
+			ctx.close();
+		} catch (NamingException e) {
+			logger.debug( e.toString());
+		}
+		return users;
+		
+	}
 
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
-
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
-
-
-			};
-
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
-
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
-
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
-
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
-
-			return service;
-		}])
-
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
-
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
-				}
-			};
-
-			/* jshint ignore:end */
-		});
+}

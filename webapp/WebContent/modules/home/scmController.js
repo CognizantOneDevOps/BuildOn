@@ -222,7 +222,7 @@ angular.module('Home')
 						'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
 					}
 			}
-			$http.post('ScmUserDetailsServlet',data,config)
+			$http.post('ScmUserDetailsController',data,config)
 			.then(function (response) {
 				$scope.details=response.data;
 				console.log("$scope.details.length....."+$scope.details.length);
@@ -311,6 +311,13 @@ angular.module('Home')
 					console.log("not null");
 					HomeService.removeRecord(r.id,$rootScope.scmUser,function(response) {
 						$scope.status=response.data;
+						if($scope.status != 'invalid'){
+							$scope.status=response.data;
+						}else{
+							$location.path('/login');
+							
+						}
+						
 					});
 
 				}
@@ -332,7 +339,7 @@ angular.module('Home')
 									'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
 								}
 						}
-						$http.post('ScmUserDetailsServlet',data,config)
+						$http.post('ScmUserDetailsController',data,config)
 						.then(function (response) { $scope.details=response.data;
 						console.log("$scope.details.length....."+$scope.details.length);
 						$scope.drawSCMConfig($scope.details.length);
@@ -355,7 +362,7 @@ angular.module('Home')
 								'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
 							}
 					}
-					$http.post('ScmUserDetailsServlet',data,config)
+					$http.post('ScmUserDetailsController',data,config)
 					.then(function (response) { $scope.details=response.data;
 					console.log("$scope.details.length:"+$scope.details.length);
 					$scope.drawSCMConfig($scope.details.length);
@@ -386,25 +393,12 @@ angular.module('Home')
 							'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
 						}
 				}
-				$http.post('ScmPersistServlet',data,config)
+				$http.post('ScmPersistController',data,config)
 				.then(function (response) { 
 					$scope.saved=response.data;
-					console.log("  $scope.saved..."+  $scope.saved);
+					console.log("  $scope.saved :"+  $scope.saved);
+					if($scope.saved !='invalid'){
 					$scope.scmSaveprogress = "hide";
-
-					/*	HomeService.save($rootScope.scmUser,$scope.rows[index].setDefault,$rootScope.type,$scope.rows[index].url ,$scope.rows[index].oauthtoken,
-						$scope.rows[index].id, function(response) {
-					$scope.saved=response.data;
-					console.log("  $scope.saved:"+  $scope.saved);
-					$scope.scmSaveprogress = "hide";*/
-
-
-					/*HomeService.getScmDetails($rootScope.scmUser,$rootScope.type,function(response) {
-						  $scope.details=response.data;
-						  console.log("save...."+$scope.details.length);
-						  $scope.drawSCMConfig($scope.details.length);
-
-			    	});*/
 					var data = $.param({
 						userId:$rootScope.scmUser,
 						type:$rootScope.type
@@ -414,7 +408,7 @@ angular.module('Home')
 								'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
 							}
 					}
-					$http.post('ScmUserDetailsServlet',data,config)
+					$http.post('ScmUserDetailsController',data,config)
 					.then(function (response) { 
 						$scope.details=response.data;
 						console.log("$scope.details.length....."+$scope.details.length);
@@ -423,25 +417,34 @@ angular.module('Home')
 					function(error) {
 						console.log("error");
 					});
+				}else{
+					$location.path('/login');
+				}//invalid
+					
 
 				});
 			};
 
 
 			$scope.testConnection = function(index) {
-				//this["scmtestprogress_"+index] = true;
 				$scope.scmTestprogress = "load";
 				$scope.num=0;
 				$scope.uname=$scope.rows[index].oauthtoken;
-				//$scope.upass=$scope.rows[index].password;
 				$scope.uurl=$scope.rows[index].url;
 				$scope.num = index;
 				console.log($scope.num );
 				$scope.msgSuccess=false;
 				HomeService.getTestCon($scope.uname,$scope.uurl,  function(response) {
+					
 					$scope.msgSuccess=response.data;
+					if($scope.msgSuccess!='invalid'){
 					console.log(index +  $scope.msgSuccess);
 					$scope.scmTestprogress = "hide";
+					}else{
+					
+					$location.path('/login');
+					
+				}
 				});
 			}
 

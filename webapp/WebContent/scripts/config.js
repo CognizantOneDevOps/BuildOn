@@ -21,5 +21,5 @@ var dbserviceurl="http://34.204.11.220:9000/dbservice"
 //var dbserviceurl="http://54.89.161.240:9000/dbservice"	
 	
 //LDAP authentication
-var LDAPAuth=false
+var LDAPAuth=true
 	

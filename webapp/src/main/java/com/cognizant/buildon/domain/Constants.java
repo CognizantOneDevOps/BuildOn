@@ -201,163 +201,152 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.domain;
 
-angular.module('Authentication')
+public interface Constants {
+	
+	
+	public   String SUCCESS    ="SUCCESS";
+	
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+	public   String FAILURE    ="FAILURE";
 
-			service.Login = function (username, password, callback) {
+	public   String INPROGRESS ="INPROGRESS";
+	
+	public   String NOTSTARTED ="NOTSTARTED";
+	
+	public   String ABORTED="ABORTED";
 
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+	public   String STATUS="status";
+	
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+	public   String YOU="you";
+
+	public   String OTHERS="others";
+	
+
+	public   String SUCCESSSTATUS="Success";
+	
+	public   String FAILURESTATUS="Failure";
+	
+	public   String ABORTEDSTATUS="Aborted";
+
+	public   String INPROGRESSSTATUS ="Inprogress";
+	
+	public   String INITIATEDSTATUS ="Initiated";
+	
+	public   String JENKINSFILE="Jenkinsfile";
+	
+	public   String  LOCALPATH="localPath";
+	
+	public   String  PROJECT="project";
+	
+	public   String PROPERTYFILE="buildon.properties";
+	
+	public   String DEFAULTPOD = "default";
+	
+	
+	public   String YOU_SUCCESS = "you_success";
+	
+	public   String YOU_FAILURE = "you_failure";
+	
+	public   String YOU_ABORTED = "you_aborted";
+	
+	
+	public   String OTHERS_SUCCESS = "others_success";
+	
+	public   String OTHERS_FAILURE = "others_failure";
+	
+	public   String OTHERS_ABORTED = "others_aborted";
+	
+	
+	public   String COLOR = "color";
+	
+	public   String BUILD_STATUS = "build_status";
+	
+	public   String VALUE = "value";
+	
+	public   String PROJECTS = "Projects";
+	
+	
+	public   String JOBNAME = "jobname";
+	
+	public   String GIT = "git";
+	
+	public   String LDAP_FILTERS_NAME = "objectClass=user";
+	
+	public   String LDAP_FILTERS_ACC = "sAMAccountName";
+	
+	public   String LDAP_SID = "objectSID";
+	
+	public   String LDAP_SID_BIN = "java.naming.ldap.attributes.binary";
+	
+	public   String SIMPLE = "simple";
+	
+	public   String LDAP_CTX_FAC = "com.sun.jndi.ldap.LdapCtxFactory";
+	
+	public   String LDAP_GN_NAME = "givenname";
+	
+	public   String LDAP_MAIL = "mail";
+	
+	public   String LDAP_NAME = "name";
+	
+	public   String LOG_RESULT = "No Results";
+	
+	public   String NO_JENKINS = "No Jenkinsfile";
+	
+	public   String OAUTH = "oauth2";
+	
+	public   String DOT =".";
+	
+	public   String FWD_SLASH ="/";
+	
+	public   String GIT_UPLOAD ="/usr/bin/git-upload-pack";
+	
+	public   String JENKINS_FILE ="Jenkinsfile";
+	
+	public   String FILE ="file";
+	
+	public   String HEAD ="HEAD";
+	
+	public   String JENKINS_MOD_MSG ="Jenkinsfile modified";
+	
+	public   String STAGE ="stage";
+	
+	public   String LOG_TAB ="/root/buildlog/";
+	
+	public   String LOG =".log";
+	
+	public   String KUBE ="kube-";
+	
+	public   String JENKINS ="jenkins-";
+	
+	public   String JOB ="job";
+	
+	public   String HTTP ="http://";
+	
+	public   String CI_URL ="/lastBuild/consoleText";
+	
+	public   String BUILDON ="buildon-";
+	
+	public   String SERV_URL ="/1/wfapi/describe";
+	
+	public   String INVALID ="invalid";
+	
+	public   String GLB_USER ="globaluser";
+	
+	public   String MINS ="Mins ";
+	
+	public   String SEC ="Sec";
+	
+	public   String LDAP_CONCAT ="@CTS";
+	
+	public   String ACCOUNT_NAME ="sAMAccountName";
+	
+	public   String SEARCH_FILTER_MAIL = "(&(objectClass=user)(mail=";
+	
+	public   String SEARCH_FILTER_ACCOUNT = "(&(objectClass=user)(sAMAccountName=";
+	
 
 
-			};
-			
-			
-
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
-
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
-
-
-			};
-
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
-
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
-
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
-
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
-
-			return service;
-		}])
-
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
-
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
-				}
-			};
-
-			/* jshint ignore:end */
-		});
+}

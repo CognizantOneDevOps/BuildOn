@@ -201,163 +201,146 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.scheduler;
 
-angular.module('Authentication')
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Properties;
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+import org.apache.commons.dbcp.BasicDataSource;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-			service.Login = function (username, password, callback) {
+import com.cognizant.buildon.services.BuildOnService;
+import com.cognizant.buildon.services.BuildOnServiceImpl;
 
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+/**
+ * @author 338143
+ *
+ */
+public class QuartzJob  implements Job{
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
-
-
-			};
-			
-			
-
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
-
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
-
-
-			};
-
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
-
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
-
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
-
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
-
-			return service;
-		}])
-
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
-
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
+	private static final Logger logger=LoggerFactory.getLogger(QuartzJob.class);
+	private static Connection con=null;
+	private String commitid=null;
+	private String logdir=null;
+	private File file=null;
+	
+	/* (non-Javadoc)
+	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+	 */
+	public void execute(JobExecutionContext context) throws JobExecutionException {
+		HashMap<String,String> map=new HashMap<String,String>();
+		String  sql = ("select commitid,logdir,DATE(start_timestamp)  from root.reports  where start_timestamp < "
+				+ " (select  {fn TIMESTAMPADD(SQL_TSI_DAY,-15,DATE(CURRENT_TIMESTAMP))} from sysibm.sysdummy1)");
+		con=createConnection();
+		try(PreparedStatement statement=con.prepareStatement(sql)) {
+			try( ResultSet rs = statement.executeQuery()){
+				while (rs.next()) {
+					commitid=rs.getString(1);
+					logdir=rs.getString(2);
+					map.put(commitid,logdir);
+					logger.info("commitid :logdir "+commitid+logdir);
 				}
-			};
+			}
+			logger.info("Map size:"+map.size());
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+		}
+		for(Entry<String,String> e: map.entrySet()){
+			if(null!=e.getValue() && !e.getValue().equals("")){
+				deleteReportsRec(e.getKey().toString());
+				file=new File(logdir.toString());
+				deleteLogFiles(file);
+			}
+		}
+	}
 
-			/* jshint ignore:end */
-		});
+	/**
+	 * @param file
+	 */
+	private static void deleteLogFiles(File file) {
+		if(file.isDirectory()){
+			if(file.list().length==0){
+				file.delete();
+			}else{
+				String files[] = file.list();
+				for (String temp : files) {
+					File fileDelete = new File(file,temp);
+					deleteLogFiles(fileDelete);
+				}
+				if(file.list().length==0){
+					file.delete();
+					logger.info("Directory is deleted : "+ file.getAbsolutePath());
+				}
+			}
+		}else{
+			file.delete();
+		}
+
+	}
+
+	/**
+	 * @param commitid
+	 */
+	private void deleteReportsRec(String commitid) {
+		String sql="delete from reports where commitid=?";
+		con=createConnection();
+		try(PreparedStatement statement=con.prepareStatement(sql)) {
+			statement.setString(1,commitid);
+			statement.executeUpdate();
+
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+		}
+	}
+
+	private static Connection  createConnection(){
+		BuildOnService service=new BuildOnServiceImpl();
+		Properties props = readPropertyFile();
+		String driver = props.getProperty("derby.driver");
+		String url = props.getProperty("derby.url");
+		String username = props.getProperty("derby.username");
+		String password = props.getProperty("derby.password");
+	    String pass=service.decrypt(password);
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(driver);
+		dataSource.setUrl(url);
+		dataSource.setUsername(username);
+		dataSource.setPassword(pass);
+		try {
+			con = dataSource.getConnection();
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+		}
+		
+		return con;
+	}
+
+	private static Properties readPropertyFile() {
+		Properties props = new Properties();
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream("buildon.properties");
+		try {
+			props.load(is);
+			is.close();
+		} catch (FileNotFoundException e1) {
+			logger.debug(e1.toString());
+		} catch (IOException e) {
+			logger.debug(e.toString());
+		}
+		return props;
+	}
+
+}

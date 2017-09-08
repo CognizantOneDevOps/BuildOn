@@ -201,163 +201,169 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.services;
 
-angular.module('Authentication')
+import java.util.Date;
+import java.util.List;
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+import org.json.JSONObject;
 
-			service.Login = function (username, password, callback) {
+import com.cognizant.buildon.domain.Reports;
+import com.cognizant.buildon.domain.ScmDetails;
+import com.cognizant.buildon.domain.Users;
 
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+/**
+ * @author 338143
+ *
+ */
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+public interface BuildOnService {
+	
+	/**
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public List<Users> getAuth(String username, String password) ;
+	
+	/**
+	 * @param startdate
+	 * @param enddate
+	 * @param project
+	 * @param branch
+	 * @param intiatedBy
+	 * @param userId
+	 * @return
+	 */
+	public List<Reports> getresults(Date startdate,Date enddate,String project,String branch,String intiatedBy,String userId);
+	
+
+	/**
+	 * @param userId
+	 * @param switchval
+	 * @param type
+	 * @param url
+	 * @param username
+	 * @param id
+	 * @return
+	 */
+	public boolean  saveScmDet(String userId,String switchval,String type,String url ,String username,String id) ;
+	
+	/**
+	 * @param userid
+	 * @param type
+	 * @return
+	 */
+	public  List<ScmDetails> getScmDetails(String userid,String type);
+
+	/**
+	 * @param id
+	 * @param userid 
+	 * @return
+	 */
+	public boolean removeRecord(String id, String userid);
+
+	/**
+	 * @param userid
+	 * @param type
+	 * @return
+	 */
+	public List<String> getPeferenceDetails(String userid, String type);
+
+	/**
+	 * @param userid
+	 * @param switchmode
+	 * @param repo
+	 * @param branch
+	 * @return
+	 */
+	public boolean savePeferenceDetails(String userid, String switchmode, String repo,String branch);
+
+	/**
+	 * @param userid
+	 * @return
+	 */
+	public JSONObject getHistoricalReports(String userid);
+
+	/**
+	 * @param scmuser
+	 * @return
+	 */
+	public JSONObject getIndividualReports(String scmuser);
+
+	/**
+	 * @param scmuser
+	 * @param commitid
+	 * @return
+	 */
+	public JSONObject getIndividualstatusReports(String scmuser, String commitid);
+
+	/**
+	 * @param commitid
+	 * @return
+	 */
+	public String getJsonData(String commitid);
+
+	/**
+	 * @param commitId
+	 * @return
+	 */
+	public String getReportTriggerData(String commitId);
+
+	/**
+	 * @param password
+	 * @return
+	 */
+	public String decrypt(String password);
+	
+	/**
+	 * @param value
+	 * @return
+	 */
+	public  boolean isNumeric(String value); 
+	
+	/**
+	 * @param value
+	 * @return
+	 */
+	public  boolean isAlphaNumeric(String value);
+	
+	/**
+	 * @param value
+	 * @return
+	 */
+	public  boolean isValidUrl(String value); 
+	
+	/**
+	 * @param value
+	 * @return
+	 */
+	public  boolean isValidEmail(String value);
+
+	/**
+	 * @param value
+	 * @return
+	 */
+	public boolean isValidAlpha(String value);
+	
+	/**
+	 * @return
+	 */
+	public String getEncryptkey();
 
 
-			};
-			
-			
 
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+	/**
+	 * @param value
+	 * @return
+	 */
+	public String encrypt(String value);
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+	
 
-
-			};
-
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
-
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
-
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
-
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
-
-			return service;
-		}])
-
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
-
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
-				}
-			};
-
-			/* jshint ignore:end */
-		});
+	public String getCookiesDecrytpedvalue(String globalCookie);
+	
+	public Users  getEmailForUser(String id);
+	
+	
+}

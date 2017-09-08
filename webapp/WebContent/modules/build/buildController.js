@@ -217,6 +217,8 @@ angular.module('Build', ['ui.ace'])
 					console.log($rootScope.userId + $rootScope.scmUser); 
 					$rootScope.obj = response.data;
 					console.log($scope.obj);
+					
+					if($rootScope.obj != 'invalid'){
 					angular.forEach( $rootScope.obj, function(value, key) {					
 						$scope.items=$scope.obj.repoList;
 						$rootScope.buildtrendJson =$scope.obj.trendsarray;	
@@ -242,6 +244,12 @@ angular.module('Build', ['ui.ace'])
 					}, 500);
 
 
+					}else{
+						$location.path('/login');
+					}
+					
+					
+					
 				});
 
 		//	});
@@ -423,12 +431,18 @@ angular.module('Build', ['ui.ace'])
 		                    'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
 		                }
 		            }
-		            $http.post('JenkinsServlet',data,config)
+		            $http.post('JenkinsWebController',data,config)
 		           .then(function (response) {
 		        	   $scope.projdata=response.data;
+		        	   
+		        	   if( $scope.projdata!='invalid'){
 						$scope.imgshow=false;
 						$scope.cancel();
 						console.log( $scope.projdata);
+		        	   }else{
+		        		   $location.path('/login');
+		        		   
+		        	   }
 		            }, function(error) {
 					console.log("error");
 					});

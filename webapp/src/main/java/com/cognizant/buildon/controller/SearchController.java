@@ -201,163 +201,181 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.controller;
 
-angular.module('Authentication')
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-			service.Login = function (username, password, callback) {
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+import com.cognizant.buildon.domain.Constants;
+import com.cognizant.buildon.domain.Reports;
+import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnService;
+import com.cognizant.buildon.services.BuildOnServiceImpl;
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+/**
+ * @author 338143
+ *
+ */
 
+/**
+ * Servlet implementation class SearchServlet
+ */
+@WebServlet("/SearchController")
+public class SearchController extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger=LoggerFactory.getLogger(SearchController.class);
 
-			};
-			
-			
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public SearchController() {
+		super();
+	}
 
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		BuildOnService buildonservice=new BuildOnServiceImpl();
+		String userid=request.getParameter("userId");
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
-
-
-			};
-
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
-
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
-
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
-
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
-
-			return service;
-		}])
-
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
-
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
+		logger.debug("searchservlet get");
+		String globalCookie=null;
+		String userId=null;
+		String responseStr=null;
+		Cookie[] cookie =request.getCookies();
+		if(cookie!=null ){
+			for (Cookie cookies : cookie) {
+				if (cookies.getName().equals("user")) {
+				globalCookie= cookies.getValue();
 				}
-			};
+			}
+		}
+		userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
+		
+		logger.debug("search servlet user... "+userId);
+		if(null!=userId && !(userId.equals(""))){
+			logger.debug("search servlet if  ");
+			Users userinfo=buildonservice.getEmailForUser(userId);
+			JSONObject list=buildonservice.getHistoricalReports(userinfo.getEmail());
+			response.getWriter().write(list.toString());
 
-			/* jshint ignore:end */
-		});
+		}else{
+			deleteCookies(response, cookie);
+			responseStr=Constants.INVALID;
+			response.getWriter().write(responseStr.toString());
+
+		}
+
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		BuildOnService buildonservice=new BuildOnServiceImpl();
+		List<Reports> list=new ArrayList<>();
+
+		String userId=request.getParameter("userId");
+		String project=request.getParameter("project");
+		String branch=request.getParameter("branch");
+		String intiatedBy=request.getParameter("intiatedby");
+		String srtdate=request.getParameter("sdate");
+		String enddate=request.getParameter("edate");
+		JSONObject json=null;
+		JSONArray jsArray = new JSONArray();
+		String calduration=null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date startDate=new Date();
+		Date endDate=new Date();
+		try {
+			startDate = sdf.parse(srtdate);
+			endDate=sdf.parse(enddate);
+		} catch (ParseException e1) {
+			logger.debug(e1.toString());
+		}
+
+		String globalCookie=null;
+		String responseStr=null;
+		Cookie[] cookie =request.getCookies();
+		if(cookie!=null ){
+			for (Cookie cookies : cookie) {
+				
+				if (cookies.getName().equals("user")) {
+				globalCookie= cookies.getValue();
+				}
+			}
+		}
+		userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
+		if(null!=userId && !(userId.equals(""))){
+			Users userinfo=buildonservice.getEmailForUser(userId);
+			list=buildonservice.getresults(startDate,endDate,project,branch,intiatedBy,userinfo.getEmail());
+			for(Reports report:list){
+				json=new JSONObject();
+				try {
+					json.put("jobname",report.getJobname());
+					json.put("status",report.getStatus());
+					json.put("project", report.getProject());
+					json.put("branch", report.getBranch());
+					calduration = calculateDuration(calduration, report);
+					json.put("duration",calduration);
+					json.put("commitid", report.getCommitid());
+					json.put("TRIGGER_FROM",report.getTRIGGER_FROM());
+					json.put("scmuser",report.getScmuser());
+					jsArray.put(json);
+				} catch (JSONException e) {
+					logger.debug(e.toString());
+				}
+			}
+			response.getWriter().write(jsArray.toString());
+
+		}else{
+			deleteCookies(response, cookie);
+			responseStr=Constants.INVALID;
+			response.getWriter().write(responseStr.toString());
+
+
+		}
+
+	}
+
+	private String calculateDuration(String calduration, Reports report) {
+		if( report.getDuration()!=null){
+			int minutes = report.getDuration() / 60000;
+			int minutes1 = report.getDuration() % 60000;
+			int seconds = minutes1 / 1000;
+			calduration = minutes + "Mins " + seconds + "Sec"; 
+		}
+		return calduration;
+	}
+
+	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
+		if (cookie != null) {
+			for (Cookie cookiedel : cookie) {
+				cookiedel.setValue(null);
+				cookiedel.setMaxAge(0);
+				response.addCookie(cookiedel);
+
+			}
+		}
+	}
+
+
+}

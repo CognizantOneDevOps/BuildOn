@@ -215,7 +215,7 @@ angular.module('Preference')
 			var service = {};
 			service.getPreferenceDetails = function (userId,type,callback) {
 			var response =$http({
-				url : 'PreferenceServlet',
+				url : 'PreferenceController',
 				method: "GET",
 				params: {
 					"userId":userId,
@@ -232,7 +232,7 @@ angular.module('Preference')
 			
 		service.savePreferenceDetails = function (userId,switchmode,repo,branch,callback) {
 				var response =$http({
-					url : 'PreferenceServlet',
+					url : 'PreferenceController',
 					method: "POST",
 					params: {
 						"userId":userId,

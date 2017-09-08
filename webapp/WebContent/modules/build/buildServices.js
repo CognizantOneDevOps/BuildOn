@@ -215,7 +215,7 @@ angular.module('Build')
 			
 			service.getRepoDetails = function (userId,callback) {
 				var response =$http({
-					url : 'GithubRepoServlet',
+					url : 'GithubRepoWebController',
 					method: "GET",
 					params: {
 						"userId":userId 
@@ -230,7 +230,7 @@ angular.module('Build')
 			};
 			service.getScmDetails = function (userId,repo,callback) {
 				var response =$http({
-					url : 'GithubServlet',
+					url : 'GithubWebController',
 					method: "GET",
 					params: {
 						"userId":userId,
@@ -247,7 +247,7 @@ angular.module('Build')
 			
 			service.getJenkinsFile = function (userId,branch,project,callback) {
 					var response =$http({
-						url : 'GithubServlet',
+						url : 'GithubWebController',
 						method: "POST",
 						params: {
 							"userId":userId ,
@@ -266,7 +266,7 @@ angular.module('Build')
 					
 				service.buildon = function (userId,branch,repo,content,callback) {
 						var response =$http({
-							url : 'JenkinsServlet',
+							url : 'JenkinsWebController',
 							method: "GET",
 							params: {
 								"userId":userId,
@@ -551,7 +551,7 @@ angular.module('Build')
 
 					var defered = $q.defer();
 					$http({
-							url : 'BuildonServlet',
+							url : 'BuildonWebController',
 							method: "POST",
 							params: {
 									"userId":userId,

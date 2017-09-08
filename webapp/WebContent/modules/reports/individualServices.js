@@ -213,7 +213,7 @@ angular.module('Individual')
 
 			service.getIndividualReports = function (scmuser,callback) {
 				var response =$http({
-					url : 'ReportServlet',
+					url : 'ReportController',
 					method: "GET",
 					params: {
 						"scmuser":scmuser
@@ -231,7 +231,7 @@ angular.module('Individual')
 			
 			service.getIndividualStatusReports = function (scmuser,commitid,callback) {
 				var response =$http({
-					url : 'ReportServlet',
+					url : 'ReportController',
 					method: "POST",
 					params: {
 						"scmuser":scmuser,
@@ -250,7 +250,7 @@ angular.module('Individual')
 			
 			service.getJsonData = function (commitid,callback) {
 				var response =$http({
-					url : 'IndividualReport',
+					url : 'IndividualReportController',
 					method: "GET",
 					params: {
 						"commitid":commitid
@@ -268,7 +268,7 @@ angular.module('Individual')
 			
 			service.getDBServiceUpdate = function (commitid,repo,branch,callback) {
 				var response =$http({
-					url : 'IndividualReport',
+					url : 'IndividualReportController',
 					method: "POST",
 					params: {
 						"commitid":commitid,

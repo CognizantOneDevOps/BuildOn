@@ -214,7 +214,7 @@ angular.module('Home')
 			var service = {};
 			service.save = function (userId,switchval,type,url,oauthtoken,id, callback) {
 			var response =$http({
-				url : 'ScmPersistServlet',
+				url : 'ScmPersistController',
 				method: "POST",
 				params: {
 					"userId":userId,
@@ -235,7 +235,7 @@ angular.module('Home')
 			
 		 service.getScmDetails = function (userId,type,callback) {
 					var response =$http({
-						url : 'ScmUserDetailsServlet',
+						url : 'ScmUserDetailsController',
 						method: "POST",
 						params: {
 							"userId":userId,
@@ -252,7 +252,7 @@ angular.module('Home')
 		 
 		 service.getTestCon = function (uname,uurl, callback) {
 				var response =$http({
-					url : 'ScmPersistServlet',
+					url : 'ScmPersistController',
 					method: "GET",
 					params: {
 						"user":uname,
@@ -269,7 +269,7 @@ angular.module('Home')
 		 
 		 service.removeRecord = function (id,userid, callback) {
 				var response =$http({
-					url : 'ScmUserDetailsServlet',
+					url : 'ScmUserDetailsController',
 					method: "GET",
 					params: {
 						"id":id,

@@ -201,163 +201,121 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.controller;
 
-angular.module('Authentication')
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-			service.Login = function (username, password, callback) {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+import com.cognizant.buildon.domain.Constants;
+import com.cognizant.buildon.domain.LDAPAuthentication;
+import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnService;
+import com.cognizant.buildon.services.BuildOnServiceImpl;
+import com.google.gson.Gson;
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+/**
+ * @author 338143
+ *
+ */
 
+/**
+ * Servlet implementation class Authentication
+ */
+@WebServlet("/AuthenticationWebController")
+public class AuthenticationWebController extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	private static  final Logger logger=LoggerFactory.getLogger(AuthenticationWebController.class);
 
-			};
-			
-			
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public AuthenticationWebController() {
+		super();
+	}
 
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		BuildOnService service=new BuildOnServiceImpl();
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		String decodedpass=service.decrypt(password);
+		String userId=null;
+		String userid=null;
+		//userId=LDAPAuthentication.getEmpId(username);
+		userid=String.valueOf(userId);
+		Cookie cookie=new Cookie("user",service.encrypt(userid));
+		cookie.setMaxAge(54000);
+		response.addCookie(cookie);
+		response.getWriter().write(username);
+	}
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+		BuildOnService service=new BuildOnServiceImpl();
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		Properties props = readPropertyFile();
+		boolean isLDAP = Boolean.parseBoolean(props.getProperty("ldap.isLDAP"));
+		Users user=new Users();
+		String userId=null;
+		List<Users> users=new ArrayList<Users>();
+		String json=null;
+		if(!isLDAP){
+		users=service.getAuth(username,password);
+		if(!users.isEmpty()){
+			user=users.get(0);
+		}
+		userId=String.valueOf(user.getId());
+		Cookie cookie=new Cookie("user",service.encrypt(userId));
+		cookie.setMaxAge(54000);
+		response.addCookie(cookie);
+		json = new Gson().toJson(users);
+		}else{
+			String userid=null;
+			user=LDAPAuthentication.getEmpId(username);
+			userid=String.valueOf(user.getId());
+			Cookie cookie=new Cookie("user",service.encrypt(userid));
+			cookie.setMaxAge(54000);
+			response.addCookie(cookie);
+			users.add(user);
+			json = new Gson().toJson(users);
+		}
+		response.getWriter().write(json);
 
-			};
+	}
+	
+	private static  Properties readPropertyFile() {
+		Properties props = new Properties();
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
+		try {
+			props.load(is);
+			is.close();
+		} catch (FileNotFoundException e1) {
+			logger.debug(e1.toString());
+		} catch (IOException e) {
+			logger.debug(e.toString());
+		}
+		return props;
+	}
 
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
-
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
-
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
-
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
-
-			return service;
-		}])
-
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
-
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
-				}
-			};
-
-			/* jshint ignore:end */
-		});
+}

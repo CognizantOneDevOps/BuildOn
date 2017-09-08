@@ -215,7 +215,7 @@ angular.module('Historical')
 			var service = {};
 			service.getHistoricalReports = function (userId,callback) {
 			var response =$http({
-				url : 'SearchServlet',
+				url : 'SearchController',
 				method: "GET",
 				params: {
 					"userId":userId
@@ -233,7 +233,7 @@ angular.module('Historical')
 			
 			service.getReportTriggerData = function (commitid,callback) {
 				var response =$http({
-					url : 'HistoricServlet',
+					url : 'HistoricWebController',
 					method: "POST",
 					params: {
 						"commitid":commitid						
@@ -251,7 +251,7 @@ angular.module('Historical')
 			
 			service.getHistoricDBService = function (commitid,callback) {
 				var response =$http({
-					url : 'PipelineHistoricServlet',
+					url : 'PipelineHistoricController',
 					method: "POST",
 					params: {
 						"commitid":commitid						
@@ -269,7 +269,7 @@ angular.module('Historical')
 			
 			service.getSearchresult = function (userId,project,branch,intiatedby,sdate,edate,callback) {
 				var response =$http({
-					url : 'SearchServlet',
+					url : 'SearchController',
 					method: "POST",
 					params: {
 						"userId":userId,
@@ -290,7 +290,7 @@ angular.module('Historical')
 				
 				service.getBranchDetails = function (userId,repo,callback) {
 					var response =$http({
-						url : 'HistoricCIServlet',
+						url : 'HistoricCIWebController',
 						method: "POST",
 						params: {
 							"userId":userId,

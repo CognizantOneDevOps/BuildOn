@@ -221,14 +221,7 @@ angular.module('Historical')
 			  $scope.projects=  $scope.details.projectlist;
     	});
     	
-/*		$scope.selectval = function(item,selected) {
-			if(selected =='selbranch'){
-				$rootScope.histselectedbranch=item;
-			}else if(selected =='selproject'){
-				$rootScope.histselectedproject=item;
-			}
-		};
-		*/
+
 		$scope.selectval = function(item,selected) {
 			if(selected =='selbranch'){
 				$rootScope.histselectedbranch=item;
@@ -239,7 +232,14 @@ angular.module('Historical')
 				HistoricalService.getBranchDetails($rootScope.scmUser,$rootScope.histselectedproject, function(response) {
 					$scope.branches=response.data;
 					console.log($scope.branches);
-					$scope.isLoading = false;
+					if($scope.branches !='invalid'){
+						$scope.isLoading = false;
+					}else{
+						
+						$location.path('/login');
+						
+					}
+					
 
 				});
 				

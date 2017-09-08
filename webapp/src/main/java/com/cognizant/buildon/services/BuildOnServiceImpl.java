@@ -201,163 +201,321 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-'use strict';
+package com.cognizant.buildon.services;
 
-angular.module('Authentication')
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-.factory('AuthenticationService',
-		['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-		 function (Base64, $http, $cookieStore, $rootScope, $timeout) {
-			var service = {};
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
-			service.Login = function (username, password, callback) {
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "POST",
-					params: {
-						"username": username, 
-						"password": password 
-					}
+import com.cognizant.buildon.dao.BuildOnDAO;
+import com.cognizant.buildon.dao.BuildOnDAOImpl;
+import com.cognizant.buildon.domain.Constants;
+import com.cognizant.buildon.domain.LDAPAuthentication;
+import com.cognizant.buildon.domain.Reports;
+import com.cognizant.buildon.domain.ScmDetails;
+import com.cognizant.buildon.domain.Users;
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+/**
+ * @author 338143
+ *
+ */
+
+public class BuildOnServiceImpl implements BuildOnService {
+
+	private static final Logger logger=LoggerFactory.getLogger(BuildOnServiceImpl.class);	
+	private BuildOnDAO buildOnDao=new BuildOnDAOImpl();
+
+	@Override
+	public List<Users> getAuth(String username, String password) {
+		return buildOnDao.getAuth(username, password);	
+	}
+
+	@Override
+	public List<Reports> getresults(Date startdate, Date enddate, String project, String branch,String intiatedBy,String userId) {
+		return buildOnDao.getresults(startdate,enddate,project,branch,intiatedBy,userId);	
+	}
+
+	@Override
+	public boolean saveScmDet(String userId ,String switchval ,String type,String url,String username,String id) {
+		return buildOnDao.saveScmDet(userId,switchval,type,url,username,id);
+	}
+
+	@Override
+	public List<ScmDetails> getScmDetails(String userId ,String type) {
+		return buildOnDao.getScmDetails(userId,type);
+	}
+
+	@Override
+	public boolean removeRecord(String id,String userid) {
+		return buildOnDao.removeRecord(id,userid);
+	}
+
+	@Override
+	public List<String> getPeferenceDetails(String userid, String type) {
+		return  buildOnDao.getPeferenceDetails(userid,type);
+	}
+
+	@Override
+	public boolean savePeferenceDetails(String userid, String switchmode, String repo,String branch) {
+		return  buildOnDao.savePeferenceDetails(userid,switchmode,repo,branch);
+	}
+
+	@Override
+	public JSONObject getHistoricalReports(String userid) {
+		return  buildOnDao.getHistoricalReports(userid);
+	}
+
+	@Override
+	public JSONObject getIndividualReports(String scmuser) {
+		Reports report=buildOnDao.getIndividualReports(scmuser);
+		JSONObject json=new JSONObject();
+		try {	if(null !=report){
+			json.put("Project",report.getProject());
+			json.put("Branch",report.getBranch());
+			json.put("jenkinsfile","Jenkinsfile");
+			json.put("Initiatedby",report.getScmuser().toLowerCase());
+			json.put("CommitID",report.getCommitid());
+			json.put("Beginon",report.getStart_timestamp()+" UTC");
+			json.put("JobId",report.getJobname());
+			json.put("Estimatedtime",report.getEstimated_duration());
+			json.put("Logdir",report.getLogdir());
+			json.put("TRIGGER_FROM",report.getTRIGGER_FROM());
+			if(null!=report.getStatus() && report.getStatus().equals("NOTSTARTED")){
+				json.put(Constants.STATUS,"Initiated");	
+			}else if( report.getStatus().equals("INPROGRESS")){
+				json.put(Constants.STATUS,"Inprogress");	
+			}else if( report.getStatus().equals("SUCCESS")){
+				json.put(Constants.STATUS,"Success");	
+			}else if( report.getStatus().equals("FAILURE")){
+				json.put(Constants.STATUS,"Failure");	
+			}else if( report.getStatus().equals("ABORTED")){
+				json.put(Constants.STATUS,"Aborted");	
+			}
+
+		}
+		} catch (JSONException e) {
+			logger.debug(e.toString());
+		}
+
+		return json;
+	}
 
 
-			};
-			
-			
+	@Override
+	public JSONObject getIndividualstatusReports(String scmuser, String commitid) {
+		JSONObject json=new JSONObject();
+		Reports report=buildOnDao.getIndividualstatusReports(scmuser,commitid);
+		try {	
+			if(null !=report){
+				json.put("Project",report.getProject());
+				json.put("Branch",report.getBranch());
+				json.put("jenkinsfile","Jenkinsfile");
+				json.put("Initiatedby",report.getScmuser().toLowerCase());
+				json.put("CommitID",report.getCommitid());
+				json.put("Beginon",report.getStart_timestamp()+" UTC");
+				json.put("JobId",report.getJobname());
+				json.put("Estimatedtime",report.getEstimated_duration());
+				json.put("status",report.getStatus());
+				json.put("Logdir",report.getLogdir());
+				json.put("TRIGGER_FROM",report.getTRIGGER_FROM());
+			}
+		} catch (JSONException e) {
+			logger.debug(e.toString());
+		}
+		return  json;
+	}
 
-			service.LDAPAuthlogin = function (username, password, callback) {
-				var response =$http({
-					url : 'AuthenticationWebController',
-					method: "GET",
-					params: {
-						"username": username, 
-						"password": password 
-					}
 
-				})
-				.then(function successCallback(response,status) {				
-					var resultobj={username: username, password: password };
-					callback(response.data); 
-				}, function errorCallback (response,status) {
-					callback(response);
-				});
+	@Override
+	public String getJsonData(String commitid) {
+		return  buildOnDao.getJsonData(commitid);
+	}
+
+	@Override
+	public String getReportTriggerData(String commitid) {
+		return  buildOnDao.getReportTriggerData(commitid);
+	}
+
+	@Override
+	public String decrypt(String password) {
+		String psk =getEncryptkey();
+		String iv = getEncryptkey();
+		byte[] cipherText= Base64.getDecoder().decode(password);
+		String encryptionKey = psk;
+		Cipher cipher;
+		String decrypted=null;
+		try {
+			cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			final SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF8"), "AES");
+			cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv.getBytes("UTF8")));
+			decrypted = new String(cipher.doFinal(cipherText),"UTF-8");
+
+		} catch (NoSuchAlgorithmException e) {
+			logger.debug(e.toString());
+		} catch (NoSuchPaddingException e) {
+			logger.debug(e.toString());
+		} catch (InvalidKeyException e) {
+			logger.debug(e.toString());
+		} catch (InvalidAlgorithmParameterException e) {
+			logger.debug(e.toString());
+		} catch (UnsupportedEncodingException e) {
+			logger.debug(e.toString());
+		} catch (IllegalBlockSizeException e) {
+			logger.debug(e.toString());
+		} catch (BadPaddingException e) {
+			logger.debug(e.toString());
+		}
+		return decrypted;
+	}
+
+	@Override
+	public String encrypt(String value) {
+		try {
+			String key =getEncryptkey();
+			String initVector = getEncryptkey();
+
+			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+
+			byte[] encrypted = cipher.doFinal(value.getBytes());
+
+			String encryptedValue = Base64.getEncoder().encodeToString(encrypted);
+			return encryptedValue;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return null;
+	}
 
 
-			};
+	@Override
+	public String getEncryptkey(){
+		InetAddress ip = null;
+		byte[] mac = null;
+		NetworkInterface network = null;
+		StringBuilder sb = new StringBuilder();
+		try {
+			ip = InetAddress.getLocalHost();
+		} catch (UnknownHostException e1) {
+			logger.debug(e1.toString());
+		}
+		try {
+			network = NetworkInterface.getByInetAddress(ip);
+			mac = network.getHardwareAddress();
+		} catch (SocketException e) {
+			logger.debug(e.toString());
+		}
+		for (int i = 0; i < mac.length; i++) {
+			sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "" : ""));
+		}
+		sb.append("0000");
+		return sb.toString();
+	}
 
-			
-			
-			
-			service.SetCredentials = function (username, password) {
-				var authdata = Base64.encode(username + ':' + password);
+	@Override
+	public boolean isNumeric(String value) {
+		return value != null && value.matches("[0-9]+");
+	}
 
-				$rootScope.globals = {
-						currentUser: {
-							username: username,
-							authdata: authdata
-						}
-				};
+	@Override
+	public boolean isAlphaNumeric(String value) {
+		return value != null && value.matches("[A-Za-z0-9]+");
+	}
 
-				//$http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; // jshint ignore:line
-			};
+	@Override
+	public boolean isValidUrl(String value) {
+		Pattern pattern = Pattern.compile(
+				"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+		Matcher matcher;
+		matcher=pattern.matcher(value);
+		boolean matches = matcher.matches();
+		return matches;
+	}
 
-			service.ClearCredentials = function () {
-				$rootScope.globals = {};
-				$cookieStore.remove('globals');
-				$http.defaults.headers.common.Authorization = 'Basic ';
-			};
+	@Override
+	public boolean isValidEmail(String value) {
+		Pattern pattern = Pattern.compile("^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})");
+		Matcher matcher;
+		matcher=pattern.matcher(value);
+		boolean matches = matcher.matches();
+		return matches;
+	}
 
-			return service;
-		}])
+	@Override
+	public boolean isValidAlpha(String value) {
+		Pattern pattern = Pattern.compile("^[a-zA-Z]+$");
+		Matcher matcher;
+		matcher=pattern.matcher(value);
+		boolean matches = matcher.matches();
+		return matches;
+	}
 
-		.factory('Base64', function () {
-			var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+	@Override
+	public String getCookiesDecrytpedvalue(String globalCookie) {
+		String user =decrypt(globalCookie);
+		return user;
+	}
 
-			return {
-				encode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
+	@Override
+	public Users getEmailForUser(String id) {
+		Properties props = readPropertyFile();
+		boolean isLDAP = Boolean.parseBoolean(props.getProperty("ldap.isLDAP"));
+		if(!isLDAP){
+		return  buildOnDao.getEmailForUser(id);
+		}else{
+			Users users=LDAPAuthentication.getEmailForLDAPUser(id);
+		return  users;
+		}
+	}
 
-					do {
-						chr1 = input.charCodeAt(i++);
-						chr2 = input.charCodeAt(i++);
-						chr3 = input.charCodeAt(i++);
+	/**
+	 * @return
+	 */
+	private Properties readPropertyFile() {
+		Properties props = new Properties();
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
+		try {
+			props.load(is);
+			is.close();
+		} catch (FileNotFoundException e1) {
+			logger.debug(e1.toString());
+		} catch (IOException e) {
+			logger.debug(e.toString());
+		}
+		return props;
+	}
 
-						enc1 = chr1 >> 2;
-						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-						enc4 = chr3 & 63;
-
-						if (isNaN(chr2)) {
-							enc3 = enc4 = 64;
-						} else if (isNaN(chr3)) {
-							enc4 = 64;
-						}
-
-						output = output +
-						keyStr.charAt(enc1) +
-						keyStr.charAt(enc2) +
-						keyStr.charAt(enc3) +
-						keyStr.charAt(enc4);
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-					} while (i < input.length);
-
-					return output;
-				},
-
-				decode: function (input) {
-					var output = "";
-					var chr1, chr2, chr3 = "";
-					var enc1, enc2, enc3, enc4 = "";
-					var i = 0;
-
-					// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(input)) {
-						window.alert("There were invalid base64 characters in the input text.\n" +
-								"Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-						"Expect errors in decoding.");
-					}
-					input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-					do {
-						enc1 = keyStr.indexOf(input.charAt(i++));
-						enc2 = keyStr.indexOf(input.charAt(i++));
-						enc3 = keyStr.indexOf(input.charAt(i++));
-						enc4 = keyStr.indexOf(input.charAt(i++));
-
-						chr1 = (enc1 << 2) | (enc2 >> 4);
-						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-						chr3 = ((enc3 & 3) << 6) | enc4;
-
-						output = output + String.fromCharCode(chr1);
-
-						if (enc3 != 64) {
-							output = output + String.fromCharCode(chr2);
-						}
-						if (enc4 != 64) {
-							output = output + String.fromCharCode(chr3);
-						}
-
-						chr1 = chr2 = chr3 = "";
-						enc1 = enc2 = enc3 = enc4 = "";
-
-					} while (i < input.length);
-
-					return output;
-				}
-			};
-
-			/* jshint ignore:end */
-		});
+	
+}

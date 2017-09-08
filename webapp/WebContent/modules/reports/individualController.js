@@ -218,8 +218,11 @@ angular.module('Individual')
 
 			var ciNewlogs = "";
 			var ciAppendlogs = "";			
+			var fetchUser = "";
+
 
 			if($rootScope.shwfromhist){
+				fetchUser = $rootScope.histuser;
 				console.log($rootScope.histuser);
 				console.log($rootScope.histcommitid);
 				IndividualService.getIndividualStatusReports($rootScope.histuser,$rootScope.histcommitid,function(response) {
@@ -250,7 +253,7 @@ angular.module('Individual')
 			}
 
 			if(!$rootScope.shwfromhist){
-					
+					fetchUser = $rootScope.scmUser;
 					console.log($rootScope.scmUser);
 					IndividualService.getIndividualReports($rootScope.scmUser,function(response) {
 						if(response.data != 'invalid'){
@@ -325,7 +328,7 @@ angular.module('Individual')
 						IndividualService.getJsonData($rootScope.CommitId,function(response) {													
 							$scope.pipelineData =response.data;
 							if($scope.pipelineData != 'invalid'){
-							IndividualService.getIndividualStatusReports($rootScope.scmUser,$rootScope.CommitId,function(response) {
+							IndividualService.getIndividualStatusReports(fetchUser,$rootScope.CommitId,function(response) {
 								$scope.details=response.data;
 								
 								if(response.data != 'invalid'){
@@ -375,7 +378,7 @@ angular.module('Individual')
 
 
 						//xhr.open("GET",$scope.kubelogConfig+"/kubelog?data="+$rootScope.CommitId,true);
-						xhr.open("GET","KubernetesServlet?commitId="+$rootScope.CommitId,true);
+						xhr.open("GET","KubernetesWebController?commitId="+$rootScope.CommitId,true);
 
 						xhr.onload = function(){
 
@@ -411,7 +414,7 @@ angular.module('Individual')
 						xhr.send();			
 					}
 					else if($scope.templateName == "ind_build_report" && $rootScope.shwfromhist) {
-						$scope.historicKube="HistoricServlet?commitId="+$rootScope.CommitId;
+						$scope.historicKube="HistoricWebController?commitId="+$rootScope.CommitId;
 						$http.get($scope.historicKube)
 						.then(function (data) {		  
 							$scope.infralogShow = false;							
@@ -448,7 +451,7 @@ angular.module('Individual')
 						// using XMLHttpRequest
 						var xhr =new XMLHttpRequest();
 
-						xhr.open("GET","CILogServlet?commitId="+$rootScope.CommitId,true);
+						xhr.open("GET","CILogWebController?commitId="+$rootScope.CommitId,true);
 						xhr.onload = function(){
 
 							$scope.cilogShow = false;
@@ -513,7 +516,7 @@ angular.module('Individual')
 
 						//$http.get($rootScope.infralogFilepath) //when I try to read cities.json error occurs
 						
-						$scope.historicCI="HistoricCIServlet?commitId="+$rootScope.CommitId;
+						$scope.historicCI="HistoricCIWebController?commitId="+$rootScope.CommitId;
 						$http.get($scope.historicCI)
 						.then(function (data) {		      
 							$scope.cilogShow = false;      						

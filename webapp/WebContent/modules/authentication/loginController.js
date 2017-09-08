@@ -218,20 +218,19 @@ angular.module('Authentication')
 				$scope.showThrobber = false;
 				$scope.isLDAPAuth=LDAPAuth;
 				console.log($scope.isLDAPAuth);
-				//AuthenticationService.ClearCredentials();
 				$scope.login = function () {
 					$scope.showThrobber = true;
-					if(!$scope.isLDAPAuth){
-						console.log("DB authentication");
-						$http({
-							url : 'Authentication',
-							method: "POST",
-							params: {
-								"username": $scope.username,
-								"password": $scope.password 
-							}
-						})
-						.then(function successCallback(response) {				
+						var data = $.param({
+							username:$scope.username,
+							password:$scope.password 
+						});
+						var config = {
+								headers : {
+									'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+								}
+						}
+						$http.post('AuthenticationWebController',data,config)
+						.then(function (response) {				
 							console.log("success");
 							$scope.results=response.data;
 							if($scope.results.length >0){
@@ -239,7 +238,7 @@ angular.module('Authentication')
 								$rootScope.scmUser=$scope.results[0].email;
 								$rootScope.name=$scope.results[0].uname;
 								$location.path('/home');
-								$route.reload();
+							//	$route.reload();
 							}else {
 								$scope.error = response.message;
 								$scope.showThrobber = false;
@@ -248,36 +247,13 @@ angular.module('Authentication')
 							}
 							
 							
-						}, function errorCallback (response) {
+						},
+						function(error) {
 							console.log("error");
 						});
-
 						
 						
-					}  
+					} 
 
-					if($scope.isLDAPAuth){
-						console.log("LDAPauthentication");
-						AuthenticationService.LDAPAuthlogin($scope.username,encrypted, function(response) {
-							$scope.results=response;
-							console.log($scope.results.mail);
-							if($scope.results.mail != null && $scope.results.name!=null) {
-								$scope.isLoginError=false;
-								$rootScope.scmUser=$scope.results.mail;
-								$rootScope.name=$scope.results.name;
-								AuthenticationService.SetCredentials($scope.username, $scope.password);
-								$location.path('/home');
-							}else {
-								$scope.error = response.message;
-								$scope.showThrobber = false;
-								$scope.isLoginError=true;
-								$scope.errormsg="Invalid credentials";
-							}
-						});
-					}  
-
-				};
-
-		
 
 		}]);
