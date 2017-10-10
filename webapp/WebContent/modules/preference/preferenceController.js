@@ -207,7 +207,7 @@
     ['$scope','$location', 'NgTableParams','PreferenceService','$rootScope','$interval',
     function ($scope, $location, NgTableParams,PreferenceService,$rootScope,$interval) {
     	
-    	$rootScope.type="github";
+    	//$rootScope.type="github";
 
     	console.log($rootScope.scmUser);
     	PreferenceService.getPreferenceDetails($rootScope.scmUser,$rootScope.type, function(response) {

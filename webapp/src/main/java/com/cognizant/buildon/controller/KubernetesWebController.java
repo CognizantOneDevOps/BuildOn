@@ -212,6 +212,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.cognizant.buildon.domain.GitOperations;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
 import com.cognizant.buildon.services.BuildOnServiceImpl;
 
@@ -238,9 +239,9 @@ public class KubernetesWebController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String commitId=request.getParameter("commitId");
-		boolean isvalidId=service.isAlphaNumeric(commitId);
+		boolean isvalidId=buildonservice.isAlphaNumeric(commitId);
 		String  logs=null;
 		if(isvalidId){
 		logs=GitOperations.getKuberneteslog(commitId);

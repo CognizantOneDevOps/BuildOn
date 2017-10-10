@@ -212,8 +212,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.cognizant.buildon.domain.GitOperations;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -240,10 +240,10 @@ public class HistoricWebController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String logs=null;
 		String commitId=request.getParameter("commitId");
-		boolean isvalidId=service.isAlphaNumeric(commitId);
+		boolean isvalidId=buildonservice.isAlphaNumeric(commitId);
 		if(isvalidId){
 			logs = GitOperations.getHistoricKube(commitId);
 		}
@@ -254,12 +254,12 @@ public class HistoricWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String commitId=request.getParameter("commitid");
-		boolean isvalidId=service.isAlphaNumeric(commitId);
+		boolean isvalidId=buildonservice.isAlphaNumeric(commitId);
 		String trigger=null;
 		if(isvalidId){
-			trigger=service.getReportTriggerData(commitId);
+			trigger=buildonservice.getReportTriggerData(commitId);
 		}
 		response.getWriter().write(trigger);
 	}

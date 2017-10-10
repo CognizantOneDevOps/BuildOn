@@ -205,11 +205,19 @@
 
 angular.module('Home')
 .controller('scmController',
-		['$scope','$timeout', '$location', 'HomeService','$rootScope','$http',
-		 function ($scope,$timeout, $location,HomeService,$rootScope,$http) {
+		['$scope','$timeout', '$location', 'HomeService','$rootScope','$http','$filter',
+		 function ($scope,$timeout, $location,HomeService,$rootScope,$http,$filter) {
 			$rootScope.shwfromhist=false;
-			$scope.selection = { value: 'github'};
-			$rootScope.type="github";
+
+			if(!$rootScope.type) {				
+				$rootScope.type="first";
+				$scope.loggedin = "first"; 
+			}else {
+				$scope.selection = { value: $rootScope.type };
+				$scope.loggedin =" "; 
+			}
+
+
 			//$rootScope.userId =$rootScope.scmUser;
 			console.log($rootScope.scmUser + $rootScope.type );
 
@@ -228,6 +236,22 @@ angular.module('Home')
 				console.log("$scope.details.length....."+$scope.details.length);
 				if($scope.details != "invalid"){
 
+					var result = $filter('filter')($scope.details, {defaultvalue:1});		
+					
+					
+					if(result.length > 0) {
+						var dValue = $filter('filter')($scope.details, {defaultvalue:1})[0];
+						$scope.selection = { value: dValue.type};
+						$rootScope.type = dValue.type;
+					}else {
+						$scope.selection = { value: 'github'};
+						$rootScope.type="github";
+					} 
+					
+					if($scope.loggedin) {
+                        $scope.details = $filter('filter')($scope.details, {type:$rootScope.type});
+					} 
+					
 					$scope.drawSCMConfig($scope.details.length);
 
 				}else{
@@ -246,14 +270,13 @@ angular.module('Home')
 				$scope.rowModel = {				
 						addRowCount: totalScmconfig 
 				};
-				console.log("totalScmconfig...."+totalScmconfig);
+				console.log("totalScmconfig:"+totalScmconfig);
 				if(totalScmconfig > 0){
-
 					var row = { 
 							oauthtoken: $scope.details[0].oauthtoken,
 							url :$scope.details[0].url,
 							id:$scope.details[0].id,
-							setDefault:$scope.details[0].defaultValue
+							setDefault:$scope.details[0].defaultvalue
 					};
 
 					$scope.rows = [row];
@@ -262,7 +285,7 @@ angular.module('Home')
 						var row = {   
 								oauthtoken: $scope.details[i].oauthtoken,
 								url :$scope.details[i].url,
-								setDefault:$scope.details[i].defaultValue,
+								setDefault:$scope.details[i].defaultvalue,
 								id:$scope.details[i].id,
 						};	
 						$scope.rows.push(row);
@@ -295,7 +318,6 @@ angular.module('Home')
 				for (var i = 0; i < $scope.rowModel.addRowCount; i++) {		
 					var row = {   
 							oauthtoken: '',
-							//password:'',
 							url:'',
 							setDefault:'0'
 					};
@@ -315,9 +337,9 @@ angular.module('Home')
 							$scope.status=response.data;
 						}else{
 							$location.path('/login');
-							
+
 						}
-						
+
 					});
 
 				}
@@ -325,8 +347,8 @@ angular.module('Home')
 
 			$scope.newValue = function(selectedVal) {
 				var arrLength;
-
-				if(selectedVal == "github") {
+				$scope.msgSuccess=false; 
+				if(selectedVal == 'github') {
 					$rootScope.type=selectedVal;
 					$scope.$evalAsync(function () {
 						$scope.drawSCMConfig($scope.details.length);
@@ -341,7 +363,6 @@ angular.module('Home')
 						}
 						$http.post('ScmUserDetailsController',data,config)
 						.then(function (response) { $scope.details=response.data;
-						console.log("$scope.details.length....."+$scope.details.length);
 						$scope.drawSCMConfig($scope.details.length);
 						},
 						function(error) {
@@ -370,6 +391,27 @@ angular.module('Home')
 					function(error) {
 						console.log("error");
 					});
+				}else if(selectedVal == "gitlab"){
+					$scope.details.length=0;
+					$scope.drawSCMConfig($scope.details.length);
+					$rootScope.type=selectedVal;
+					var data = $.param({
+						userId:$rootScope.scmUser,
+						type:$rootScope.type
+					});
+					var config = {
+							headers : {
+								'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+							}
+					}
+					$http.post('ScmUserDetailsController',data,config)
+					.then(function (response) { $scope.details=response.data;
+					console.log("$scope.details.length:"+$scope.details.length);
+					$scope.drawSCMConfig($scope.details.length);
+					},
+					function(error) {
+						console.log("error");
+					});
 				}
 			}
 
@@ -378,7 +420,7 @@ angular.module('Home')
 				$scope.saved=false;
 				$scope.num=0;
 				$scope.num = index;
-				console.log("$scope.rows[index].id:"+$scope.rows[index].id+"num:"+$scope.num);
+				console.log("$scope.rows[index].setDefault:"+$scope.rows[index].setDefault +"id :"+$scope.rows[index].id+"num:"+$scope.num);
 
 				var data = $.param({
 					"userId":$rootScope.scmUser,
@@ -398,29 +440,29 @@ angular.module('Home')
 					$scope.saved=response.data;
 					console.log("  $scope.saved :"+  $scope.saved);
 					if($scope.saved !='invalid'){
-					$scope.scmSaveprogress = "hide";
-					var data = $.param({
-						userId:$rootScope.scmUser,
-						type:$rootScope.type
-					});
-					var config = {
-							headers : {
-								'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
-							}
-					}
-					$http.post('ScmUserDetailsController',data,config)
-					.then(function (response) { 
-						$scope.details=response.data;
-						console.log("$scope.details.length....."+$scope.details.length);
-						$scope.drawSCMConfig($scope.details.length);
-					},
-					function(error) {
-						console.log("error");
-					});
-				}else{
-					$location.path('/login');
-				}//invalid
-					
+						$scope.scmSaveprogress = "hide";
+						var data = $.param({
+							userId:$rootScope.scmUser,
+							type:$rootScope.type
+						});
+						var config = {
+								headers : {
+									'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+								}
+						}
+						$http.post('ScmUserDetailsController',data,config)
+						.then(function (response) { 
+							$scope.details=response.data;
+							console.log("$scope.details==>"+$scope.details);
+							$scope.drawSCMConfig($scope.details.length);
+						},
+						function(error) {
+							console.log("error");
+						});
+					}else{
+						$location.path('/login');
+					}//invalid
+
 
 				});
 			};
@@ -435,16 +477,16 @@ angular.module('Home')
 				console.log($scope.num );
 				$scope.msgSuccess=false;
 				HomeService.getTestCon($scope.uname,$scope.uurl,  function(response) {
-					
+
 					$scope.msgSuccess=response.data;
 					if($scope.msgSuccess!='invalid'){
-					console.log(index +  $scope.msgSuccess);
-					$scope.scmTestprogress = "hide";
+						console.log(index +  $scope.msgSuccess);
+						$scope.scmTestprogress = "hide";
 					}else{
-					
-					$location.path('/login');
-					
-				}
+
+						$location.path('/login');
+
+					}
 				});
 			}
 

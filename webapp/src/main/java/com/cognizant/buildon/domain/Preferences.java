@@ -215,7 +215,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "PREFERENCES")
+@Table(name = "buildon_preferences")
 public class Preferences {
 	private static final long serialVersionUID = 1L;
 	

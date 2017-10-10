@@ -216,6 +216,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -225,6 +226,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FilenameUtils;
@@ -260,7 +262,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cognizant.buildon.dao.BuildOnDAOImpl;
+import com.cognizant.buildon.services.BuildOnFactory;
+import com.cognizant.buildon.services.BuildOnService;
 import com.jcraft.jsch.Session;
 
 import io.fabric8.kubernetes.api.KubernetesHelper;
@@ -283,47 +286,43 @@ public class GitOperations {
 	private static JSONArray latestbuildarray=null;
 	private static JSONArray comparebuildarray=null;
 
-	private GitOperations(){
-
-	}
 	/**
 	 * @param email
+	 * @param type 
 	 * @return
 	 */
-	public static JSONObject getRepodetails(String email) {
+	public static JSONObject getRepodetails(String email, String type) {
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=email.toLowerCase();
 		ArrayList<String> repoList=new ArrayList<>();
+		List<ScmDetails> scmdetails=buildonservice.getUserScmDetails(userId,type);
+		if(scmdetails.size() >0){
+			ScmDetails scm=scmdetails.get(0);
+			logger.debug(scm.getUrl());
+			String scmurl=scm.getUrl().substring(scm.getUrl().lastIndexOf('/') + 1);
+			String[] url = scmurl.split("\\."); 
+			String repo = url[0]; 
+			repoList.add(repo);
+		}
 		ExecutorService executor =Executors.newFixedThreadPool(6);
 		executor.submit(new Runnable() {
 			public void run() {
-				List<ScmDetails> scmdetails=BuildOnDAOImpl.getUserScmDetails(userId);
-				ScmDetails scm=scmdetails.get(0);
-				logger.debug("GitOperations :"+scm.getUrl());
-				String scmurl=scm.getUrl().substring(scm.getUrl().lastIndexOf('/') + 1);
-				String[] url = scmurl.split("\\."); 
-				String repo = url[0]; 
-				repoList.add(repo);
-
+				trendsarray=buildonservice.getBuildtrends(userId);
 			}
 		});
 		executor.submit(new Runnable() {
 			public void run() {
-				trendsarray=getBuildtrends(userId);
+				projwisearray= buildonservice.getProjectwiseBuild(userId);
 			}
 		});
 		executor.submit(new Runnable() {
 			public void run() {
-				projwisearray= getProjectwiseBuild(userId);
+				latestbuildarray= buildonservice.getLatestbuild(userId);
 			}
 		});
 		executor.submit(new Runnable() {
 			public void run() {
-				latestbuildarray= getLatestbuild(userId);
-			}
-		});
-		executor.submit(new Runnable() {
-			public void run() {
-				comparebuildarray=getCompareBuild(userId);
+				comparebuildarray=buildonservice.getCompareBuild(userId);
 			}
 		});
 		executor.shutdownNow();
@@ -346,63 +345,32 @@ public class GitOperations {
 		return jsonobj;
 	}
 
-	/**
-	 * @param userId
-	 * @return
-	 */
-	protected static JSONArray getCompareBuild(String userId) {
-		return BuildOnDAOImpl.getCompareBuild(userId);
-	}
-
-	/**
-	 * @param userId
-	 * @return
-	 */
-	private static JSONArray getLatestbuild(String userId) {
-		return BuildOnDAOImpl.getLatestbuild(userId);
-	}
-	
-	/**
-	 * @param userId
-	 * @return
-	 */
-	private static JSONArray getProjectwiseBuild(String userId) {
-		return BuildOnDAOImpl.getProjectwiseBuild(userId);
-	}
-	
-	/**
-	 * @param userId
-	 * @return
-	 */
-	private static JSONArray getBuildtrends(String userId){
-		return BuildOnDAOImpl.getBuildtrends(userId);
-	}
 
 	/**
 	 * @param email
 	 * @param repo
+	 * @param type 
 	 * @return
 	 */
-	public static ArrayList<String> getBranchDetails(String email,String repo) {
-		
-	
-		
+	public static ArrayList<String> getBranchDetails(String email,String repo, String type) {
+
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=email.toLowerCase();
 		ArrayList<String> branches=new ArrayList<>();
-		List<ScmDetails> scmdetails=BuildOnDAOImpl.getUserScmDetails(userId);
+		List<ScmDetails> scmdetails=buildonservice.getUserScmDetails(userId,type);
 		ScmDetails scmdet=scmdetails.get(0);
 		String url=scmdet.getUrl();
 		int index=url.lastIndexOf('/');
 		String scmurl=url.substring(0,index);
-		scmurl=scmurl+"/"+repo+".git";
-		String username="oauth2";
+		scmurl=scmurl+"/"+repo+"."+Constants.GIT;
+		String username=Constants.OAUTH;
 		String pass=scmdet.getOauthtoken();
 		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
 		Collection<Ref> refs;
 		try {
 			logger.debug("before list");
 			refs = Git.lsRemoteRepository().setTransportConfigCallback(getTransportConfigCallback())
-					.setUploadPack("/usr/bin/git-upload-pack")					
+					.setUploadPack(Constants.GIT_UPLOAD)					
 					.setHeads(true)
 					.setTags(true)
 					.setRemote(scmurl)
@@ -415,7 +383,11 @@ public class GitOperations {
 		} catch (GitAPIException e) {
 			logger.debug(e.toString());
 		} 
+
+
+
 		return branches;
+
 	}
 
 	/**
@@ -442,14 +414,15 @@ public class GitOperations {
 	 * @param branch
 	 * @param email
 	 * @param session
+	 * @param type 
 	 * @return
 	 */
-	public static String getJenkinsFile(String repoName,String branch,String email,HttpSession session) {
+	public static String getJenkinsFile(String repoName,String branch,String email,HttpSession session, String type) {
 		String userId=email.toLowerCase();
 		Repository repository=null;
 		String urlLocal=null; 
 		session.setAttribute(Constants.PROJECT,repoName);
-		File localPath=cloneRepo(userId,branch,repoName,session);
+		File localPath=cloneRepo(userId,branch,repoName,session,type);
 		urlLocal =localPath +"/."+Constants.GIT;
 		byte[] content = null;
 		String jenkinsContent=null;
@@ -462,35 +435,29 @@ public class GitOperations {
 			RevTree tree = commit.getTree();
 			TreeWalk treeWalk = new TreeWalk(repository);
 			treeWalk.addTree(tree);
-			treeWalk.setRecursive(false);
-			outerloop:
-				while(treeWalk.next()) {
-					if (treeWalk.getPathString().toLowerCase().endsWith("file")) {
-						if(treeWalk.getPathString().equals("Jenkinsfile")){
+			treeWalk.setRecursive(true);
+			while(treeWalk.next()) {
+				if (treeWalk.getPathString().endsWith(Constants.JENKINS_FILE)) {
+					ObjectId objectId = treeWalk.getObjectId(0);
+					ObjectLoader loader = repository.open(objectId);
+					content=loader.getBytes();
+					jenkinsContent = new String(content);
+					break;
+				}
+				else  if(treeWalk.isSubtree()  &&  treeWalk.getPathString().equalsIgnoreCase(repoName) ) {
+					treeWalk.enterSubtree();
+					while(treeWalk.next()){
+						if (treeWalk.getPathString().equals(Constants.JENKINS_FILE)) {
 							ObjectId objectId = treeWalk.getObjectId(0);
 							ObjectLoader loader = repository.open(objectId);
 							content=loader.getBytes();
 							jenkinsContent = new String(content);
 							break;
-						}else{
-							continue outerloop;
 						}
 
-					}else  if(treeWalk.isSubtree()  &&  treeWalk.getPathString().equalsIgnoreCase(repoName) ) {
-						treeWalk.enterSubtree();
-						while(treeWalk.next()){
-							if (treeWalk.getPathString().equals("Jenkinsfile")) {
-								ObjectId objectId = treeWalk.getObjectId(0);
-								ObjectLoader loader = repository.open(objectId);
-								content=loader.getBytes();
-								jenkinsContent = new String(content);
-								break;
-							}
-
-						}
 					}
-
-				}  
+				}
+			}  
 
 		} catch (IOException e) {
 			logger.debug(e.toString());
@@ -507,23 +474,23 @@ public class GitOperations {
 	 */
 	public static boolean  checkrepo(String url,String oauth){
 		boolean isSuccess=false;
-		String username="oauth2";
+		String username=Constants.OAUTH;
 		String password=oauth;
 		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,password);                               
 		Collection<Ref> refs = null;
 		try {
 			refs = Git.lsRemoteRepository()
 					.setTransportConfigCallback(getTransportConfigCallback())
-					.setUploadPack("/usr/bin/git-upload-pack")                                                                   
+					.setUploadPack(Constants.GIT_UPLOAD)                                                                   
 					.setHeads(true)
 					.setTags(true)
 					.setRemote(url)
 					.setCredentialsProvider(credentialsProvider)
 					.call();
-				for (Ref ref : refs) {
-					isSuccess =true;
-				} 
-			
+			for (Ref ref : refs) {
+				isSuccess =true;
+			} 
+
 		} catch (InvalidRemoteException e) {
 			logger.debug(e.toString());
 			isSuccess =false;
@@ -534,7 +501,7 @@ public class GitOperations {
 			logger.debug(e.toString());
 			isSuccess =false;
 		}
-		                                            
+
 		return isSuccess;
 	}
 
@@ -542,9 +509,11 @@ public class GitOperations {
 	 * @param email
 	 * @param content
 	 * @param session
+	 * @param type 
 	 * @return
 	 */
-	public static boolean saveJenkinsEdit(String email,String content,HttpSession session) {
+	public static boolean saveJenkinsEdit(String email,String content,HttpSession session, String type) {
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=email.toLowerCase();
 		Object path=session.getAttribute(Constants.LOCALPATH);
 		String urlLocal = path +"/."+Constants.GIT;
@@ -562,7 +531,7 @@ public class GitOperations {
 			treeWalk.setRecursive(true);
 			File file = new File(path+"/" +Constants.JENKINSFILE);
 			while(treeWalk.next()) {
-				if (treeWalk.getPathString().equals("Jenkinsfile")) {
+				if (treeWalk.getPathString().equals(Constants.JENKINS_FILE)) {
 					try(Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path+"/" + treeWalk.getPathString()),"utf-8")) ) {   
 						writer.write(content);
 					}catch(IOException e){
@@ -585,22 +554,20 @@ public class GitOperations {
 				}
 			}
 
-			logger.debug("path :"+path);
 			Git git = Git.open(new File(urlLocal));
 			repository = git.getRepository();
 			git.add().addFilepattern(".").call();
-			//git.commit().setMessage("Jenkinsfile modified").call();
 			CommitCommand commitCommand = git.commit();
-			commitCommand.setMessage("Jenkinsfile modified");
+			commitCommand.setMessage(Constants.JENKINS_MOD_MSG);
 			commitCommand.setAuthor(email,email);
 			commitCommand.setCommitter(commitCommand.getAuthor());
 			commitCommand.call();
 
-			List<ScmDetails> scmdetails=BuildOnDAOImpl.getUserScmDetails(userId);
+			List<ScmDetails> scmdetails=buildonservice.getUserScmDetails(userId,type);
 			ScmDetails scmdet=scmdetails.get(0);
-			String username="oauth2";
+			String username=Constants.OAUTH;
 			String pass=scmdet.getOauthtoken();
-			logger.debug("username:"+username+pass);
+			logger.debug(username+pass);
 			CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
 			String currentBranch = git.getRepository().getBranch();
 			List<RefSpec> specs = Arrays.asList(new RefSpec(currentBranch + ":" + currentBranch));
@@ -610,7 +577,6 @@ public class GitOperations {
 			pushCommand.setRefSpecs(specs);
 			pushCommand.setDryRun(false);
 			pushCommand.call();
-			logger.debug("after push");
 			repository.close();
 		}catch (IOException e) {
 			logger.debug(e.toString());
@@ -620,124 +586,6 @@ public class GitOperations {
 		}
 
 		return isSaved;
-	}
-
-	/**
-	 * @param userId
-	 * @param branch
-	 * @param repo
-	 * @param content
-	 * @param session
-	 * @return
-	 */
-	public static boolean buildon(String userId,String branch,String repo,String content,HttpSession session)  {
-		String urlLocal=null;
-		boolean isSuccess=false;
-		/*File localPath=null;
-		URL obj =null;
-		Ref headref =null;
-		Repository repository=null;
-		HttpURLConnection con=null;
-		Object path=session.getAttribute(Constants.LOCALPATH);
-		logger.debug("localpath print in buildon"+session.getAttribute(Constants.LOCALPATH));
-		if(null!=path){
-			urlLocal = path +"/."+Constants.GIT;
-		}else{
-			localPath=cloneRepo(userId,branch,repo,session);
-			urlLocal =localPath +"/."+Constants.GIT;
-		}
-		File gitDir = new File(urlLocal);
-
-		try {
-			repository = new FileRepository(gitDir);
-		} catch (IOException e2) {
-			logger.debug(e2.toString());
-		}
-		org.eclipse.jgit.lib.Config config = repository.getConfig();
-		String url = config.getString("remote", "origin", "url");
-		String[] urls = url.split("/", -1);
-		String user=urls[urls.length-2];
-		String full_name=user+"/"+repo;
-		String id=RandomStringUtils.randomAlphanumeric(40);
-
-		try {
-			headref = repository.getRef(branch);
-		} catch (IOException e2) {
-			logger.debug(e2.toString());
-		}
-		String ref=headref.getName();
-		String namespace=user; 
-		JSONObject jsonobject=new JSONObject();
-		JSONObject commitobject=new JSONObject();
-		JSONArray commitarray=new JSONArray();
-		JSONObject jsonrepo=new JSONObject();
-		JSONObject jsonproject=new JSONObject();
-		try {
-			commitobject.put("id",id.toLowerCase());
-			commitarray.put(commitobject);
-			jsonrepo.put("name",repo);
-			jsonrepo.put("git_http_url","");
-			jsonproject.put("path_with_namespace",full_name);
-			jsonproject.put("namespace",namespace); 
-			jsonobject.put("project",jsonproject);
-			jsonobject.put("ref", ref);
-			jsonobject.put("commits", commitarray);
-			jsonobject.put("repository", jsonrepo);
-			jsonobject.put("jenkinsContent", content);
-			jsonobject.put("git_http_url","" );
-		} catch (JSONException e) {
-			logger.debug(e.toString());
-		}
-		Properties props = new Properties();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
-		try {
-			props.load(is);
-			is.close();
-		} catch (FileNotFoundException e1) {
-			logger.debug(e1.toString());
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}
-		String urlProps = props.getProperty("python.url");
-		String urlPython = urlProps+"/setup";
-
-		try {
-			obj = new URL(urlPython);
-
-			con = (HttpURLConnection)obj.openConnection();
-
-			con.setRequestMethod("POST");
-		} catch (IOException  e) {
-			logger.debug(e.toString());
-		} 
-		con.setDoOutput(true);
-		con.setRequestProperty("Content-Type","applictaion/json");
-		con.setConnectTimeout(5000);
-		con.setReadTimeout(5000);
-		OutputStreamWriter out = null;
-		int responseCode=0;
-		try {
-			out = new OutputStreamWriter(con.getOutputStream());
-			out.write(jsonobject.toString());	       
-			responseCode = con.getResponseCode();
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}finally{
-			try {
-				out.close();
-			} catch (IOException e) {
-				logger.debug(e.toString());
-			}
-		}
-		logger.debug("responseCode"+responseCode);
-		if(responseCode==200){
-			isSuccess=true;
-		}
-		repository.close();
-		File f=new File(path.toString());
-		delete(f);*/
-		return isSuccess;
 	}
 
 
@@ -774,13 +622,14 @@ public class GitOperations {
 	 * @param branch
 	 * @param repo
 	 * @param session
+	 * @param type 
 	 * @return
 	 * @throws IOException
 	 * @throws InvalidRemoteException
 	 * @throws TransportException
 	 * @throws GitAPIException
 	 */
-	public static boolean callBuildon(String userId, String branch,String repo, HttpSession session) 
+	public static boolean callBuildon(String userId, String branch,String repo, HttpSession session, String type) 
 			throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 		String urlLocal=null;
 		boolean isSuccess=false;
@@ -789,14 +638,14 @@ public class GitOperations {
 		if(null!=path){
 			urlLocal = path +"/."+Constants.GIT;
 		}else{
-			localPath=cloneRepo(userId,branch,repo,session);
+			localPath=cloneRepo(userId,branch,repo,session,type);
 			urlLocal =localPath +"/."+Constants.GIT;
 		}
 		File gitDir = new File(urlLocal);
 		Repository repository = new FileRepository(gitDir);
 		org.eclipse.jgit.lib.Config config = repository.getConfig();
 		String url = config.getString("remote", "origin", "url");
-		logger.debug("callbuildon url"+url);
+		logger.debug(url);
 		String[] urls = url.split("/", -1);
 		String user=urls[urls.length-2];
 		String full_name=user+"/"+repo;
@@ -810,41 +659,51 @@ public class GitOperations {
 		JSONObject jsonrepo=new JSONObject();
 		JSONObject jsonproject=new JSONObject(); 
 		JSONObject authorobject=new JSONObject();
-		try {
-			commitobject.put("id",id.toLowerCase());
-			authorobject.put("email",userId.toLowerCase());
-			commitobject.put("author",authorobject);
-			commitarray.put(commitobject); 
 
-			jsonrepo.put("name",repo);
-			jsonrepo.put("git_http_url","");
-			jsonproject.put("path_with_namespace",full_name);
-			jsonproject.put("namespace",namespace); 
-			jsonproject.put("http_url",url); 
-			jsonobject.put("project",jsonproject);
-			jsonobject.put("ref", ref);
-			jsonobject.put("commits", commitarray);
-			jsonobject.put("repository", jsonrepo);
-			logger.debug("callbuildon jsonrepo new "+jsonobject.toString());
-		} catch (JSONException e) {
-			logger.debug(e.toString());
+		if( null!= type && type.equals("gitlab")){
+			try {
+				commitobject.put("id",id.toLowerCase());
+				authorobject.put("email",userId.toLowerCase());
+				commitobject.put("author",authorobject);
+				commitarray.put(commitobject); 
+				jsonrepo.put("name",repo);
+				jsonrepo.put("git_http_url","");
+				jsonproject.put("path_with_namespace",full_name);
+				jsonproject.put("namespace",namespace); 
+				jsonproject.put("http_url",url); 
+				jsonobject.put("project",jsonproject);
+				jsonobject.put("ref", ref);
+				jsonobject.put("commits", commitarray);
+				jsonobject.put("repository", jsonrepo);
+				logger.debug("callbuildon jsonrepo"+jsonobject.toString());
+
+			} catch (JSONException e) {
+				logger.debug(e.toString());
+			}
+
+		}else if(null!= type && type.equals("github")){
+			try {
+				JSONObject headcommit=new JSONObject();
+				commitobject.put("id",id.toLowerCase());
+				authorobject.put("email",userId.toLowerCase());
+				commitobject.put("author",authorobject);
+				commitarray.put(commitobject); 
+				jsonrepo.put("name",repo);
+				jsonrepo.put("full_name",full_name);
+				jsonrepo.put("clone_url",url);
+				jsonrepo.put("git_url","");
+				jsonobject.put("ref", ref);
+				jsonobject.put("commits", commitarray);
+				jsonobject.put("repository", jsonrepo);
+				jsonobject.put("head_commit", headcommit);
+			} catch (JSONException e) {
+				logger.debug(e.toString());
+			}
 		}
-		logger.debug("callbuildon jsonrepo"+jsonobject.toString());
-		Properties props = new Properties();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
-		try {
-			props.load(is);
-			is.close();
-		} catch (FileNotFoundException e1) {
-			logger.debug(e1.toString());
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}
+		logger.debug(jsonobject.toString());
+		Properties props = readPropertymethod();
 		String urlProps = props.getProperty("python.url");
-		logger.debug("urlProps:"+urlProps);
 		String urlPython = urlProps+"/setup";
-		logger.debug("urlPython...."+urlPython);
 		URL obj = new URL(urlPython);
 		HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 		con.setRequestMethod("POST");
@@ -870,6 +729,20 @@ public class GitOperations {
 		delete(f);
 		return isSuccess;
 	}
+	private static Properties readPropertymethod() {
+		Properties props = new Properties();
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
+		try {
+			props.load(is);
+			is.close();
+		} catch (FileNotFoundException e1) {
+			logger.debug(e1.toString());
+		} catch (IOException e) {
+			logger.debug(e.toString());
+		}
+		return props;
+	}
 
 
 
@@ -878,19 +751,19 @@ public class GitOperations {
 	 * @param branch
 	 * @param repo
 	 * @param session
+	 * @param type 
 	 * @return
 	 */
-	private static File cloneRepo(String email, String branch, String repo, HttpSession session) {
+	private static File cloneRepo(String email, String branch, String repo, HttpSession session, String type) {
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=email.toLowerCase();
-		
-		logger.debug("cloning path...");
-		List<ScmDetails> scmdetails=BuildOnDAOImpl.getUserScmDetails(userId);
+		List<ScmDetails> scmdetails=buildonservice.getUserScmDetails(userId ,type);
 		ScmDetails scmdet=scmdetails.get(0);
 		String url=scmdet.getUrl();
 		int index=url.lastIndexOf('/');
 		String scmurl=url.substring(0,index);
 		scmurl=scmurl+"/"+repo+".git";
-		String username="oauth2";
+		String username=Constants.OAUTH;
 		String pass=scmdet.getOauthtoken();
 		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
 		File localPath =null;
@@ -900,7 +773,6 @@ public class GitOperations {
 			if(!localPath.delete()) {
 				throw new IOException("Could not delete temporary file " + localPath);
 			}
-			logger.debug("localPath...."+localPath);
 			try {
 				Git.cloneRepository() 
 				.setURI(scmurl)
@@ -923,18 +795,9 @@ public class GitOperations {
 	 * @return
 	 */
 	public static String getKuberneteslog(String commitId) {
-		String podName=BuildOnDAOImpl.getPodname(commitId);
-		Properties props = new Properties();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
-		try {
-			props.load(is);
-			is.close();
-		} catch (FileNotFoundException e1) {
-			logger.debug(e1.toString());
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
+		String podName=buildonservice.getPodname(commitId);
+		Properties props = readPropertymethod();
 		String url = props.getProperty("kubernetes.url");
 		String namespace=props.getProperty("kubernetes.namespace");
 		io.fabric8.kubernetes.client.Config config = new ConfigBuilder().withMasterUrl(url).build();
@@ -952,7 +815,8 @@ public class GitOperations {
 	 */
 	public static String getCIlog(String commitId) {
 		logger.debug("CILOG start");
-		Service service=BuildOnDAOImpl.getServiceData(commitId);
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
+		Service service=buildonservice.getServiceData(commitId);
 		StringBuilder sb = new StringBuilder();
 		BufferedReader br=null;
 		String ciJob=null;
@@ -979,7 +843,7 @@ public class GitOperations {
 		} catch (JSONException e1) {
 			logger.debug(e1.toString());
 		}
-		logger.debug("Status :"+status);
+		logger.debug(status);
 		if(null!=status && status.equals(Constants.INPROGRESS)){
 			String cilogsUrl="http://"+service.getPodip()+":"+service.getPodport()+"/job/"+"buildon-"+commitId+"/lastBuild/consoleText";
 			logger.debug("cilogsUrl :"+cilogsUrl);
@@ -1023,7 +887,6 @@ public class GitOperations {
 	 * @return
 	 */
 	public static String getHistoricKube(String commitId) {
-		logger.debug("getHistoricKube:"+commitId);
 		String path = FilenameUtils.normalize("/root/buildlog/"+commitId+"/kube-"+commitId+".log");
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -1042,7 +905,6 @@ public class GitOperations {
 	 * @return
 	 */
 	public static String getHistoricCILogs(String commitId) {
-		//String path="/root/buildlog/"+commitId+"/jenkins-"+commitId+".log";
 		String path = FilenameUtils.normalize("/root/buildlog/"+commitId+"/jenkins-"+commitId+".log");
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -1067,37 +929,28 @@ public class GitOperations {
 	 * @throws IOException 
 	 */
 	public static boolean getDBServiceUpdate(String commitid, String repo, String branch)  {
-
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		boolean statusupdate=false;
 		String commitidresult=null;
-		Properties props = new Properties();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
-		try {
-			props.load(is);
-			is.close();
-		} catch (FileNotFoundException e1) {
-			logger.debug(e1.toString());
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}
+		Properties props = readPropertymethod();
 		String URI = props.getProperty("kubernetes.url");
 		String namespace=props.getProperty("kubernetes.namespace");
 		String podPort=props.getProperty("kubernetes.podport");
 		String basepath=props.getProperty("kubernetes.logbasepath");
 		String resultJSON=null;		
 		io.fabric8.kubernetes.client.Config config = new ConfigBuilder().withMasterUrl(URI).build();
-		try(		KubernetesClient client = new DefaultKubernetesClient(config)){
+		String podNameValue =null;
+		boolean statusflag=false;
+		String podIP = null;
+		int stage_node_inc=0;
+		try(KubernetesClient client = new DefaultKubernetesClient(config)){
 			PodList podList = client.pods().inNamespace(Constants.DEFAULTPOD).list();
 			KubernetesHelper.removeEmptyPods(podList);
-
-			int j=0;		
 			for (Pod podname : podList.getItems()) {
-				String podNameValue = podname.getMetadata().getName().toString();
-				if(podNameValue.contains(commitid) == true)
+				podNameValue=podname.getMetadata().getName().toString();
+				if(null!= podNameValue && podNameValue.contains(commitid) == true)
 				{	
-					boolean statusflag=false;
-					String podIP = null;
+					statusflag=false;
 					while(!statusflag)
 					{
 						String podStatus = client.pods().inNamespace(Constants.DEFAULTPOD).withName(podNameValue).get().getStatus().getPhase().toString();				
@@ -1106,163 +959,204 @@ public class GitOperations {
 							statusflag=true;
 						}
 					}
-					String read = null;				
-					ArrayList<String>  fetchcjob =  new ArrayList<String>();
-					String cjobstatus =  null;			
-					JSONArray jsontestarray=new JSONArray();				
-					String fileName = basepath+commitid+"/Jenkinsfile";
-					logger.debug("fileName..."+fileName+"commitid..."+commitid);
-					logger.debug("Inside file reader try block");
-					try (BufferedReader br = new BufferedReader(new FileReader(fileName))){
-						while ((read = br.readLine()) != null) {
-							if (read.contains("stage")) {
-								String[] getcjob = read.split("'");
-								fetchcjob.add(getcjob[1]);
-								logger.debug("extractjcob count " + getcjob[1]);
-							}					
-						} 
 
-					} catch (IOException e) {
-						logger.debug(e.toString());
-					}
-					for(int k = 0 ; k < fetchcjob.size() ; k++) {	
-						JSONObject jsontest=new JSONObject();
-						String currentcjob = fetchcjob.get(k);				
-						logger.debug("currentcjob for NOTSTARTED" + currentcjob);
-						try {
+				}
+			}
+			client.close();
+		}catch(Exception e){ //kubernetes try
+			logger.debug(e.toString());
+		}
+
+		logger.debug("getDBServiceUpdate:"+podNameValue+":"+commitid+":"+podIP);		
+		String read = null;				
+		ArrayList<String>  fetchcjob =  new ArrayList<String>();
+		String cjobstatus =  null;			
+		JSONArray jsontestarray=new JSONArray();				
+		String fileName = basepath+commitid+"/Jenkinsfile";
+		logger.debug("fileName..."+fileName+"commitid..."+commitid);
+		try (BufferedReader br = new BufferedReader(new FileReader(fileName))){
+			while ((read = br.readLine()) != null) {
+				if (read.contains("stage('") || read.contains("stage ('")) {
+					String[] getcjob = read.split("'");
+					fetchcjob.add(getcjob[1]);
+					logger.debug("extractjcob count " + getcjob[1]);
+				}	
+			} 
+
+		} catch (IOException e) {
+			logger.debug(e.toString());
+		}
+
+		logger.debug("index value 1" + readFile(fileName).indexOf("stages(")+ "index value 1"+ readFile(fileName).indexOf("stages ("));			
+		if ( readFile(fileName).indexOf("stages(") > -1 || readFile(fileName).indexOf("stages (") > -1)
+		{
+			stage_node_inc=1;
+			logger.debug("if stage_node_inc value" + stage_node_inc);								   
+		}
+		else
+		{
+			stage_node_inc=0;
+			logger.debug("else stage_node_inc value" + stage_node_inc);
+		}
+
+		for(int k = 0 ; k < fetchcjob.size() ; k++) {	
+			JSONObject jsontest=new JSONObject();
+			String currentcjob = fetchcjob.get(k);				
+			logger.debug("currentcjob for NOTSTARTED" + currentcjob);
+			try {
+				jsontest.put(Constants.JOBNAME, currentcjob);
+				jsontest.put(Constants.STATUS, "NOTSTARTED");
+			} catch (JSONException e) {
+				logger.debug(e.toString());
+			}
+
+			jsontestarray.put(jsontest);
+		}
+		resultJSON=jsontestarray.toString();
+		logger.debug("resultJSON"+resultJSON);
+		if(commitidresult==null)
+		{
+			statusupdate=buildonservice.getDBServiceInsert(podIP,podPort,podNameValue,resultJSON,commitid);
+		}
+		for(int i = 0 ; i < fetchcjob.size() ; i++) {
+			JSONObject jsontest=new JSONObject();
+			String currentcjob = fetchcjob.get(i);
+			logger.debug("currentcjob if" + currentcjob);						
+			boolean updateflag=false;
+			boolean loopstatus=false;
+			while(!updateflag)
+			{
+				String url = "http://" + podIP + ":" + podPort + "/job/" + "buildon-"+commitid+"/1/wfapi/describe";
+				HttpURLConnection con=null;
+				try{								
+					URL obj = new URL(url);
+					con = (HttpURLConnection) obj.openConnection();							
+					con.setRequestMethod("GET");
+					con.connect();							
+					int responseCode = con.getResponseCode();
+					logger.debug("Response Code : " + responseCode);							
+					if(con.getResponseCode()==200)
+					{
+						BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+						String inputLine;
+						StringBuilder response = new StringBuilder();
+						while ((inputLine = in.readLine()) != null) {
+							response.append(inputLine);
+						}
+						logger.debug("Response JSON : " + response.toString());		
+						JSONObject stageobj = new JSONObject(response.toString());
+						JSONArray jsonarray = stageobj.getJSONArray("stages");
+
+
+						//JSONObject status = jsonarray.getJSONObject(i);
+						JSONObject status = jsonarray.getJSONObject(stage_node_inc);						
+						logger.debug("Response status : " +status.toString());	
+						cjobstatus = status.getString("status");
+
+
+						logger.debug("Response cjobstatus : " +cjobstatus +"loopstatus==>"+loopstatus);
+						if (cjobstatus.equals("") || cjobstatus.equals("IN_PROGRESS"))
+						{
 							jsontest.put(Constants.JOBNAME, currentcjob);
-							jsontest.put(Constants.STATUS, "NOTSTARTED");
-						} catch (JSONException e) {
-							logger.debug(e.toString());
+							jsontest.put(Constants.STATUS,Constants.INPROGRESS);
+							jsontestarray.put(i,jsontest);
+							resultJSON=jsontestarray.toString();
+							if (!loopstatus){
+								statusupdate=buildonservice.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
+								loopstatus=true;
+							}
+
+						}
+						else
+						{
+							if(cjobstatus.equals("SUCCESS"))
+							{	
+								jsontest.put(Constants.JOBNAME, currentcjob);
+								jsontest.put(Constants.STATUS, cjobstatus);
+								updateflag=true;
+								jsontestarray.put(i,jsontest);
+								resultJSON=jsontestarray.toString();
+								statusupdate=buildonservice.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
+								stage_node_inc=stage_node_inc+1;
+							}
+							else if(cjobstatus.equals("FAILURE") || cjobstatus.equals("FAILED")){
+								jsontest.put(Constants.JOBNAME, currentcjob);
+								jsontest.put(Constants.STATUS,"FAILURE");
+								updateflag=true;
+								jsontestarray.put(i,jsontest);
+								i=fetchcjob.size()+1;
+								resultJSON=jsontestarray.toString();
+								statusupdate=buildonservice.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
+								stage_node_inc=stage_node_inc+1;
+							}
+							else
+							{
+								jsontest.put(Constants.JOBNAME, currentcjob);
+								jsontest.put(Constants.STATUS, cjobstatus);
+								updateflag=true;
+								jsontestarray.put(i,jsontest);
+								i=fetchcjob.size()+1;
+								resultJSON=jsontestarray.toString();
+								statusupdate=buildonservice.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
+							}
+
 						}
 
-						jsontestarray.put(jsontest);
+
+
+						in.close();
+						con.disconnect();
+
 					}
-					resultJSON=jsontestarray.toString();
-					logger.debug("resultJSON"+resultJSON);
-					commitidresult=BuildOnDAOImpl.getServiceCommitId(commitid);
-					logger.debug("After result commitidresult"+commitidresult);
-
-					if(commitidresult==null)
-					{
-						logger.debug("Inside if commitidresult"+commitidresult);
-						statusupdate=BuildOnDAOImpl.getDBServiceInsert(podIP,podPort,podNameValue,resultJSON,commitid);
-					}
-					for(int i = 0 ; i < fetchcjob.size() ; i++) {
-						JSONObject jsontest=new JSONObject();
-						String currentcjob = fetchcjob.get(i);				
-						logger.debug("currentcjob if" + currentcjob);						
-						boolean updateflag=false;
-						while(!updateflag)
-						{
-							String url = "http://" + podIP + ":" + podPort + "/job/" + "buildon-"+commitid+"/1/wfapi/describe";
-							HttpURLConnection con=null;
-							try{								
-								URL obj = new URL(url);
-								con = (HttpURLConnection) obj.openConnection();							
-								con.setRequestMethod("GET");
-								con.connect();							
-								int responseCode = con.getResponseCode();
-								logger.debug("Response Code : " + responseCode);							
-								if(con.getResponseCode()==200)
-								{
-									BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-									String inputLine;
-									StringBuilder response = new StringBuilder();
-									while ((inputLine = in.readLine()) != null) {
-										response.append(inputLine);
-									}
-									logger.debug("Response JSON : " + response.toString());		
-									JSONObject stageobj = new JSONObject(response.toString());
-									JSONArray jsonarray = stageobj.getJSONArray("stages");
-									JSONObject status = jsonarray.getJSONObject(i);
-									logger.debug("Response status : " +status.toString());	
-									cjobstatus = status.getString("status");
-									logger.debug("Response cjobstatus : " +cjobstatus);	
-
-									if (cjobstatus.equals("") || cjobstatus.equals("IN_PROGRESS"))
-									{
-										jsontest.put(Constants.JOBNAME, currentcjob);
-										jsontest.put(Constants.STATUS,Constants.INPROGRESS);
-										jsontestarray.put(i,jsontest);
-										resultJSON=jsontestarray.toString();
-										statusupdate=BuildOnDAOImpl.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
-
-									}
-									else
-									{
-										if(cjobstatus.equals("SUCCESS"))
-										{	
-											jsontest.put(Constants.JOBNAME, currentcjob);
-											jsontest.put(Constants.STATUS, cjobstatus);
-											updateflag=true;
-											jsontestarray.put(i,jsontest);
-											resultJSON=jsontestarray.toString();
-											statusupdate=BuildOnDAOImpl.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
-										}
-										else if(cjobstatus.equals("FAILURE") || cjobstatus.equals("FAILED")){
-											jsontest.put(Constants.JOBNAME, currentcjob);
-											jsontest.put(Constants.STATUS,"FAILURE");
-											updateflag=true;
-											jsontestarray.put(i,jsontest);
-											i=fetchcjob.size()+1;
-											resultJSON=jsontestarray.toString();
-											statusupdate=BuildOnDAOImpl.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
-										}
-										else
-										{
-											jsontest.put(Constants.JOBNAME, currentcjob);
-											jsontest.put(Constants.STATUS, cjobstatus);
-											updateflag=true;
-											jsontestarray.put(i,jsontest);
-											i=fetchcjob.size()+1;
-											resultJSON=jsontestarray.toString();
-											statusupdate=BuildOnDAOImpl.getDBServiceUpdate(podIP,podPort,podNameValue,resultJSON,commitid);
-										}
-
-									}
-									in.close();
-									con.disconnect();
-
-								}
-							}catch(Exception e)
-							{e.printStackTrace();
-							logger.debug("logger"+e);
-							}
-						}					 				
-					}					
+				}catch(Exception e)
+				{
+					logger.debug(e.toString());
 				}
-
-			}  
-
-		}catch(Exception e){
-			logger.debug(e.toString());
-
-		}	
+			}					 				
+		}					
 		return statusupdate;
 	}//End of DBsevice update method
 
+	public static StringBuilder readFile(String path) 
+	{       
+		// Assumes that a file article.rss is available on the SD card
+		File file = new File(path);
+		StringBuilder builder = new StringBuilder();
+		if (!file.exists()) {
+			throw new RuntimeException("File not found");
+		}
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				builder.append(line);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
+		return builder;
+	}
 
 
 	/**
 	 * @param commitid
 	 * @return
 	 */
-	public static boolean getHistoricDBService(String commitid){ 
+	public static boolean getHistoricDBService(String commitid){
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		boolean statusupdate=false;
 		String commitidresult=null;
-		Properties props = new Properties();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
-		try {
-			props.load(is);
-			is.close();
-		} catch (FileNotFoundException e1) {
-			logger.debug(e1.toString());
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}			
+		Properties props = readPropertymethod();			
 		String basepath=props.getProperty("kubernetes.logbasepath");
 		String resultJSON=null;
 
@@ -1274,7 +1168,7 @@ public class GitOperations {
 
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))){
 			while ((read = br.readLine()) != null) {
-				if (read.contains("stage")) {
+				if (read.contains("stage('") || read.contains("stage ('")) {
 					String[] getcjob = read.split("'");
 					fetchcjob.add(getcjob[1]);
 					logger.debug("extractjcob count " + getcjob[1]);
@@ -1288,7 +1182,7 @@ public class GitOperations {
 			JSONObject jsontest=new JSONObject();
 			String currentcjob = fetchcjob.get(k);				
 			logger.debug("currentcjob" + currentcjob);
-			cjobstatus=BuildOnDAOImpl.getReportsStatus(commitid,currentcjob);
+			cjobstatus=buildonservice.getReportsStatus(commitid,currentcjob);
 			logger.debug("cjobstatus" + cjobstatus);
 			try {
 				jsontest.put(Constants.JOBNAME, currentcjob);
@@ -1301,40 +1195,40 @@ public class GitOperations {
 		}
 		resultJSON=jsontestarray.toString();
 		logger.debug("resultJSON"+resultJSON);
-		commitidresult=BuildOnDAOImpl.getServiceCommitId(commitid);
+		commitidresult=buildonservice.getServiceCommitId(commitid);
 		logger.debug(commitidresult);
 
 		if(commitidresult==null)
 		{
 			logger.debug("Inside if commitidresult historic"+commitidresult);
-			statusupdate=BuildOnDAOImpl.getHistoricDBServiceInsert(commitid,resultJSON);
+			statusupdate=buildonservice.getHistoricDBServiceInsert(commitid,resultJSON);
 		}
 		return statusupdate;
 	}
-	
+
 	/**
 	 * @param email
 	 * @param repo
 	 * @return
 	 */
 	public static ArrayList<String> gethistoricalBranch(String email, String repo) {
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=email.toLowerCase();
 		ArrayList<String> branches=new ArrayList<>();
 		String repobranch=null;
-		List<ScmDetails> scmdetails=BuildOnDAOImpl.getHistoricalURL(userId,repo);
+		List<ScmDetails> scmdetails=buildonservice.getHistoricalURL(userId,repo);
 		ScmDetails scmdet=scmdetails.get(0);
 		String url=scmdet.getUrl();
 		int index=url.lastIndexOf('/');
 		String scmurl=url.substring(0,index);
-		scmurl=scmurl+"/"+repo+".git";
-		String username="oauth2";
+		scmurl=scmurl+"/"+repo+"."+Constants.GIT;
+		String username=Constants.OAUTH;
 		String pass=scmdet.getOauthtoken();
 		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
 		Collection<Ref> refs;
 		try {
-			logger.debug("before list");
 			refs = Git.lsRemoteRepository().setTransportConfigCallback(getTransportConfigCallback())
-					.setUploadPack("/usr/bin/git-upload-pack")					
+					.setUploadPack(Constants.GIT_UPLOAD)					
 					.setHeads(true)
 					.setTags(true)
 					.setRemote(scmurl)
@@ -1350,8 +1244,7 @@ public class GitOperations {
 		} 
 		return null;
 	}
-	
-	
+
 
 }
 

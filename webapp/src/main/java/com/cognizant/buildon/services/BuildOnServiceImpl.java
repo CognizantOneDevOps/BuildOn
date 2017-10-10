@@ -214,7 +214,6 @@ import java.net.UnknownHostException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -228,18 +227,21 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cognizant.buildon.dao.BuildOnDAO;
-import com.cognizant.buildon.dao.BuildOnDAOImpl;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.LDAPAuthentication;
 import com.cognizant.buildon.domain.Reports;
 import com.cognizant.buildon.domain.ScmDetails;
+import com.cognizant.buildon.domain.Service;
 import com.cognizant.buildon.domain.Users;
 
 /**
@@ -250,7 +252,7 @@ import com.cognizant.buildon.domain.Users;
 public class BuildOnServiceImpl implements BuildOnService {
 
 	private static final Logger logger=LoggerFactory.getLogger(BuildOnServiceImpl.class);	
-	private BuildOnDAO buildOnDao=new BuildOnDAOImpl();
+	private BuildOnDAO buildOnDao=BuildOnFactory.getDAOInstance();
 
 	@Override
 	public List<Users> getAuth(String username, String password) {
@@ -372,10 +374,10 @@ public class BuildOnServiceImpl implements BuildOnService {
 		Cipher cipher;
 		String decrypted=null;
 		try {
-			cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			final SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF8"), "AES");
-			cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv.getBytes("UTF8")));
-			decrypted = new String(cipher.doFinal(cipherText),"UTF-8");
+			cipher = Cipher.getInstance(Constants.AES_PADDING);
+			final SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes(Constants.UTF),Constants.AES);
+			cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv.getBytes(Constants.UTF)));
+			decrypted = new String(cipher.doFinal(cipherText),Constants.UTF);
 
 		} catch (NoSuchAlgorithmException e) {
 			logger.debug(e.toString());
@@ -401,10 +403,10 @@ public class BuildOnServiceImpl implements BuildOnService {
 			String key =getEncryptkey();
 			String initVector = getEncryptkey();
 
-			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(Constants.UTF));
+			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(Constants.UTF),Constants.AES);
 
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			Cipher cipher = Cipher.getInstance(Constants.AES_PADDING);
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
 			byte[] encrypted = cipher.doFinal(value.getBytes());
@@ -417,7 +419,6 @@ public class BuildOnServiceImpl implements BuildOnService {
 
 		return null;
 	}
-
 
 	@Override
 	public String getEncryptkey(){
@@ -445,18 +446,17 @@ public class BuildOnServiceImpl implements BuildOnService {
 
 	@Override
 	public boolean isNumeric(String value) {
-		return value != null && value.matches("[0-9]+");
+		return value != null && value.matches(Constants.VALID_NUMERIC);
 	}
 
 	@Override
 	public boolean isAlphaNumeric(String value) {
-		return value != null && value.matches("[A-Za-z0-9]+");
+		return value != null && value.matches(Constants.VALID_ALPHA_NUMERIC);
 	}
 
 	@Override
 	public boolean isValidUrl(String value) {
-		Pattern pattern = Pattern.compile(
-				"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+		Pattern pattern = Pattern.compile(Constants.VALID_URL);
 		Matcher matcher;
 		matcher=pattern.matcher(value);
 		boolean matches = matcher.matches();
@@ -465,7 +465,7 @@ public class BuildOnServiceImpl implements BuildOnService {
 
 	@Override
 	public boolean isValidEmail(String value) {
-		Pattern pattern = Pattern.compile("^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})");
+		Pattern pattern = Pattern.compile(Constants.VALID_EMAIL);
 		Matcher matcher;
 		matcher=pattern.matcher(value);
 		boolean matches = matcher.matches();
@@ -474,7 +474,7 @@ public class BuildOnServiceImpl implements BuildOnService {
 
 	@Override
 	public boolean isValidAlpha(String value) {
-		Pattern pattern = Pattern.compile("^[a-zA-Z]+$");
+		Pattern pattern = Pattern.compile(Constants.VALID_ALPHA);
 		Matcher matcher;
 		matcher=pattern.matcher(value);
 		boolean matches = matcher.matches();
@@ -486,7 +486,28 @@ public class BuildOnServiceImpl implements BuildOnService {
 		String user =decrypt(globalCookie);
 		return user;
 	}
+	
+	@Override
+	public JSONArray getCompareBuild(String userId) {
+		return buildOnDao.getCompareBuild(userId);
+	}
 
+	@Override
+	public JSONArray getLatestbuild(String userId) {
+		return buildOnDao.getLatestbuild(userId);
+	}
+
+	@Override
+	public JSONArray getProjectwiseBuild(String userId) {
+		return buildOnDao.getProjectwiseBuild(userId);
+	}
+
+	@Override
+	public JSONArray getBuildtrends(String userId) {
+		return buildOnDao.getBuildtrends(userId);
+	}
+	
+	
 	@Override
 	public Users getEmailForUser(String id) {
 		Properties props = readPropertyFile();
@@ -502,7 +523,8 @@ public class BuildOnServiceImpl implements BuildOnService {
 	/**
 	 * @return
 	 */
-	private Properties readPropertyFile() {
+	@Override
+	public Properties readPropertyFile() {
 		Properties props = new Properties();
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
@@ -516,6 +538,73 @@ public class BuildOnServiceImpl implements BuildOnService {
 		}
 		return props;
 	}
+	
+	
+	/**
+	 * @param response
+	 * @param cookie
+	 */
+	@Override
+	public void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
+		if (cookie != null) {
+			for (Cookie cookiedel : cookie) {
+				cookiedel.setValue(null);
+				cookiedel.setMaxAge(0);
+		        response.addCookie(cookiedel);
+		  
+		    }
+		}
+	}
+
+	@Override
+	public List<ScmDetails> getUserScmDetails(String email, String type) {
+		return buildOnDao.getUserScmDetails(email, type);
+	}
+
+	@Override
+	public boolean getDBServiceInsert(String podIP, String podPort, String podNameValue, String resultJSON,
+			String commitid) {
+		return buildOnDao.getDBServiceInsert(podIP, podPort,podNameValue, resultJSON,commitid);
+	}
+
+	@Override
+	public boolean getDBServiceUpdate(String podIP, String podPort, String podNameValue, String resultJSON,
+			String commitid) {
+		// TODO Auto-generated method stub
+		return buildOnDao.getDBServiceUpdate(podIP, podPort,podNameValue, resultJSON,commitid);
+	}
+
+	@Override
+	public String getServiceCommitId(String commitId) {
+		return buildOnDao.getServiceCommitId(commitId);
+	}
+
+	@Override
+	public String getReportsStatus(String commitId, String cijobname) {
+		return buildOnDao.getReportsStatus(commitId,cijobname);
+	}
+
+	@Override
+	public boolean getHistoricDBServiceInsert(String commitid, String resultJSON) {
+		return buildOnDao.getHistoricDBServiceInsert(commitid,resultJSON);
+	}
+
+	@Override
+	public String getPodname(String commitId) {
+		return buildOnDao.getPodname(commitId);
+	}
+
+	@Override
+	public Service getServiceData(String commitId) {
+		return buildOnDao.getServiceData(commitId);
+	}
+
+	@Override
+	public List<ScmDetails> getHistoricalURL(String email, String repo) {
+		return buildOnDao.getHistoricalURL(email,repo);
+	}
+
+	
 
 	
 }

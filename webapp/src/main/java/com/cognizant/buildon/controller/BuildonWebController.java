@@ -222,8 +222,8 @@ import org.slf4j.LoggerFactory;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -257,11 +257,12 @@ public class BuildonWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		HttpSession session=request.getSession();
 		String userId=request.getParameter("userId");
 		String branch=request.getParameter("branch");
 		String repo=request.getParameter("repo");
+		String type=request.getParameter("type");
 		boolean status=false;
 		String responseStr=null;
 		Cookie[] cookie =request.getCookies();
@@ -277,7 +278,7 @@ public class BuildonWebController extends HttpServlet {
 		if(null!=userid && !(userid.equals(""))){
 			Users userinfo=buildonservice.getEmailForUser(userid);
 			try {
-				status = GitOperations.callBuildon(userinfo.getEmail(),branch,repo,session);
+				status = GitOperations.callBuildon(userinfo.getEmail(),branch,repo,session,type);
 				responseStr=String.valueOf(status);
 			} catch (InvalidRemoteException e) {
 				logger.debug(e.toString());
@@ -300,10 +301,6 @@ public class BuildonWebController extends HttpServlet {
 			}
 			responseStr=Constants.INVALID;
 		}
-
-
-
-
 
 		response.getWriter().write(responseStr);
 	}

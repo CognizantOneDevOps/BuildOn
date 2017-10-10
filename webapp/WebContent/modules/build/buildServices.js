@@ -213,12 +213,13 @@ angular.module('Build')
 		 function (Base64, $http, $cookieStore, $rootScope, $timeout,$q) {
 			var service = {};
 			
-			service.getRepoDetails = function (userId,callback) {
+			service.getRepoDetails = function (userId,type,callback) {
 				var response =$http({
 					url : 'GithubRepoWebController',
 					method: "GET",
 					params: {
-						"userId":userId 
+						"userId":userId ,
+						"type":type 
 					}
 				})
 				.then(function successCallback(response,status) {		
@@ -228,13 +229,14 @@ angular.module('Build')
 				});
 			
 			};
-			service.getScmDetails = function (userId,repo,callback) {
+			service.getScmDetails = function (userId,repo,type,callback) {
 				var response =$http({
 					url : 'GithubWebController',
 					method: "GET",
 					params: {
 						"userId":userId,
-						"repo":repo
+						"repo":repo,
+						"type":type
 					}
 				})
 				.then(function successCallback(response,status) {		
@@ -245,14 +247,15 @@ angular.module('Build')
 			
 			};
 			
-			service.getJenkinsFile = function (userId,branch,project,callback) {
+			service.getJenkinsFile = function (userId,branch,project,type,callback) {
 					var response =$http({
 						url : 'GithubWebController',
 						method: "POST",
 						params: {
 							"userId":userId ,
 							"branch":branch,
-							"project":project
+							"project":project,
+							"type":type
 						}
 					})
 					.then(function successCallback(response,status) {		
@@ -547,8 +550,7 @@ angular.module('Build')
 
 
 				}
-				service.callBuildon = function (userId,branch,repo,callback) {
-
+				service.callBuildon = function (userId,branch,repo,type,callback) {
 					var defered = $q.defer();
 					$http({
 							url : 'BuildonWebController',
@@ -556,7 +558,8 @@ angular.module('Build')
 							params: {
 									"userId":userId,
 									"branch":branch,
-									"repo":repo
+									"repo":repo,
+									"type":type
 									
 								}
 							})

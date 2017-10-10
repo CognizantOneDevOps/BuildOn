@@ -216,7 +216,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "SCM_DETAILS")
+@Table(name = "buildon_scmdetails")
 public class ScmDetails implements Serializable{
 
 	private static final long serialVersionUID = 1L;
@@ -224,7 +224,7 @@ public class ScmDetails implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	@Column( nullable=true)
-	private int defaultValue;
+	private int defaultvalue;
 	private String type;
 	private String url;
 	private String oauthtoken;
@@ -272,13 +272,13 @@ public class ScmDetails implements Serializable{
 	 * @return
 	 */
 	public int getDefaultValue() {
-		return defaultValue;
+		return defaultvalue;
 	}
 	/**
 	 * @param defaultValue
 	 */
 	public void setDefaultValue(int defaultValue) {
-		this.defaultValue = defaultValue;
+		this.defaultvalue = defaultValue;
 	}
 	/**
 	 * @return

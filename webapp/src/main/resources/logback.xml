@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>/home/ubuntu/apache-tomcat-8.0.39/logs/buildonui-jenkinsfile.log</file>
+		<file>/home/ubuntu/apache-tomcat-8.0.39/logs/buildonui.log</file>
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</Pattern>

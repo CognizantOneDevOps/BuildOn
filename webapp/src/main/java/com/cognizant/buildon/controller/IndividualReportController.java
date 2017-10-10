@@ -214,9 +214,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
-import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -242,7 +241,7 @@ public class IndividualReportController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();  
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String commitid=request.getParameter("commitid");
 		String json=null;
 		String globalCookie=null;
@@ -262,7 +261,7 @@ public class IndividualReportController extends HttpServlet {
 		json=buildonservice.getJsonData(commitid);
 		response.getWriter().write(json);
 		}else{
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			responseStr=Constants.INVALID;
 			response.getWriter().write(responseStr.toString());
 		}
@@ -274,7 +273,7 @@ public class IndividualReportController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl(); 
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String commitid=request.getParameter("commitid");
 		String repo=request.getParameter("repo");
 		String branch=request.getParameter("branch");
@@ -296,22 +295,11 @@ public class IndividualReportController extends HttpServlet {
 		updateStatus=GitOperations.getDBServiceUpdate(commitid,repo,branch);
 		responseStr=String.valueOf(updateStatus);
 		}else{
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			responseStr=Constants.INVALID;
 		}
 		
 		response.getWriter().write(responseStr);
-	}
-	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
 	}
 
 }

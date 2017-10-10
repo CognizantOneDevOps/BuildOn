@@ -215,8 +215,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -241,30 +241,11 @@ public class ScmPersistController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)-Testconnection 
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
 		String user=request.getParameter("user");
 		String url=request.getParameter("url");
-		
 		String responseStr =null;
-		/*Cookie[] cookie =request.getCookies();
-		String globalCookie=null;
-		if(cookie!=null ){
-			for (Cookie cookies : cookie) {
-				if (cookies.getName().equals("user")) {
-				globalCookie= cookies.getValue();
-				}
-			}
-		}
-		String userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
-		if(null!=userId && !(userId.equals(""))){
-		Users userinfo=buildonservice.getEmailForUser(userId);*/
 		boolean isvalid=GitOperations.checkrepo(url,user);
-		 responseStr=String.valueOf(isvalid);
-		/*}else{
-			
-			 deleteCookies(response, cookie);
-			 responseStr=Constants.INVALID;
-		}*/
+		responseStr=String.valueOf(isvalid);
 		response.getWriter().write(responseStr);
 	}
 
@@ -273,7 +254,7 @@ public class ScmPersistController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)-Save url
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();  
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		boolean isSaved=false;
 		String userid=request.getParameter("userId");
 		String switchval=request.getParameter("switchval");
@@ -282,9 +263,6 @@ public class ScmPersistController extends HttpServlet {
 		String oauthtoken=request.getParameter("oauthtoken");
 		String id=request.getParameter("id");
 		String responseStr=null;
-		/*boolean isValidurl=buildonservice.isValidUrl(url);
-		boolean isValidAuth=buildonservice.isAlphaNumeric(oauthtoken);
-		boolean isValidUser=buildonservice.isValidEmail(userId);*/
 		Cookie[] cookie =request.getCookies();
 		String globalCookie=null;
 		if(cookie!=null ){
@@ -300,22 +278,13 @@ public class ScmPersistController extends HttpServlet {
 			isSaved=buildonservice.saveScmDet(userinfo.getEmail(),switchval,type,url,oauthtoken,id);
 			responseStr=String.valueOf(isSaved);
 		}else{
-			 deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			 responseStr=Constants.INVALID;
 		}
 			
 		response.getWriter().write(responseStr);
 	}
 	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
-	}
+	
 
 }

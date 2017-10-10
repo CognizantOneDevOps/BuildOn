@@ -209,19 +209,21 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 /**
  * @author 338143
  *
  */
 @Entity
-@Table(name = "Users")
+@Table(name = "buildon_users")
 public class Users implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "usersSequence", sequenceName = "users_id_seq", allocationSize = 1, initialValue = 100)
 	private Integer id;
 	private String uname;
 	private String upass;

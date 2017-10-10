@@ -201,11 +201,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
+
 package com.cognizant.buildon.controller;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -220,11 +219,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.LDAPAuthentication;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 import com.google.gson.Gson;
 
 /**
@@ -238,7 +236,6 @@ import com.google.gson.Gson;
 @WebServlet("/AuthenticationWebController")
 public class AuthenticationWebController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static  final Logger logger=LoggerFactory.getLogger(AuthenticationWebController.class);
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -251,13 +248,12 @@ public class AuthenticationWebController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService service=BuildOnFactory.getInstance();
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String decodedpass=service.decrypt(password);
 		String userId=null;
 		String userid=null;
-		//userId=LDAPAuthentication.getEmpId(username);
 		userid=String.valueOf(userId);
 		Cookie cookie=new Cookie("user",service.encrypt(userid));
 		cookie.setMaxAge(54000);
@@ -269,11 +265,10 @@ public class AuthenticationWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService service=BuildOnFactory.getInstance();
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
-		Properties props = readPropertyFile();
+		Properties props = service.readPropertyFile();
 		boolean isLDAP = Boolean.parseBoolean(props.getProperty("ldap.isLDAP"));
 		Users user=new Users();
 		String userId=null;
@@ -291,7 +286,7 @@ public class AuthenticationWebController extends HttpServlet {
 		json = new Gson().toJson(users);
 		}else{
 			String userid=null;
-			user=LDAPAuthentication.getEmpId(username);
+			user=LDAPAuthentication.getEmpId(username,password);
 			userid=String.valueOf(user.getId());
 			Cookie cookie=new Cookie("user",service.encrypt(userid));
 			cookie.setMaxAge(54000);
@@ -303,19 +298,4 @@ public class AuthenticationWebController extends HttpServlet {
 
 	}
 	
-	private static  Properties readPropertyFile() {
-		Properties props = new Properties();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
-		try {
-			props.load(is);
-			is.close();
-		} catch (FileNotFoundException e1) {
-			logger.debug(e1.toString());
-		} catch (IOException e) {
-			logger.debug(e.toString());
-		}
-		return props;
-	}
-
 }

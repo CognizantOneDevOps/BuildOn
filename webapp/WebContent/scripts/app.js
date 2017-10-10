@@ -1,7 +1,7 @@
 'use strict';
 
 // declare modules
-angular.module('Authentication',['angularjs-crypto','angular-jwt', 'ngMessages']);
+angular.module('Authentication',['ngMessages']);
 angular.module('Build', ['ngMaterial']);
 angular.module('Home', ["chart.js",'angularjs-crypto']);
 angular.module('Editor', ['ui.ace']);

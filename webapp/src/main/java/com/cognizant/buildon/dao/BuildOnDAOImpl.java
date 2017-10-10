@@ -220,6 +220,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -238,8 +239,6 @@ import com.cognizant.buildon.domain.Reports;
 import com.cognizant.buildon.domain.ScmDetails;
 import com.cognizant.buildon.domain.Service;
 import com.cognizant.buildon.domain.Users;
-import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -252,13 +251,16 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	private static EntityManagerFactory factory=Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
 	private static final Logger logger=LoggerFactory.getLogger(BuildOnDAOImpl.class);
 
+
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getAuth(java.lang.String, java.lang.String)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getAuth(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public List<Users>  getAuth(String username, String password) {
+	public List<Users>  getAuth(String email, String password) {
+		logger.debug("Authentication=>"+email+password);
+		String username=email.toLowerCase();
 		EntityManager em = factory.createEntityManager();
-		Query query = em.createQuery("select usr from Users usr where usr.email= :uname and usr.upass= :upass");
+		Query query = em.createQuery("select usr from  Users  usr where usr.email=:uname and usr.upass=:upass");
 		query.setParameter("uname", username);
 		query.setParameter("upass", password);
 		List<Users> userinfo = query.getResultList();
@@ -266,15 +268,18 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		return userinfo;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getEmailForUser(java.lang.String)
+	 */
 	@Override
-	public Users  getEmailForUser(String id) {
-		logger.debug("getEmailForUser: "+id);
+	public Users  getEmailForUser(String sid) {
+		logger.debug("getEmailForUser: "+sid);
+		int id=Integer.parseInt(sid);
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select usr from Users usr where usr.id= :id");
 		query.setParameter("id",id);
 		List<Users> userinfo = query.getResultList();
 		em.close();
-		logger.debug("userinfo.get(0).."+userinfo.get(0));
 		if(!userinfo.isEmpty()){
 			return userinfo.get(0);
 		}else{
@@ -293,13 +298,11 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		String userId=email.toLowerCase();
 		ArrayList<String> list=new ArrayList<>();
 		if(intiatedBy.equalsIgnoreCase("self")){
-			Connection con=null;
-			//ResultSet rs=null;
-			String sql=" (select   JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,SUM(DURATION) as DURATION,TRIGGER_FROM,start_timestamp,SCMUSER  from root.Reports  "
+			String sql=" (select   JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,SUM(DURATION) as DURATION,TRIGGER_FROM,start_timestamp,SCMUSER  from buildon_reports  "
 					+ " where  SCMUSER=?   and ( startDate=?   or endDate=?  or  PROJECT=?     or  BRANCH=?)  "
 					+ " group by JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,start_timestamp,SCMUSER ) order by start_timestamp,COMMITID  desc";
-			con=createConnection();
-			try(PreparedStatement statement=con.prepareStatement(sql)) {
+
+			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 				statement.setString(1,userId);
 				statement.setDate(2,new java.sql.Date(startdate.getTime()));
 				statement.setDate(3,new java.sql.Date(enddate.getTime()));
@@ -377,15 +380,14 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 				logger.debug(e.toString());
 			}
 		}else{
-			Connection con=null;
-			String  sql =("(SELECT start_timestamp,JOBNAME,STATUS,PROJECT,BRANCH,SUM(DURATION) as DURATION,COMMITID,TRIGGER_FROM,scmuser  FROM root.Reports r WHERE r.scmuser=?  "
+			String  sql =("(SELECT start_timestamp,JOBNAME,STATUS,PROJECT,BRANCH,SUM(DURATION) as DURATION,COMMITID,TRIGGER_FROM,scmuser  FROM  buildon_reports r WHERE r.scmuser=?  "
 					+ "    and (  r.project =?   or r.branch= ?  or  r.startDate=?    or  r.endDate=?   ) group by start_timestamp,JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,scmuser) "
 					+ "  UNION "
-					+ " (SELECT  T.start_timestamp,T.JOBNAME,T.STATUS,T.PROJECT,T.BRANCH,SUM(T.DURATION)  as DURATION,T.COMMITID,T.TRIGGER_FROM,T.scmuser   FROM  root.Reports  T WHERE T.scmuser <> ?  "
+					+ " (SELECT  T.start_timestamp,T.JOBNAME,T.STATUS,T.PROJECT,T.BRANCH,SUM(T.DURATION)  as DURATION,T.COMMITID,T.TRIGGER_FROM,T.scmuser   FROM  buildon_reports  T WHERE T.scmuser <> ?  "
 					+ "  AND (T.project = ?   or  T.branch= ?   or  T.startDate=?    or  T.endDate=?  )"
 					+ " group by T.start_timestamp,T.JOBNAME,T.STATUS,T.BRANCH,T.PROJECT,T.COMMITID,T.TRIGGER_FROM,T.scmuser) ORDER BY start_timestamp,COMMITID desc");
-			con=createConnection();
-			try(PreparedStatement statement=con.prepareStatement(sql)) {
+
+			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 				statement.setString(1,userId);
 				statement.setString(2,project);
 				statement.setString(3,branch);
@@ -471,7 +473,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	@Transactional
 	@Override
 	public boolean  saveScmDet(String email,String switchval,String type,String url, String oauthtoken,String id) {
-		logger.debug("saveScmDet  method.");
+		logger.debug("saveScmDet  method :"+type);
 		boolean isSaved=false ;
 		String userId=email.toLowerCase();
 		boolean flag=convertToBoolean(switchval);
@@ -480,7 +482,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		EntityTransaction tx =  em.getTransaction();
 		tx.begin();
 		boolean isExist=false ;
-		isExist=checkScmRecordExist(userId,url,oauthtoken,value);
+		isExist=checkScmRecordExist(userId,url,oauthtoken,value,type);
 		boolean existprefer=false; 
 
 		if(!isExist){
@@ -489,7 +491,6 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 				if(id!=null && !id.equals("")){
 					int tid=Integer.parseInt(id.trim());
 					scmdet=em.find(ScmDetails.class,tid);
-					//newly added
 					deletepreference(scmdet.getUrl(),userId);
 					scmdet.setId(tid);
 					scmdet.setType(type);
@@ -502,7 +503,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 						int idRec=Integer.parseInt(id);
 						updateScmDet(idRec,userId,em);
 					}
-					//newly added
+					//added to check preferences are exist
 					existprefer= checkpreference(userId,url);
 					if(!existprefer){
 						insertPreferences(url,em,userId);
@@ -541,13 +542,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param email
 	 */
 	@Transactional
-	public static  void deletepreference(String url,String email) {
+	public void deletepreference(String url,String email) {
 		EntityManager em1 = factory.createEntityManager();
 		String scmurl= url.substring(url.lastIndexOf("/") + 1);;
 		String[] urlsplit = scmurl.split("\\."); 
 		String repository = urlsplit[0];
-		String jpql = "DELETE FROM PREFERENCES prefer " + 
-				"WHERE prefer.repository=:repository and prefer.email=:email";
+		String jpql = "DELETE FROM buildon_preferences  " + 
+				"WHERE repository=:repository and email=:email";
 		em1.getTransaction().begin();
 		em1.createNativeQuery(jpql)
 		.setParameter("repository",repository.trim())
@@ -562,18 +563,22 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param url
 	 * @return
 	 */
-	private static boolean  checkpreference(String userId,String url){
+	private boolean  checkpreference(String userId,String url){
 		boolean isExist=false;
 		String scmurl= url.substring(url.lastIndexOf('/') + 1);;
 		String[] urlsplit = scmurl.split("\\."); 
 		String repository = urlsplit[0];
 		EntityManager em1 = factory.createEntityManager();
-		Query query = em1.createQuery("select count(det) from Preferences det where det.email=:userId and det.repository=:repository " );
-		query.setParameter("userId",userId);
-		query.setParameter("repository",repository);
-		long cnt = (long)query.getSingleResult();
-		if(cnt >0){
-			isExist=true;
+		try{
+			Query query = em1.createQuery("select count(det) from Preferences det where det.email=:userId and det.repository=:repository " );
+			query.setParameter("userId",userId);
+			query.setParameter("repository",repository);
+			long cnt = (long)query.getSingleResult();
+			if(cnt >0){
+				isExist=true;
+			}
+		}catch(NoResultException e){
+			isExist=false;
 		}
 		em1.close();
 		return isExist;
@@ -584,23 +589,30 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param url
 	 * @param oauthtoken
 	 * @param defaultValue
+	 * @param type 
 	 * @return
 	 */
-	private boolean checkScmRecordExist(String userId,String url,String oauthtoken,int defaultValue){
+	private boolean checkScmRecordExist(String userId,String url,String oauthtoken,int defaultValue, String type){
 		boolean isExist=false;
 		EntityManager em1 = factory.createEntityManager();
-		Query query = em1.createQuery("select count(det) from ScmDetails det where det.email=:userId and det.url=:url and det.oauthtoken=:oauthtoken " );
-		query.setParameter("userId",userId);
-		query.setParameter("url",url);
-		query.setParameter("oauthtoken",oauthtoken);
-		long cnt = (long)query.getSingleResult();
-		if(cnt >0){
-			isExist=true;
-			if(defaultValue > 0){
-				updateOtherDefaultval(userId,url,defaultValue);
-				updateDefaultval(userId,url,defaultValue);
+		try{
+			Query query = em1.createQuery("select count(det) from ScmDetails det where det.email=:userId and det.url=:url and det.oauthtoken=:oauthtoken  and type=:type" );
+			query.setParameter("userId",userId);
+			query.setParameter("url",url);
+			query.setParameter("oauthtoken",oauthtoken);
+			query.setParameter("type",type);
+			long cnt = (long)query.getSingleResult();
+			if(cnt >0){
+				isExist=true;
+				if(defaultValue > 0){
+					updateOtherDefaultval(userId,url,defaultValue);
+					updateDefaultval(userId,url,defaultValue);
+				}
 			}
+		}catch(NoResultException e){
+			isExist=false;
 		}
+
 		em1.close();
 		return isExist;
 	}
@@ -610,17 +622,19 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param url
 	 * @param defaultValue
 	 */
-	private static void updateOtherDefaultval(String userId,String url, int defaultValue) {
-		EntityManager em = factory.createEntityManager();
-		String jpql = "UPDATE SCM_DETAILS det " + 
-				"SET det.defaultValue =0  " +
-				"WHERE  det.email in (?)";
-		em.getTransaction().begin();
-		em.createNativeQuery(jpql)
-		.setParameter(1,userId)
-		.executeUpdate();
-		em.getTransaction().commit();
-		em.close();
+	private  void updateOtherDefaultval(String userId,String url, int defaultValue) {
+		logger.debug("updateOtherDefaultval...");
+		String sql="UPDATE buildon_scmdetails  " + 
+				"SET defaultvalue =0  " +
+				"WHERE  email in (?)";
+
+		try(Connection con=createConnection(); PreparedStatement statement=con.prepareStatement(sql)) {
+			statement.setString(1,userId);
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+		}
+
 	}
 
 	/**
@@ -629,17 +643,20 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param defaultValue
 	 */
 	private void updateDefaultval(String userId, String url, int defaultValue) {
-		EntityManager em = factory.createEntityManager();
-		String jpql = "UPDATE SCM_DETAILS det " + 
-				"SET det.defaultValue =?  " +
-				"WHERE  det.email=?  and det.url=?  ";
-		em.getTransaction().begin();
-		em.createNativeQuery(jpql)
-		.setParameter(1,defaultValue).setParameter(2,userId)
-		.setParameter(3,url)
-		.executeUpdate();
-		em.getTransaction().commit();
-		em.close();
+		String jpql = "UPDATE buildon_scmdetails  " + 
+				"SET defaultvalue =?  " +
+				"WHERE  email=?  and url=?  ";
+
+		try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(jpql)) {
+			statement.setInt(1,defaultValue);
+			statement.setString(2,userId);
+			statement.setString(3,url);
+			statement.executeUpdate();
+		}
+		catch (SQLException e) {
+			logger.debug(e.toString());
+		}
+
 	}
 
 
@@ -649,15 +666,20 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param email
 	 */
 	@Transactional
-	private static  void insertPreferences(String url,EntityManager em, String email) {
+	private void insertPreferences(String url,EntityManager em, String email) {
 		Preferences preference=new Preferences();
 		String scmurl= url.substring(url.lastIndexOf('/') + 1);;
 		String[] urlsplit = scmurl.split("\\."); 
 		String repo = urlsplit[0];
-		preference.setRepository(repo);
-		preference.setWebhook(0);
-		preference.setEmail(email);
-		em.persist(preference);
+		try {
+			preference.setRepository(repo);
+			preference.setWebhook(0);
+			preference.setEmail(email);
+			em.persist(preference);
+		}
+		catch(Exception ex) {
+			logger.debug(ex.toString());
+		}
 	}
 
 	/**
@@ -665,12 +687,19 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param em
 	 */
 	@Transactional
-	private static void updateScmDet(String userId, EntityManager em) {
+	private void updateScmDet(String userId, EntityManager em) {
 		logger.debug("update scm details with default value 1");
-		String jpql = "UPDATE SCM_DETAILS det " + 
-				"SET det.defaultValue = 0 " +
-				"WHERE  det.email=:uid   and   det.defaultValue = 1";
-		em.createNativeQuery(jpql).setParameter("uid",userId).executeUpdate();
+		String jpql = "UPDATE buildon_scmdetails  " + 
+				"SET defaultvalue = 0 " +
+				"WHERE  email=?    and   defaultvalue = 1";
+
+		try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(jpql)) {
+			statement.setString(1,userId);
+			statement.executeUpdate();
+		}
+		catch (SQLException e) {
+			logger.debug(e.toString());
+		}
 	}
 
 	/**
@@ -679,19 +708,27 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 * @param em
 	 */
 	@Transactional
-	private static void updateScmDet(int id,String userId, EntityManager em) {
-		logger.debug("update scm details with default value 0");
-		String jpql = "UPDATE SCM_DETAILS det " + 
-				"SET det.defaultValue = 0 " +
-				"WHERE det.email=:userId  and  det.id  not in(:id)";
-		em.createNativeQuery(jpql).setParameter("userId",userId).setParameter("id",id).executeUpdate();
+	private void updateScmDet(int id,String userId, EntityManager em) {
+		logger.debug(" updateScmDet(int id,String userId, EntityManager em) with default value 0");
+		String jpql = "UPDATE buildon_scmdetails  " + 
+				"SET defaultvalue = 0 " +
+				"WHERE email=? and  id  not in(?)";
+
+		try(Connection con=createConnection(); PreparedStatement statement=con.prepareStatement(jpql)) {
+			statement.setString(1,userId);
+			statement.setInt(2,id);
+			statement.executeUpdate();
+		}
+		catch (SQLException e) {
+			logger.debug(e.toString());
+		}
 	}
 
 	/**
 	 * @param value
 	 * @return
 	 */
-	private static boolean convertToBoolean(String value) {
+	private boolean convertToBoolean(String value) {
 		boolean returnValue = false;
 		if ("1".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || 
 				"true".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value))
@@ -706,9 +743,15 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	public  List<ScmDetails> getScmDetails(String userId ,String type){
 		logger.debug("getscm details with userid and type start");
 		EntityManager em = factory.createEntityManager();
-		Query query = em.createQuery("select det from ScmDetails det where det.email=:uid and det.type= :type" );
-		query.setParameter("uid",userId.toLowerCase());
-		query.setParameter("type",type);
+		Query query =null;
+		if(Constants.FIRST.equals(type)){
+			query=  em.createQuery("select det from ScmDetails det where det.email=:uid  order by det.id  asc" );
+			query.setParameter("uid",userId.toLowerCase());
+		}else{
+			query=  em.createQuery("select det from ScmDetails det where det.email=:uid and det.type= :type  order by det.id asc" );
+			query.setParameter("uid",userId.toLowerCase());
+			query.setParameter("type",type);	
+		}
 		List<ScmDetails> scmdetails = query.getResultList();
 		em.close();
 		return scmdetails;
@@ -734,8 +777,8 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		String scmurl= scmdetails.getUrl().substring(scmdetails.getUrl().lastIndexOf("/") + 1);;
 		String[] urlsplit = scmurl.split("\\."); 
 		String repository = urlsplit[0];
-		String jpql = "DELETE FROM PREFERENCES prefer " + 
-				"WHERE prefer.repository=:repository and prefer.email=:email";
+		String jpql = "DELETE FROM buildon_preferences   " + 
+				"WHERE repository=:repository and email=:email";
 		int updateCount=em.createNativeQuery(jpql).setParameter("repository",repository).setParameter("email",email).executeUpdate();
 		em.getTransaction().commit();
 		em.close();
@@ -746,16 +789,15 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	}
 
 
-	/**
-	 * @param email
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getUserScmDetails(java.lang.String, java.lang.String)
 	 */
-	public static  List<ScmDetails> getUserScmDetails(String email){
-		String type ="github";
+	@Override
+	public  List<ScmDetails> getUserScmDetails(String email ,String type){
 		int defaultval=1;
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select det from ScmDetails det where det.email=:email and det.type= :type"
-				+ " and det.defaultValue=:defaultValue");
+				+ " and det.defaultvalue=:defaultValue");
 		query.setParameter("email",email);
 		query.setParameter("type",type);
 		query.setParameter("defaultValue",defaultval);
@@ -764,27 +806,28 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		return scmdetails;
 	}
 
-	/**
-	 * @param userId
-	 * @return
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getBuildtrends(java.lang.String)
 	 */
-	public static JSONArray getBuildtrends(String userId)  {
+	@Override
+	public  JSONArray getBuildtrends(String userId)  {
 		logger.info("getBuildtrends methods start.");
 		JSONArray  jsonarray=new JSONArray();
 		JSONObject jsonobj=null;
 		String sql="SELECT  rep.startDate,sum(CASE WHEN rep.status = 'FAILURE' THEN 1 END) as failure, "
 				+ " sum(CASE WHEN rep.status = 'SUCCESS' THEN 1 END) as success, "
 				+ " sum(CASE WHEN rep.status = 'ABORTED' THEN 1 END) as Aborted "
-				+ " FROM Reports rep "
+				+ " FROM buildon_reports rep "
 				+ " where rep.scmuser=?  "
 				+ " GROUP BY rep.startDate  "
 				+ " ORDER BY rep.startDate desc";
-		Connection con=createConnection();
+
 		Long countF=0L;
 		Long countS=0L;
 		Long countA=0L;
 		Date startdate=null;
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
+		try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 			statement.setString(1,userId);
 			statement.setMaxRows(4);
 			try (ResultSet rs = statement.executeQuery()) {
@@ -809,26 +852,28 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		} catch (SQLException e) {
 			logger.debug(e.toString());
 		}
+
 		return jsonarray;
 	} 		
 
-	/**
-	 * @param userId
-	 * @return
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getProjectwiseBuild(java.lang.String)
 	 */
-	public static JSONArray getProjectwiseBuild(String userId) {
+	@Override
+	public JSONArray getProjectwiseBuild(String userId) {
 		logger.info("getProjectwiseBuild methods start.");
 		JSONArray  jsonarray=new JSONArray();
 		JSONObject jsonobj=null;
 		String  sql="SELECT  rep.project,sum(CASE WHEN status = 'FAILURE' THEN 1 END) as failure,"
 				+ " sum(CASE WHEN status = 'SUCCESS' THEN 1 END) as success,sum(CASE WHEN status = 'ABORTED' THEN 1 END) as Aborted  "
-				+ "    FROM Reports rep where rep.scmuser=?  GROUP BY rep.project order by rep.project desc";
-		Connection con=createConnection();
+				+ "    FROM buildon_reports rep where rep.scmuser=?  GROUP BY rep.project order by rep.project desc";
+
 		Long countF=0L;
 		Long countS=0L;
 		Long countA=0L;
 		String project=null;
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
+		try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 			statement.setString(1,userId);
 			try (ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
@@ -855,27 +900,25 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	}
 
 
-	/**
-	 * @param userId
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getLatestbuild(java.lang.String)
 	 */
-	public static JSONArray getLatestbuild(String userId) {
+	@Override
+	public JSONArray getLatestbuild(String userId) {
 		logger.debug("getLatestbuild methods start.");    
 		JSONArray  jsonarray=new JSONArray();
 		JSONObject jsonobj=null;
 		String sql="SELECT tmp.stdate, SUM( tmp.FAILURE) AS FAILURE ,SUM( tmp.SUCCESS) AS SUCCESS,SUM( tmp.ABORTED)  AS ABORTED   "
 				+ "   FROM ( SELECT startdate stdate, SUM(CASE WHEN rep.status = 'FAILURE' THEN 1 END) AS FAILURE  ,"
 				+ "   SUM(CASE WHEN rep.status = 'SUCCESS' THEN 1 END)  AS SUCCESS, "
-				+ "   SUM(CASE WHEN rep.status = 'ABORTED' THEN 1 END)  AS ABORTED  FROM Reports rep where rep.scmuser=?  "
+				+ "   SUM(CASE WHEN rep.status = 'ABORTED' THEN 1 END)  AS ABORTED  FROM buildon_reports rep where rep.scmuser=?  "
 				+ "   GROUP BY rep.status ,startDate ORDER BY rep.startDate desc)"
 				+ "   AS tmp GROUP BY tmp.stdate  ORDER BY tmp.stdate desc   fetch first row only ";
 
 		Long countF=0L;
 		Long countS=0L;
 		Long countA=0L;
-		Connection con=null;
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
+		try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 			statement.setString(1,userId);
 			try (ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
@@ -916,35 +959,34 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		return jsonarray;
 	}
 
-	/**
-	 * @param userId
-	 * @return
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getCompareBuild(java.lang.String)
 	 */
-	public static JSONArray getCompareBuild(String userId)  {
+	@Override
+	public  JSONArray getCompareBuild(String userId)  {
 		logger.debug("getCompareBuild methods start."); 
 		JSONArray  jsonarray=new JSONArray();
 		JSONObject jsonobj=null;
 		String sql="SELECT  'you'UID ,  r.PROJECT ,CASE WHEN r.status = 'SUCCESS' THEN 'Success' "
 				+ "  WHEN r.status = 'FAILURE' THEN 'Failure'  "
 				+ "  WHEN r.status = 'ABORTED' THEN 'Aborted' "
-				+ " ELSE 'N/A'    END status  ,COUNT (1) cnt FROM  Reports  r "
+				+ " ELSE 'N/A'    END status  ,COUNT (1) cnt FROM  buildon_reports  r "
 				+ " WHERE    scmuser = ?  GROUP BY project, STATUS  "
 				+ "  UNION "
 				+ " SELECT  'others'UID,  PROJECT , "
 				+ " CASE WHEN status = 'SUCCESS' "
 				+ " THEN 'Success'  WHEN status = 'FAILURE' THEN ' Failure'  "
 				+ " WHEN  status = 'ABORTED'        THEN ' Aborted'     ELSE 'N/A'  "
-				+ "  END status ,COUNT (1) cnt  FROM     Reports T WHERE   scmuser <> ? "
-				+ " AND      EXISTS (SELECT 1  FROM   Reports T1 WHERE  T1.email = ?  AND T1.project = T.project) "
+				+ "  END status ,COUNT (1) cnt  FROM     buildon_reports T WHERE   scmuser <> ? "
+				+ " AND      EXISTS (SELECT 1  FROM   buildon_reports T1 WHERE  T1.scmuser = ?  AND T1.project = T.project) "
 				+ " GROUP BY project, STATUS  ORDER BY project,STATUS desc";
 
 		String project =null;
 		String person =null;
 		String status=null;
 		boolean flag=false;
-		Connection con=null;
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
+		try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 			statement.setString(1, userId);
 			statement.setString(2, userId);
 			statement.setString(3, userId);
@@ -1025,10 +1067,32 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	/**
 	 * @return
 	 */
-	private static Connection  createConnection(){
-		BuildOnService service=new BuildOnServiceImpl();
+	private  Connection  createConnection(){
 		logger.debug("Create Connection");
-		Connection con=null;
+		Connection connection=null;
+		Properties props = readPropertyFile();
+		String driver = props.getProperty("postgresql.driver");
+		String url = props.getProperty("postgresql.url");
+		String username = props.getProperty("postgresql.username");
+		String password = props.getProperty("postgresql.password");
+		//String pass=service.decrypt(password);
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(driver);
+		dataSource.setUrl(url);
+		dataSource.setUsername(username);
+		dataSource.setPassword(password);
+		try {
+			connection = dataSource.getConnection();
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+		}
+		return connection;
+	}
+
+	/**
+	 * @return
+	 */
+	private Properties readPropertyFile() {
 		Properties props = new Properties();
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream is = classloader.getResourceAsStream(Constants.PROPERTYFILE);
@@ -1040,24 +1104,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		} catch (IOException e) {
 			logger.debug(e.toString());
 		}
-		String driver = props.getProperty("derby.driver");
-		String url = props.getProperty("derby.url");
-		String username = props.getProperty("derby.username");
-		String password = props.getProperty("derby.password");
-		String pass=service.decrypt(password);
-
-		BasicDataSource dataSource = new BasicDataSource();
-		dataSource.setDriverClassName(driver);
-		dataSource.setUrl(url);
-		dataSource.setUsername(username);
-		dataSource.setPassword(pass);
-		try {
-			con = dataSource.getConnection();
-		} catch (SQLException e) {
-			logger.debug(e.toString());
-		}
-
-		return con;
+		return props;
 	}
 
 	/* (non-Javadoc)
@@ -1104,16 +1151,16 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		EntityManager em = factory.createEntityManager();
 		em.getTransaction().begin();
 		if(null!=branch && !branch.equals("")){
-			String jpql = "UPDATE PREFERENCES prefer " + 
-					"  SET prefer.webhook = :webhook , prefer.branch=:branch "  +
+			String jpql = "UPDATE buildon_preferences  " + 
+					"  SET webhook = :webhook ,branch=:branch "  +
 					"  WHERE repository=:repository" ;
 			qry=em.createNativeQuery(jpql);
 			qry.setParameter("webhook",webhook);
 			qry.setParameter("branch",branch);
 			qry.setParameter("repository",repository);
 		}else{
-			String jpql = "UPDATE PREFERENCES prefer " + 
-					"  SET prefer.webhook = :webhook "  +
+			String jpql = "UPDATE buildon_preferences  " + 
+					"  SET  webhook = :webhook "  +
 					"  WHERE repository=:repository";
 			qry=em.createNativeQuery(jpql);
 			qry.setParameter("webhook",webhook);
@@ -1125,15 +1172,15 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		return true;
 	}
 
+
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getHistoricalReports(java.lang.String)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getHistoricalReports(java.lang.String)
 	 */
 	@Override
 	public JSONObject getHistoricalReports(String email) {
 		logger.debug("getHistoricalReports method start");
 		List<String> projectlist=new ArrayList<>();
 		JSONObject json=new JSONObject();
-		//String query="select rep from Reports rep where rep.scmuser=:email";
 		String query="select distinct rep from Reports rep where rep.scmuser=:email";
 		EntityManager em = factory.createEntityManager();
 		Query qry = em.createQuery(query);
@@ -1156,12 +1203,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		return json;
 	}
 
+
+
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getIndividualReports(java.lang.String)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getIndividualReports(java.lang.String)
 	 */
 	@Override
 	public Reports getIndividualReports(String userid) {
-
 		String email=userid.toLowerCase();
 		logger.info("getIndividualReports "+email);
 		String query="select rep from Reports rep where rep.scmuser=:email order by  start_timestamp  desc";
@@ -1174,15 +1222,15 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getIndividualstatusReports(java.lang.String, java.lang.String)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getIndividualstatusReports(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public Reports getIndividualstatusReports(String email, String commitid) {
 		String scmuser=email.toLowerCase();
 		ArrayList<String> list=new ArrayList<>();
 		Reports rep=null;
-		String query="select rep1 from Reports rep1 where rep1.scmuser=:scmuser and  rep1.commitid=:commitid  "
-				+ "  and exists (select rep2 from Reports rep2  where rep2.jobname = rep1.jobname and rep2.id <> rep1.id ) "
+		String query="select rep1 from Reports  rep1 where rep1.scmuser=:scmuser and  rep1.commitid=:commitid  "
+				+ "  and exists (select rep2 from Reports  rep2  where rep2.jobname = rep1.jobname and rep2.id <> rep1.id ) "
 				+ "  order by  start_timestamp  desc ";
 		EntityManager em = factory.createEntityManager();
 		Query qry = em.createQuery(query);
@@ -1221,297 +1269,211 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	}
 
 
-
-	public String getDefaultuser(String type,String email) {
-		logger.info("getdefault user start:"+type);
-		EntityManager em = factory.createEntityManager();
-		String scmuser=null;
-		Query query = em.createQuery("select det from ScmDetails det where det.defaultValue=1  and det.type= :type and det.email=:email" );
-		query.setParameter("type",type);
-		query.setParameter("email",email);
-		List<ScmDetails> scmdetails = query.getResultList();
-		for(ScmDetails scmdetail:scmdetails){
-			if(null != scmdetail.getEmail()){
-				scmuser=scmdetail.getEmail();
-			}
-		}
-		em.close();
-		return scmuser;
-
-	}
-
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getJsonData(java.lang.String)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getJsonData(java.lang.String)
 	 */
 	@Override
 	public String getJsonData(String commitid) {
 		logger.info("commitid:"+commitid);
 		String json="0";
-		Connection con=null;
-		String  sql = ("SELECT json FROM  service r WHERE r.commitid=?");
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
-			statement.setString(1,commitid );
-			try (ResultSet rs = statement.executeQuery()) {
-				if (!rs.next() ) {
-					json="0";
-				} else {
-					do {
-						json=rs.getString("JSON");
-					} while (rs.next());
-				}
-			}
-		}catch(SQLException e){
-			logger.debug(e.toString());
+		EntityManager em = factory.createEntityManager();
+		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitid");
+		query.setParameter("commitid",commitid);
+		List<Service> list = query.getResultList();
+		if(list.isEmpty()){
+			json="0";	
+		}else{
+			json=list.get(0).getJson();
 		}
+		em.close();
 		return json;
 	}
 
 
-
-
-	/**
-	 * @param commitId
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getPodname(java.lang.String)
 	 */
-	public static String getPodname(String commitId) {
+	@Override
+	public  String getPodname(String commitId) {
 		String pod="0";
-		Connection con=null;
-		String  sql = ("SELECT podname FROM  service r WHERE r.commitid=?");
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
-			statement.setString(1,commitId);
-			try (ResultSet rs = statement.executeQuery()) {
-				if (!rs.next() ) {
-					logger.debug("result set empty ");
-					pod="0";
-				} else {
-					do {
-						pod=rs.getString("PODNAME");
-					} while (rs.next());
-				}
-			}
-		}catch(SQLException e){
-			logger.debug(e.toString());
+		EntityManager em = factory.createEntityManager();
+		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitid");
+		query.setParameter("commitid",commitId);
+		List<Service> list = query.getResultList();
+		if(list.isEmpty()){
+			pod="0";	
+		}else{
+			pod=list.get(0).getPodname();
 		}
+
+		em.close();
 		return pod;
 	}
 
-	/**
-	 * @param commitId
-	 * @return
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getServiceCommitId(java.lang.String)
 	 */
-	public static String getServiceCommitId(String commitId) {
-		String commitidresult=null;
-		Connection con=null;
-		String  sql = ("SELECT commitid FROM  service r WHERE r.commitid=?");
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql);) {
-			statement.setString(1,commitId);
-			try (ResultSet rs = statement.executeQuery()) {
-				if (!rs.next() ) {
-					commitidresult=null;
-				} else {
-					logger.debug("else loop");
-					do {
-						commitidresult=rs.getString("commitid");
-					} while (rs.next());
-				}
-			}
-		}catch(SQLException e){
-			logger.debug(e.toString());
+	@Override
+	public  String getServiceCommitId(String commitId) {
+		String commitidresult="0";
+		EntityManager em = factory.createEntityManager();
+		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitId");
+		query.setParameter("commitId", commitId);
+		List<Service>  list = query.getResultList();
+		if(list.size() >0 ){
+			commitidresult=list.get(0).getCommitid();
 		}
+		em.close();
 		return commitidresult;
 	}
 
-	/**
-	 * @param commitId
-	 * @return
-	 */
-	public static Service getServiceData(String commitId) {
-		Service service=new Service();
-		Connection con=null;
-		String  sql = ("SELECT * FROM  service r WHERE r.commitid=?");
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql) ) {
-			statement.setString(1,commitId);
-			try (ResultSet rs = statement.executeQuery()) {
-				if (!rs.next() ) {
-					logger.debug("no data");
-				} else {
-					do {
-						service.setPodname(rs.getString("PODNAME"));
-						service.setPodip(rs.getString("PODIP"));
-						service.setJson(rs.getString("JSON"));
-						service.setPodport(rs.getString("PODPORT"));
-					} while (rs.next());
-				}
-			}
 
-		}catch(SQLException e){
-			logger.debug(e.toString());
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getServiceData(java.lang.String)
+	 */
+	@Override
+	public Service getServiceData(String commitId) {
+		Service service=new Service();
+		EntityManager em = factory.createEntityManager();
+		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitId");
+		query.setParameter("commitId", commitId);
+		List<Service>  list = query.getResultList();
+		if(list.size() >0 ){
+			service=list.get(0);
 		}
-		logger.debug("end");
+		em.close();
 		return service;
 	}
 
 
-	/**
-	 * @param podIP
-	 * @param podPort
-	 * @param podNameValue
-	 * @param resultJSON
-	 * @param commitid
-	 * @return
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getDBServiceInsert(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public static boolean getDBServiceInsert(String podIP, String podPort, String podNameValue, String resultJSON,
+	@Override
+	public  boolean getDBServiceInsert(String podIP, String podPort, String podNameValue, String resultJSON,
 			String commitid) {
 		boolean update=false;
-		Connection con=null;
-		String insertTableSQL = "INSERT INTO service"
+		logger.debug("DBServiceInsert:"+resultJSON+":"+podNameValue);
+		String insertTableSQL = "INSERT INTO buildon_service"
 				+ "(COMMITID,PODIP,PODPORT,PODNAME,JSON) VALUES"
 				+ "(?,?,?,?,?)";
-		con=createConnection();
-		try(PreparedStatement preparedStatement = con.prepareStatement(insertTableSQL)) {
-			preparedStatement.setString(1,commitid);
-			preparedStatement.setString(2,podIP);
-			preparedStatement.setString(3,podPort);
-			preparedStatement.setString(4,podNameValue);
-			preparedStatement.setString(5,resultJSON);
-			int i=preparedStatement .executeUpdate();
-			if(i>0){
-				update=true;
-			}
-		} catch (SQLException e) {
-			logger.debug(e.toString());
+		EntityManager em = factory.createEntityManager();
+		try{
+			em.getTransaction().begin();
+			em.createNativeQuery(insertTableSQL).setParameter(1,commitid).setParameter(2,podIP)
+			.setParameter(3, podPort).setParameter(4, podNameValue).setParameter(5,resultJSON)
+			.executeUpdate();
+			em.getTransaction().commit();
+		}catch(Exception ex){
+			logger.debug(ex.toString());	
+		}finally{
+			em.close();
 		}
 		return update;
-
 	}	
 
-
-	/**
-	 * @param podIP
-	 * @param podPort
-	 * @param podNameValue
-	 * @param resultJSON
-	 * @param commitid
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getDBServiceUpdate(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public static boolean getDBServiceUpdate(String podIP, String podPort, String podNameValue, String resultJSON,
+	@Override
+	public  boolean getDBServiceUpdate(String podIP, String podPort, String podNameValue, String resultJSON,
 			String commitid) {
-		String sql = " UPDATE service " + 
-				"   SET  PODIP=?, PODPORT=?, PODNAME=?, JSON=?     WHERE commitid=? " ;    
-		Connection con=null;
+		EntityManager em = factory.createEntityManager();
 		boolean update=false;
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
-			statement.setString(1,podIP);
-			statement.setString(2,podPort);
-			statement.setString(3,podNameValue);
-			statement.setString(4,resultJSON);
-			statement.setString(5,commitid);
-			int i=statement.executeUpdate();
-			if(i>0){
-				update=true;	
-			}
-		}catch(SQLException e){
-			logger.debug(e.toString());
+		int i=0;
+		String sql = " UPDATE buildon_service  " + 
+				"   SET  PODIP=?, PODPORT=?,PODNAME=?,JSON=?     WHERE commitid=? " ;
+		try{
+			em.getTransaction().begin();
+			i= em.createNativeQuery(sql).setParameter(1,podIP).setParameter(2, podPort)
+					.setParameter(3, podNameValue).setParameter(4,resultJSON).setParameter(5,commitid).executeUpdate();
+			em.getTransaction().commit();
+		}catch(Exception ex){
+			logger.debug(ex.toString());	
+		}finally{
+			em.close();
 		}
+		logger.debug("getDBServiceUpdate :"+i);
 		return update;
-	}
-
-
-	/**
-	 * @param commitid
-	 * @param resultJSON
-	 * @return
-	 */
-	public static boolean getHistoricDBServiceInsert(String commitid,String resultJSON) {
-		logger.debug("getHistoricDBServiceInsert start");
-		boolean update=false;
-		Connection con=null;
-		String insertTableSQL = "INSERT INTO service"
-				+ "(COMMITID,JSON) VALUES"
-				+ "(?,?)";
-		con=createConnection();
-		try(PreparedStatement preparedStatement = con.prepareStatement(insertTableSQL)) {
-			preparedStatement.setString(1,commitid);		
-			preparedStatement.setString(2,resultJSON);
-			int i=preparedStatement .executeUpdate();
-			if(i>0){
-				update=true;
-			}
-		} catch (SQLException e) {
-			logger.debug(e.toString());
-		}
-		return update;
-
-	}
-
-
-	/**
-	 * @param commitId
-	 * @param cijobname
-	 * @return
-	 */
-	public static String getReportsStatus(String commitId,String cijobname) {
-		String status="0";
-		Connection con=null;
-		String  sql = ("SELECT status FROM reports r WHERE r.commitid=? and r.CI_JOBNAME=?");
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
-			statement.setString(1,commitId);
-			statement.setString(2,cijobname);
-			try (ResultSet rs = statement.executeQuery()) {
-				if (!rs.next() ) {
-					status="0";
-				} else {
-					do {
-						status=rs.getString("STATUS");
-					} while (rs.next());
-				}
-			}
-		}catch(SQLException e){
-			logger.debug(e.toString());
-		}
-		return status;
 	}
 
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getReportTriggerData(java.lang.String)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getHistoricDBServiceInsert(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public  boolean getHistoricDBServiceInsert(String commitid,String resultJSON) {
+		logger.debug("getHistoricDBServiceInsert start");
+		boolean update=false;
+		String insertTableSQL = "INSERT INTO buildon_service"
+				+ "(COMMITID,JSON) VALUES"
+				+ "(?,?)";
+		EntityManager em = factory.createEntityManager();
+		try{
+		em.getTransaction().begin();
+		em.createNativeQuery(insertTableSQL).setParameter(1,commitid).setParameter(2, resultJSON)
+		.executeUpdate();
+		em.getTransaction().commit();
+		}catch(Exception ex){
+			logger.debug(ex.toString());	
+		}finally{
+			em.close();
+		}
+		return update;
+
+	}
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getReportsStatus(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String getReportsStatus(String commitId,String cijobname) {
+		String status="0";
+		EntityManager em = factory.createEntityManager();
+		Query query = em.createQuery("select report from  Reports  report where report.commitid=:commitId  and  report.ci_jobname=:cijobname ");
+		query.setParameter("commitId", commitId);
+		query.setParameter("cijobname",cijobname);
+		List<Reports>  list = query.getResultList();
+		if(list.isEmpty()){
+			status="0";
+		}else{
+			status=list.get(0).getStatus();
+
+		}
+		em.close();
+
+		return status;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getReportTriggerData(java.lang.String)
 	 */
 	@Override
 	public String getReportTriggerData(String commitid) {
 		logger.debug("commitid:"+commitid);		
 		String trigger="0";		
-		Connection con=null;
-		String  sql = ("SELECT TRIGGER_FROM FROM reports r WHERE r.commitid=?");
-		con=createConnection();
-		try(PreparedStatement statement=con.prepareStatement(sql)) {
-			statement.setString(1,commitid );
-			try (ResultSet rs = statement.executeQuery()) {
-				if (!rs.next() ) {
-					logger.debug("no data");
-					trigger="0";
-				} else {
-					do {
-						trigger=rs.getString("TRIGGER_FROM");
-					} while (rs.next());
-				}
-			}
-		}catch(SQLException e){
-			logger.debug(e.toString());
-		} 
+		EntityManager em = factory.createEntityManager();
+		Query query = em.createQuery("select report from  Reports  report where report.commitid=:commitid");
+		query.setParameter("commitid", commitid);
+		List<Reports>  list = query.getResultList();
+		if(list.isEmpty()){
+			trigger="0";
+		}else{
+			trigger=list.get(0).getTRIGGER_FROM();
+		}
+		em.close();
+
 		return trigger;
 	}
 
-	/**
-	 * @param email
-	 * @param repo
-	 * @return
+
+	/* (non-Javadoc)
+	 * @see com.cognizant.buildon.dao.BuildOnDAO#getHistoricalURL(java.lang.String, java.lang.String)
 	 */
-	public static List<ScmDetails> getHistoricalURL(String email, String repo) {
+	@Override
+	public List<ScmDetails> getHistoricalURL(String email, String repo) {
 		String repository="%"+repo+"%";
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select det from ScmDetails det where det.email=:email and det.url like :repo");

@@ -232,17 +232,17 @@ import com.cognizant.buildon.services.BuildOnServiceImpl;
 public class QuartzJob  implements Job{
 
 	private static final Logger logger=LoggerFactory.getLogger(QuartzJob.class);
-	private static Connection con=null;
 	private String commitid=null;
 	private String logdir=null;
 	private File file=null;
+	private  Connection con=null;
 	
 	/* (non-Javadoc)
 	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
 	 */
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		HashMap<String,String> map=new HashMap<String,String>();
-		String  sql = ("select commitid,logdir,DATE(start_timestamp)  from root.reports  where start_timestamp < "
+		String  sql = ("select commitid,logdir,DATE(start_timestamp)  from buildon_reports   where start_timestamp < "
 				+ " (select  {fn TIMESTAMPADD(SQL_TSI_DAY,-15,DATE(CURRENT_TIMESTAMP))} from sysibm.sysdummy1)");
 		con=createConnection();
 		try(PreparedStatement statement=con.prepareStatement(sql)) {
@@ -270,7 +270,7 @@ public class QuartzJob  implements Job{
 	/**
 	 * @param file
 	 */
-	private static void deleteLogFiles(File file) {
+	private  void deleteLogFiles(File file) {
 		if(file.isDirectory()){
 			if(file.list().length==0){
 				file.delete();
@@ -306,19 +306,18 @@ public class QuartzJob  implements Job{
 		}
 	}
 
-	private static Connection  createConnection(){
-		BuildOnService service=new BuildOnServiceImpl();
+	private  Connection  createConnection(){
 		Properties props = readPropertyFile();
-		String driver = props.getProperty("derby.driver");
-		String url = props.getProperty("derby.url");
-		String username = props.getProperty("derby.username");
-		String password = props.getProperty("derby.password");
-	    String pass=service.decrypt(password);
+		String driver = props.getProperty("postgresql.driver");
+		String url = props.getProperty("postgresql.url");
+		String username = props.getProperty("postgresql.username");
+		String password = props.getProperty("postgresql.password");
+	    //String pass=service.decrypt(password);
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(driver);
 		dataSource.setUrl(url);
 		dataSource.setUsername(username);
-		dataSource.setPassword(pass);
+		dataSource.setPassword(password);
 		try {
 			con = dataSource.getConnection();
 		} catch (SQLException e) {
@@ -328,7 +327,7 @@ public class QuartzJob  implements Job{
 		return con;
 	}
 
-	private static Properties readPropertyFile() {
+	private  Properties readPropertyFile() {
 		Properties props = new Properties();
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream is = classloader.getResourceAsStream("buildon.properties");

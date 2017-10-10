@@ -203,150 +203,181 @@
  *******************************************************************************/
 package com.cognizant.buildon.domain;
 
+/**
+ * @author 338143
+ *
+ */
+
 public interface Constants {
-	
-	
-	public   String SUCCESS    ="SUCCESS";
-	
 
-	public   String FAILURE    ="FAILURE";
 
-	public   String INPROGRESS ="INPROGRESS";
-	
-	public   String NOTSTARTED ="NOTSTARTED";
-	
-	public   String ABORTED="ABORTED";
+	String SUCCESS    ="SUCCESS";
 
-	public   String STATUS="status";
-	
 
-	public   String YOU="you";
+	String FAILURE    ="FAILURE";
 
-	public   String OTHERS="others";
-	
+	String INPROGRESS ="INPROGRESS";
 
-	public   String SUCCESSSTATUS="Success";
-	
-	public   String FAILURESTATUS="Failure";
-	
-	public   String ABORTEDSTATUS="Aborted";
+	String NOTSTARTED ="NOTSTARTED";
 
-	public   String INPROGRESSSTATUS ="Inprogress";
+	String ABORTED="ABORTED";
+
+	String STATUS="status";
+
+
+	String YOU="you";
+
+	String OTHERS="others";
+
+
+	String SUCCESSSTATUS="Success";
+
+	String FAILURESTATUS="Failure";
+
+	String ABORTEDSTATUS="Aborted";
+
+	String INPROGRESSSTATUS ="Inprogress";
+
+	String INITIATEDSTATUS ="Initiated";
+
+	String JENKINSFILE="Jenkinsfile";
+
+	String  LOCALPATH="localPath";
+
+	String  PROJECT="project";
+
+	String PROPERTYFILE="buildon.properties";
+
+	String DEFAULTPOD = "default";
+
+
+	String YOU_SUCCESS = "you_success";
+
+	String YOU_FAILURE = "you_failure";
+
+	String YOU_ABORTED = "you_aborted";
+
+
+	String OTHERS_SUCCESS = "others_success";
+
+	String OTHERS_FAILURE = "others_failure";
+
+	String OTHERS_ABORTED = "others_aborted";
+
+
+	String COLOR = "color";
+
+	String BUILD_STATUS = "build_status";
+
+	String VALUE = "value";
+
+	String PROJECTS = "Projects";
+
+
+	String JOBNAME = "jobname";
+
+	String GIT = "git";
+
+	String LDAP_FILTERS_NAME = "objectClass=user";
+
+	String LDAP_FILTERS_ACC = "sAMAccountName";
+
+	String LDAP_SID = "objectSID";
+
+	String LDAP_SID_BIN = "java.naming.ldap.attributes.binary";
+
+	String SIMPLE = "simple";
+
+	String LDAP_CTX_FAC = "com.sun.jndi.ldap.LdapCtxFactory";
+
+	String LDAP_GN_NAME = "givenname";
+
+	String LDAP_MAIL = "mail";
+
+	String LDAP_NAME = "name";
+
+	String LOG_RESULT = "No Results";
+
+	String NO_JENKINS = "No Jenkinsfile";
+
+	String OAUTH = "oauth2";
+
+	String DOT =".";
+
+	String FWD_SLASH ="/";
+
+	String GIT_UPLOAD ="/usr/bin/git-upload-pack";
+
+	String JENKINS_FILE ="Jenkinsfile";
+
+	String FILE ="file";
+
+	String HEAD ="HEAD";
+
+	String JENKINS_MOD_MSG ="Jenkinsfile modified";
+
+	String STAGE ="stage";
+
+	String LOG_TAB ="/root/buildlog/";
+
+	String LOG =".log";
+
+	String KUBE ="kube-";
+
+	String JENKINS ="jenkins-";
+
+	String JOB ="job";
+
+	String HTTP ="http://";
+
+	String CI_URL ="/lastBuild/consoleText";
+
+	String BUILDON ="buildon-";
+
+	String SERV_URL ="/1/wfapi/describe";
+
+	String INVALID ="invalid";
+
+	String GLB_USER ="globaluser";
+
+	String MINS ="Mins ";
+
+	String SEC ="Sec";
+
+	String LDAP_CONCAT ="@CTS";
+
+	String ACCOUNT_NAME ="sAMAccountName";
+
+	String SEARCH_FILTER_MAIL = "(&(objectClass=user)(mail=";
+
+	String SEARCH_FILTER_ACCOUNT = "(&(objectClass=user)(sAMAccountName=";
+
+	String AES_PADDING = "AES/CBC/PKCS5Padding";
+
+	String UTF = "UTF-8";
+
+	String AES = "AES";
+
+	String VALID_URL ="^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+
+	String VALID_ALPHA ="^[a-zA-Z]+$";
+
+	String VALID_EMAIL ="^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})";
+
+	String VALID_NUMERIC ="[0-9]+";
+
+	String VALID_ALPHA_NUMERIC ="[A-Za-z0-9]+";
+
+	String NO_USER ="noLDAPUser";
+
+	String  SERACH_ACCOUNT="(&(objectClass=user)(sAMAccountName=";
+
+	String  MEMBER_OF="memberOf";
 	
-	public   String INITIATEDSTATUS ="Initiated";
-	
-	public   String JENKINSFILE="Jenkinsfile";
-	
-	public   String  LOCALPATH="localPath";
-	
-	public   String  PROJECT="project";
-	
-	public   String PROPERTYFILE="buildon.properties";
-	
-	public   String DEFAULTPOD = "default";
-	
-	
-	public   String YOU_SUCCESS = "you_success";
-	
-	public   String YOU_FAILURE = "you_failure";
-	
-	public   String YOU_ABORTED = "you_aborted";
-	
-	
-	public   String OTHERS_SUCCESS = "others_success";
-	
-	public   String OTHERS_FAILURE = "others_failure";
-	
-	public   String OTHERS_ABORTED = "others_aborted";
-	
-	
-	public   String COLOR = "color";
-	
-	public   String BUILD_STATUS = "build_status";
-	
-	public   String VALUE = "value";
-	
-	public   String PROJECTS = "Projects";
-	
-	
-	public   String JOBNAME = "jobname";
-	
-	public   String GIT = "git";
-	
-	public   String LDAP_FILTERS_NAME = "objectClass=user";
-	
-	public   String LDAP_FILTERS_ACC = "sAMAccountName";
-	
-	public   String LDAP_SID = "objectSID";
-	
-	public   String LDAP_SID_BIN = "java.naming.ldap.attributes.binary";
-	
-	public   String SIMPLE = "simple";
-	
-	public   String LDAP_CTX_FAC = "com.sun.jndi.ldap.LdapCtxFactory";
-	
-	public   String LDAP_GN_NAME = "givenname";
-	
-	public   String LDAP_MAIL = "mail";
-	
-	public   String LDAP_NAME = "name";
-	
-	public   String LOG_RESULT = "No Results";
-	
-	public   String NO_JENKINS = "No Jenkinsfile";
-	
-	public   String OAUTH = "oauth2";
-	
-	public   String DOT =".";
-	
-	public   String FWD_SLASH ="/";
-	
-	public   String GIT_UPLOAD ="/usr/bin/git-upload-pack";
-	
-	public   String JENKINS_FILE ="Jenkinsfile";
-	
-	public   String FILE ="file";
-	
-	public   String HEAD ="HEAD";
-	
-	public   String JENKINS_MOD_MSG ="Jenkinsfile modified";
-	
-	public   String STAGE ="stage";
-	
-	public   String LOG_TAB ="/root/buildlog/";
-	
-	public   String LOG =".log";
-	
-	public   String KUBE ="kube-";
-	
-	public   String JENKINS ="jenkins-";
-	
-	public   String JOB ="job";
-	
-	public   String HTTP ="http://";
-	
-	public   String CI_URL ="/lastBuild/consoleText";
-	
-	public   String BUILDON ="buildon-";
-	
-	public   String SERV_URL ="/1/wfapi/describe";
-	
-	public   String INVALID ="invalid";
-	
-	public   String GLB_USER ="globaluser";
-	
-	public   String MINS ="Mins ";
-	
-	public   String SEC ="Sec";
-	
-	public   String LDAP_CONCAT ="@CTS";
-	
-	public   String ACCOUNT_NAME ="sAMAccountName";
-	
-	public   String SEARCH_FILTER_MAIL = "(&(objectClass=user)(mail=";
-	
-	public   String SEARCH_FILTER_ACCOUNT = "(&(objectClass=user)(sAMAccountName=";
-	
+	String FIRST="first";
+
+
+
 
 
 }

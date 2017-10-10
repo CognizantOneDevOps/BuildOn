@@ -206,6 +206,7 @@ package com.cognizant.buildon.dao;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.cognizant.buildon.domain.*;
@@ -310,7 +311,103 @@ public interface BuildOnDAO {
 	 */
 	public String getReportTriggerData(String commitid);
 
-	Users getEmailForUser(String id);
+	/**
+	 * @param id
+	 * @return
+	 */
+	public Users getEmailForUser(String id);
+	
+	/**
+	 * @param userId
+	 * @return
+	 */
+	public JSONArray getCompareBuild(String userId);
+	
+	/**
+	 * @param userId
+	 * @return
+	 */
+	public  JSONArray getLatestbuild(String userId);
+	
+	/**
+	 * @param userId
+	 * @return
+	 */
+	public  JSONArray getProjectwiseBuild(String userId) ;
+	
+	/**
+	 * @param userId
+	 * @return
+	 */
+	public  JSONArray getBuildtrends(String userId);
+	
+	/**
+	 * @param email
+	 * @param type
+	 * @return
+	 */
+	public   List<ScmDetails> getUserScmDetails(String email ,String type);
+
+	/**
+	 * @param podIP
+	 * @param podPort
+	 * @param podNameValue
+	 * @param resultJSON
+	 * @param commitid
+	 * @return
+	 */
+	public boolean getDBServiceInsert(String podIP, String podPort, String podNameValue, String resultJSON,
+			String commitid);
+
+	/**
+	 * @param podIP
+	 * @param podPort
+	 * @param podNameValue
+	 * @param resultJSON
+	 * @param commitid
+	 * @return
+	 */
+	public boolean getDBServiceUpdate(String podIP, String podPort, String podNameValue, String resultJSON,
+			String commitid);
+
+	/**
+	 * @param commitId
+	 * @return
+	 */
+	public String getServiceCommitId(String commitId);
+
+	/**
+	 * @param commitId
+	 * @param cijobname
+	 * @return
+	 */
+	public String getReportsStatus(String commitId, String cijobname);
+
+	/**
+	 * @param commitid
+	 * @param resultJSON
+	 * @return
+	 */
+	public boolean getHistoricDBServiceInsert(String commitid, String resultJSON);
+
+	/**
+	 * @param commitId
+	 * @return
+	 */
+	public String getPodname(String commitId);
+	
+	/**
+	 * @param commitId
+	 * @return
+	 */
+	public Service getServiceData(String commitId);
+
+	/**
+	 * @param email
+	 * @param repo
+	 * @return
+	 */
+	public List<ScmDetails> getHistoricalURL(String email, String repo);
 	
 	
 }

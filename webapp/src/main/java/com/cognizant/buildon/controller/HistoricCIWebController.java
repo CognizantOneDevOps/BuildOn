@@ -216,8 +216,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 import com.google.gson.Gson;
 
 /**
@@ -243,10 +243,10 @@ public class HistoricCIWebController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String logs=null;
 		String commitId=request.getParameter("commitId");
-		boolean isvalidId=service.isAlphaNumeric(commitId);
+		boolean isvalidId=buildonservice.isAlphaNumeric(commitId);
 		if(isvalidId){
 			logs = GitOperations.getHistoricCILogs(commitId);
 		}
@@ -257,7 +257,7 @@ public class HistoricCIWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 	
 		String userid=request.getParameter("userId");
 		String repo=request.getParameter("repo");
@@ -278,22 +278,13 @@ public class HistoricCIWebController extends HttpServlet {
 		json = new Gson().toJson(listbranch);
 		response.getWriter().write(json);
 		}else{
-			 deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			 json=Constants.INVALID;
 		response.getWriter().write(json);	
 		}
 		
 	}
 	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
-	}
+	
 
 }

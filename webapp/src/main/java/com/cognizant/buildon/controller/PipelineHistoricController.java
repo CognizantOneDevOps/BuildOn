@@ -215,6 +215,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cognizant.buildon.domain.GitOperations;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
 import com.cognizant.buildon.services.BuildOnServiceImpl;
 
@@ -242,13 +243,13 @@ public class PipelineHistoricController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService service=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String commitid=request.getParameter("commitid");
 		logger.debug("commitid pipeline"+commitid);
 		String json=null;
-		boolean isvalidId=service.isAlphaNumeric(commitid);
+		boolean isvalidId=buildonservice.isAlphaNumeric(commitid);
 		if(isvalidId){
-			json=service.getJsonData(commitid);
+			json=buildonservice.getJsonData(commitid);
 		}
 		response.getWriter().write(json);
 	}

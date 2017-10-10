@@ -216,8 +216,8 @@ import org.json.JSONObject;
 
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -242,7 +242,7 @@ public class ReportController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String scmuser=request.getParameter("scmuser");
 		JSONObject json=null;
 		String globalCookie=null;
@@ -262,7 +262,7 @@ public class ReportController extends HttpServlet {
 		json=buildonservice.getIndividualReports(scmuser);
 		response.getWriter().write(json.toString());
 		}else{
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			responseStr=Constants.INVALID;
 			response.getWriter().write(responseStr.toString());
 		}
@@ -275,7 +275,7 @@ public class ReportController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String scmuser=request.getParameter("scmuser");
 		String commitid=request.getParameter("commitid");
 		JSONObject json=null;
@@ -296,7 +296,7 @@ public class ReportController extends HttpServlet {
 		json=buildonservice.getIndividualstatusReports(scmuser,commitid);
 		response.getWriter().write(json.toString());
 		}else{
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			responseStr=Constants.INVALID;
 			response.getWriter().write(responseStr.toString());
 		}
@@ -305,15 +305,6 @@ public class ReportController extends HttpServlet {
 
 	}
 	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
-	}
+	
 
 }

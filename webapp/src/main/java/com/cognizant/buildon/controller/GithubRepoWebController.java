@@ -217,8 +217,8 @@ import org.json.JSONObject;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -231,62 +231,52 @@ import com.cognizant.buildon.services.BuildOnServiceImpl;
  */
 @WebServlet("/GithubRepoWebController")
 public class GithubRepoWebController extends HttpServlet {
-	 /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
-     * @see HttpServlet#HttpServlet()
-     */
-    public GithubRepoWebController() {
-        super();
-    }
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public GithubRepoWebController() {
+		super();
+	}
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String responseStr=null;
 		JSONObject jsonobj=new JSONObject();
 		String userid=request.getParameter("userId");
+		String type=request.getParameter("type");
 		Cookie[] cookie =request.getCookies();
 		String globalCookie=null;
 		if(cookie!=null ){
 			for (Cookie cookies : cookie) {
 				if (cookies.getName().equals("user")) {
-				globalCookie= cookies.getValue();
+					globalCookie= cookies.getValue();
 				}
 			}
 		}
 		String userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userId && !(userId.equals(""))){
-		Users userinfo=buildonservice.getEmailForUser(userId);
-    	jsonobj=GitOperations.getRepodetails(userinfo.getEmail());
-    	response.getWriter().write(jsonobj.toString());
+			Users userinfo=buildonservice.getEmailForUser(userId);
+			jsonobj=GitOperations.getRepodetails(userinfo.getEmail(),type);
+			response.getWriter().write(jsonobj.toString());
 		}else{
-			
-			 deleteCookies(response, cookie);
-			 responseStr=Constants.INVALID;
-			 response.getWriter().write(responseStr);	
+
+			buildonservice.deleteCookies(response, cookie);
+			responseStr=Constants.INVALID;
+			response.getWriter().write(responseStr);	
 		}
-    	
+
 	}
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doGet(request, response);
-	}
-	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
 	}
 
 

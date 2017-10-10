@@ -48,6 +48,10 @@ RUN mkdir -p /usr/share/maven \
 # Define MAVEN_HOME
 ENV MAVEN_HOME /usr/share/maven
 
+# Copy Maven settings
+RUN rm -rf /usr/share/maven/conf/settings.xml
+COPY settings.xml /usr/share/maven/conf/settings.xml
+
 ########################################################### JENKINS  ###########################################################
 ENV JENKINS_VERSION 2.60.1
 ##########################

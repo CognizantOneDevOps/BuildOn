@@ -205,55 +205,44 @@
 
 angular.module('Authentication')
 
-.config(function Config($httpProvider,jwtInterceptorProvider) {
-	jwtInterceptorProvider.tokenGetter = function() {
-		return localStorage.getItem('JWT');
-	}
-	$httpProvider.interceptors.push('jwtInterceptor');
-})
 .controller('LoginController',
 		['$scope', '$rootScope', '$location','$http','$localStorage','$route',
 		 function ($scope, $rootScope, $location,$http,$localStorage,$route) {
-			
-				$scope.showThrobber = false;
-				$scope.isLDAPAuth=LDAPAuth;
-				console.log($scope.isLDAPAuth);
-				$scope.login = function () {
-					$scope.showThrobber = true;
-						var data = $.param({
-							username:$scope.username,
-							password:$scope.password 
-						});
-						var config = {
-								headers : {
-									'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
-								}
-						}
-						$http.post('AuthenticationWebController',data,config)
-						.then(function (response) {				
-							console.log("success");
-							$scope.results=response.data;
-							if($scope.results.length >0){
-								$scope.isLoginError=false;
-								$rootScope.scmUser=$scope.results[0].email;
-								$rootScope.name=$scope.results[0].uname;
-								$location.path('/home');
-							//	$route.reload();
-							}else {
-								$scope.error = response.message;
-								$scope.showThrobber = false;
-								$scope.isLoginError=true;
-								$scope.errormsg="Invalid credentials";
-							}
-							
-							
-						},
-						function(error) {
-							console.log("error");
-						});
-						
-						
-					} 
 
+			$scope.showThrobber = false;
+			$scope.login = function () {
+				console.log("Authentication");
+				$scope.showThrobber = true;
+				var data = $.param({
+					username:$scope.username,
+					password:$scope.password 
+				});
+				var config = {
+						headers : {
+							'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+						}
+				}
+				$http.post('AuthenticationWebController',data,config)
+				.then(function (response) {				
+					console.log("response"+response.data);
+					$scope.results=response.data;
+					if($scope.results.length >0  && $scope.results[0].email != 'noLDAPUser'){
+						$scope.isLoginError=false;
+
+						$rootScope.scmUser=$scope.results[0].email;
+						console.log("$rootScope.scmUser:"+$rootScope.scmUser);
+						$rootScope.name=$scope.results[0].uname;
+						$location.path('/home');
+					}else {
+						$scope.error = response.message;
+						$scope.showThrobber = false;
+						$scope.isLoginError=true;
+						$scope.errormsg="Invalid credentials";
+					}
+				},
+				function(error) {
+					console.log("error");
+				});
+			} 
 
 		}]);

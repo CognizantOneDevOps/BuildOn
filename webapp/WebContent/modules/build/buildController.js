@@ -212,8 +212,8 @@ angular.module('Build', ['ui.ace'])
 			$scope.formData = {}; 
 			$rootScope.buildtrendJson = {};
 				$rootScope.$broadcast('userid',$rootScope.scmUser);
-				console.log($rootScope.scmUser);
-				BuildService.getRepoDetails($rootScope.scmUser,function(response) {
+				console.log($rootScope.scmUser + $rootScope.type);
+				BuildService.getRepoDetails($rootScope.scmUser,$rootScope.type,function(response) {
 					console.log($rootScope.userId + $rootScope.scmUser); 
 					$rootScope.obj = response.data;
 					console.log($scope.obj);
@@ -280,7 +280,7 @@ angular.module('Build', ['ui.ace'])
 					$rootScope.selectedbranch=project;
 					$scope.isLoadingbranch = true;
 					$scope.isLoadingtxt=true;
-					BuildService.getJenkinsFile($rootScope.scmUser,$rootScope.selectedbranch,$rootScope.selectedproj,function(response) {
+					BuildService.getJenkinsFile($rootScope.scmUser,$rootScope.selectedbranch,$rootScope.selectedproj,$rootScope.type,function(response) {
 						$scope.yamlContent=response.data;
 						//console.log("$scope.yamlContent:"+$scope.yamlContent);
 						$scope.show = false;
@@ -308,7 +308,7 @@ angular.module('Build', ['ui.ace'])
 					$rootScope.selectedproj=project;
 					$scope.isLoading = true;
 					console.log($rootScope.scmUser);
-					BuildService.getScmDetails($rootScope.scmUser,$rootScope.selectedproj, function(response) {
+					BuildService.getScmDetails($rootScope.scmUser,$rootScope.selectedproj,$rootScope.type, function(response) {
 						$scope.branches=response.data;
 						console.log($scope.branches);
 						if($scope.branches != 'invalid'){
@@ -350,7 +350,7 @@ angular.module('Build', ['ui.ace'])
 				
 				
 				
-				BuildService.getJenkinsFile($rootScope.scmUser,$rootScope.selectedbranch,$rootScope.selectedproj, function(response) {
+				BuildService.getJenkinsFile($rootScope.scmUser,$rootScope.selectedbranch,$rootScope.selectedproj,$rootScope.type, function(response) {
 					$scope.yamlContent=response.data;
 					console.log( "get jenkins:" + $scope.yamlContent);
 					
@@ -424,7 +424,8 @@ angular.module('Build', ['ui.ace'])
 					$scope.content=$scope.yamlContent;
 					var data = $.param({
 						userId: $rootScope.scmUser,
-						content: $scope.content
+						content: $scope.content,
+						type:$rootScope.type
 		            });
 		            var config = {
 		                headers : {
@@ -486,12 +487,10 @@ angular.module('Build', ['ui.ace'])
 			$scope.callBuildon = function() {
 				$rootScope.reportshw=true;
 				$scope.loadtab=true;
-				console.log($rootScope.scmUser+$rootScope.selectedproj+$rootScope.selectedbranch+$rootScope.userId);
-				 BuildService.callBuildon($rootScope.scmUser,$rootScope.selectedbranch,$rootScope.selectedproj).then(function (response) {
+				console.log($rootScope.scmUser+$rootScope.selectedproj+$rootScope.selectedbranch+$rootScope.userId + $rootScope.type);
+				 BuildService.callBuildon($rootScope.scmUser,$rootScope.selectedbranch,$rootScope.selectedproj,$rootScope.type).then(function (response) {
 						console.log(response.data);
 						$scope.status=response.data;
-
-
 						if($scope.status != "invalid"){
 						$rootScope.showIndividualreport = true;
 						$scope.loadtab=false;

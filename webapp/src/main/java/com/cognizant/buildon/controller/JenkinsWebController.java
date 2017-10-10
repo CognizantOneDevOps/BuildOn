@@ -216,8 +216,8 @@ import javax.servlet.http.HttpSession;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -231,23 +231,24 @@ import com.cognizant.buildon.services.BuildOnServiceImpl;
 @WebServlet("/JenkinsWebController")
 public class JenkinsWebController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public JenkinsWebController() {
-        super();
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public JenkinsWebController() {
+		super();
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session=request.getSession();
+		/*HttpSession session=request.getSession();
 		String userId=request.getParameter("userId");
 		String content=request.getParameter("content");
 		String branch=request.getParameter("branch");
-		String repo=request.getParameter("repo");
-		boolean isSaved=GitOperations.buildon(userId,branch,repo,content,session);
+		String repo=request.getParameter("repo");*/
+		boolean isSaved=false;
+		//GitOperations.buildon(userId,branch,repo,content,session);
 		String resp=String.valueOf(isSaved);
 		response.getWriter().write(resp);
 	}
@@ -256,43 +257,33 @@ public class JenkinsWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		HttpSession session=request.getSession();
 		String userid=request.getParameter("userId");
-    	String content=request.getParameter("content");
-    	String responseStr=null;
+		String content=request.getParameter("content");
+		String type=request.getParameter("type");
+		String responseStr=null;
 		Cookie[] cookie =request.getCookies();
 		String globalCookie=null;
 		if(cookie!=null ){
 			for (Cookie cookies : cookie) {
 				if (cookies.getName().equals("user")) {
-				globalCookie= cookies.getValue();
+					globalCookie= cookies.getValue();
 				}
 			}
 		}
 		String userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userId && !(userId.equals(""))){
-		Users userinfo=buildonservice.getEmailForUser(userId);
-    	boolean isSaved=GitOperations.saveJenkinsEdit(userinfo.getEmail(),content,session);
-    	responseStr=String.valueOf(isSaved);
-    	response.getWriter().write(responseStr);
+			Users userinfo=buildonservice.getEmailForUser(userId);
+			boolean isSaved=GitOperations.saveJenkinsEdit(userinfo.getEmail(),content,session,type);
+			responseStr=String.valueOf(isSaved);
+			response.getWriter().write(responseStr);
 		}else{
-			 deleteCookies(response, cookie);
-			 responseStr=Constants.INVALID;
-			 response.getWriter().write(responseStr);
+			buildonservice.deleteCookies(response, cookie);
+			responseStr=Constants.INVALID;
+			response.getWriter().write(responseStr);
 		}
-		
-	}
-	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
+
 	}
 
 }

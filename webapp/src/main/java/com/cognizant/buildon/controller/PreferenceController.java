@@ -216,8 +216,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 
 /**
  * @author 338143
@@ -242,7 +242,7 @@ public class PreferenceController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userid=request.getParameter("userId");
 		String type=request.getParameter("type");
 		List<String> list=new ArrayList<String>();
@@ -265,7 +265,7 @@ public class PreferenceController extends HttpServlet {
 		 response.getWriter().write(list.toString());
 		}else{
 			
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			responseStr=Constants.INVALID;
 			response.getWriter().write(responseStr.toString());	
 		}
@@ -276,7 +276,7 @@ public class PreferenceController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		boolean status=false;
 		String userid=request.getParameter("userId");
 		String switchmode=request.getParameter("switchmode");
@@ -298,24 +298,11 @@ public class PreferenceController extends HttpServlet {
 		status=buildonservice.savePeferenceDetails(userid,switchmode,repo,branch);
 		 responseStr=String.valueOf(status);
 		}else{
-			
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			responseStr=Constants.INVALID;
 		}
 		response.getWriter().write(responseStr);
 		
 	}
 	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
-	}
-
-
 }

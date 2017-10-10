@@ -212,6 +212,7 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
@@ -227,13 +228,13 @@ import org.slf4j.LoggerFactory;
  */
 public class LDAPAuthentication {
 	private static  final Logger logger=LoggerFactory.getLogger(LDAPAuthentication.class);
-	
+
 	/**
 	 * @param username
 	 * @param password
 	 * @return
 	 */
-	  public static Users getEmpId(String email){
+	public static Users getEmpId(String email,String password){
 		Users users=new Users();
 		String empID=null;
 		Properties props = readPropertyFile();
@@ -241,7 +242,7 @@ public class LDAPAuthentication {
 		String ldapSearchBase =props.getProperty("ldap.searchbase");
 		String ldapUsername = props.getProperty("ldap.user");
 		String ldapPassword = props.getProperty("ldap.password");
-		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername, ldapPassword);
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername.trim(), ldapPassword.trim());
 		String searchFilter =Constants.SEARCH_FILTER_MAIL + email + "))";
 		SearchControls searchControls = new SearchControls();
 		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -252,7 +253,7 @@ public class LDAPAuthentication {
 			logger.debug(e1.toString());
 		}
 		SearchResult searchResult = null;
-		if(results.hasMoreElements()) {
+		if(results!= null && results.hasMoreElements()) {
 			searchResult = (SearchResult) results.nextElement();
 		}
 		String[] attrIDs = { 
@@ -261,11 +262,24 @@ public class LDAPAuthentication {
 		searchControls.setReturningAttributes(attrIDs);
 		searchFilter=Constants.LDAP_MAIL+"="+ldapUsername;
 		try {
-			 empID = searchResult.getAttributes().get(Constants.ACCOUNT_NAME).get().toString();
-			 String uname=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
-			 users.setEmail(email);
-			 users.setUname(uname);
-			 users.setId(Integer.parseInt(empID));
+
+			if(searchResult!=null ){
+				empID = searchResult.getAttributes().get(Constants.ACCOUNT_NAME).get().toString();
+				if(empID!=null){
+					boolean isvalid=authenticate(empID,password);
+					if(isvalid){
+						String uname=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
+						users.setEmail(email);
+						users.setUname(uname);
+						users.setId(Integer.parseInt(empID));
+					}else{
+						users.setEmail(Constants.NO_USER);	
+
+					}
+				}
+			}else{
+				users.setEmail(Constants.NO_USER);	
+			}
 		} catch (NamingException e) {
 			logger.debug( e.toString());
 		}
@@ -277,7 +291,36 @@ public class LDAPAuthentication {
 		return users;
 
 	}
-	
+
+
+	private static boolean authenticate(String empID, String password) {
+		boolean isSuccess=false;
+		String ldapUsername = empID.trim();
+		String ldapPassword = password.trim();
+		Properties props = readPropertyFile();
+		String ldapAdServer = props.getProperty("ldap.server");
+		String ldapSearchBase =props.getProperty("ldap.searchbase");
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername.trim(), ldapPassword.trim());
+		String searchFilter = Constants.SERACH_ACCOUNT+ ldapUsername.trim() + "))";
+		SearchControls searchControls = new SearchControls();
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		NamingEnumeration<SearchResult> results=null;
+		try {
+			results = ctx.search(ldapSearchBase,searchFilter,searchControls);
+		} catch (NamingException e1) {
+			logger.debug(e1.toString());
+		}
+		SearchResult searchResult = null;
+		if(null!=results && (results.hasMoreElements()) ){
+			isSuccess=true;
+			searchResult = (SearchResult) results.nextElement();
+		}else{
+			isSuccess=false;
+		}
+
+		return isSuccess;
+	}
+
 	/**
 	 * @param ldapAdServer
 	 * @param ldapUsername
@@ -324,8 +367,8 @@ public class LDAPAuthentication {
 		}
 		return props;
 	}
-	
-	
+
+
 
 	/**
 	 * @param id
@@ -338,7 +381,7 @@ public class LDAPAuthentication {
 		String ldapSearchBase =props.getProperty("ldap.searchbase");
 		String ldapUsername = props.getProperty("ldap.user");
 		String ldapPassword = props.getProperty("ldap.password");
-		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername, ldapPassword);
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername.trim(), ldapPassword);
 		String searchFilter = Constants.SEARCH_FILTER_ACCOUNT + id + "))";
 		SearchControls searchControls = new SearchControls();
 		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -352,19 +395,19 @@ public class LDAPAuthentication {
 		if(results.hasMoreElements()) {
 			searchResult = (SearchResult) results.nextElement();
 		}
-		
+
 		String[] attrIDs = {Constants.LDAP_GN_NAME,
 				Constants.LDAP_MAIL,
 				Constants.ACCOUNT_NAME,};
 		searchControls.setReturningAttributes(attrIDs);
 		searchFilter=Constants.ACCOUNT_NAME+"="+ldapUsername;
 		try {
-			
-			 String mail = searchResult.getAttributes().get(Constants.LDAP_MAIL).get().toString();
-			 String name=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
-			 users.setEmail(mail);
-			 users.setUname(name);
-			 
+
+			String mail = searchResult.getAttributes().get(Constants.ACCOUNT_NAME).get().toString();
+			String name=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
+			users.setEmail(mail);
+			users.setUname(name);
+
 		} catch (NamingException e) {
 			logger.debug( e.toString());
 		}
@@ -374,7 +417,61 @@ public class LDAPAuthentication {
 			logger.debug( e.toString());
 		}
 		return users;
-		
+
+	}
+
+		//check for distribution list 
+		private boolean CheckDistributionList(String username,String password){
+		String ldapUsername = username.trim();
+		String ldapPassword = password.trim();
+		Properties props = readPropertyFile();
+		boolean isMember=false;
+		String ldapAdServer = props.getProperty("ldap.server");
+		String ldapSearchBase =props.getProperty("ldap.searchbase");
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer,ldapUsername,ldapPassword);
+		String searchFilter = Constants.SEARCH_FILTER_ACCOUNT + ldapUsername + "))";
+		SearchControls searchControls = new SearchControls();
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		NamingEnumeration<SearchResult> results=null;
+		String[] attrIDs = { 
+				"cn",
+				Constants.MEMBER_OF
+		};
+		searchControls.setReturningAttributes(attrIDs);
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		searchFilter="sAMAccountName"+"="+ldapUsername;
+		NamingEnumeration<SearchResult> answer;
+		try {
+			answer = ctx.search(ldapSearchBase, searchFilter,searchControls);
+			if ( answer.hasMore()) {
+				Attributes attrs = ((SearchResult) answer.next()).getAttributes();
+				NamingEnumeration e =attrs.get(Constants.MEMBER_OF).getAll();
+				while (e.hasMore()) {
+					String value = (String) e.next();
+					if ( value.indexOf(props.getProperty("ldap.distributionlist")) != -1 ) {
+						isMember=true;
+						break;
+					}
+					else{
+						isMember=false;
+					}
+
+				}
+			}else{
+				logger.debug("no results");
+			}
+		} catch (NamingException e) {
+			logger.debug( e.toString());
+		}
+		try {
+			ctx.close();
+		} catch (NamingException e) {
+			logger.debug( e.toString());
+		}
+
+
+		return isMember;
+
 	}
 
 }

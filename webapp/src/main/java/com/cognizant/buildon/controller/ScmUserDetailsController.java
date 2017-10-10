@@ -213,12 +213,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cognizant.buildon.dao.BuildOnDAOImpl;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.ScmDetails;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 import com.google.gson.Gson;
+
 
 /**
  * @author 338143
@@ -231,20 +236,19 @@ import com.google.gson.Gson;
 @WebServlet("/ScmUserDetailsController")
 public class ScmUserDetailsController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	  
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public ScmUserDetailsController() {
-        super();
-    }
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public ScmUserDetailsController() {
+		super();
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String id=request.getParameter("id");
 		String userid=request.getParameter("userid");
 		String responseStr=null;
@@ -253,20 +257,19 @@ public class ScmUserDetailsController extends HttpServlet {
 		if(cookie!=null ){
 			for (Cookie cookies : cookie) {
 				if (cookies.getName().equals("user")) {
-				globalCookie= cookies.getValue();
+					globalCookie= cookies.getValue();
 				}
 			}
 		}
-		
 		String userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userId && !(userId.equals(""))){
-		Users userinfo=buildonservice.getEmailForUser(userId);
-		boolean status=buildonservice.removeRecord(id,userid);
-		responseStr=String.valueOf(status);
+			Users userinfo=buildonservice.getEmailForUser(userId);
+			boolean status=buildonservice.removeRecord(id,userid);
+			responseStr=String.valueOf(status);
 		}else{
-			
-			 deleteCookies(response, cookie);
-			 responseStr=Constants.INVALID;
+
+			buildonservice.deleteCookies(response, cookie);
+			responseStr=Constants.INVALID;
 		}
 		response.getWriter().write(responseStr);
 	}
@@ -275,47 +278,38 @@ public class ScmUserDetailsController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+	
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userid=request.getParameter("userId");
 		String type=request.getParameter("type");
-		String json =null;
 		
+		String json =null;
+
 		Cookie[] cookie =request.getCookies();
 		String globalCookie=null;
 		if(cookie!=null ){
 			for (Cookie cookies : cookie) {
 				if (cookies.getName().equals("user")) {
-				globalCookie= cookies.getValue();
+					globalCookie= cookies.getValue();
 				}
 			}
 		}
-		
+
 		String userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userId && !(userId.equals(""))){
-		Users userinfo=buildonservice.getEmailForUser(userId);
-		List<ScmDetails> scmdet=buildonservice.getScmDetails(userinfo.getEmail(),type);
-		json = new Gson().toJson(scmdet);
-		
+			Users userinfo=buildonservice.getEmailForUser(userId);
+			List<ScmDetails> scmdet=buildonservice.getScmDetails(userinfo.getEmail(),type);
+			json = new Gson().toJson(scmdet);
+
 		}else{
-		    deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			json=Constants.INVALID;
 		}
-		
-		
 		response.getWriter().write(json);
-		
-		
+
+
 	}
 
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-		        response.addCookie(cookiedel);
-		  
-		    }
-		}
-	}
+
 
 }

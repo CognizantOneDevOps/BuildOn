@@ -219,7 +219,7 @@ import javax.persistence.TemporalType;
  *
  */
 @Entity
-@Table(name = "Reports")
+@Table(name = "buildon_reports")
 public class Reports implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

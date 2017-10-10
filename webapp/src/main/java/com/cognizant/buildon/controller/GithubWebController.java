@@ -214,15 +214,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cognizant.buildon.dao.BuildOnDAOImpl;
 import com.cognizant.buildon.domain.Constants;
 import com.cognizant.buildon.domain.GitOperations;
 import com.cognizant.buildon.domain.Users;
+import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
-import com.cognizant.buildon.services.BuildOnServiceImpl;
 import com.google.gson.Gson;
 
 /**
@@ -252,9 +248,10 @@ public class GithubWebController extends HttpServlet {
 	 * User project details /branch details
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=request.getParameter("userId");
 		String repo=request.getParameter("repo");
+		String type=request.getParameter("type");
 		String json =null;
 		Cookie[] cookie =request.getCookies();
 		String globalCookie=null;
@@ -269,10 +266,10 @@ public class GithubWebController extends HttpServlet {
 		String userid=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userid && !(userid.equals(""))){
 			Users userinfo=buildonservice.getEmailForUser(userid);
-			ArrayList<String> listbranch=GitOperations.getBranchDetails(userinfo.getEmail(),repo);
+			ArrayList<String> listbranch=GitOperations.getBranchDetails(userinfo.getEmail(),repo,type);
 			json = new Gson().toJson(listbranch);
 		}else{
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			json="invalid";
 		}
 		response.getWriter().write(json);
@@ -284,11 +281,12 @@ public class GithubWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=new BuildOnServiceImpl();
+		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		HttpSession session=request.getSession();
 		String project=request.getParameter("project");
 		String branch=request.getParameter("branch");
 		String userId=request.getParameter("userId");
+		String type=request.getParameter("type");
 		String content=null;
 		
 		Cookie[] cookie =request.getCookies();
@@ -303,7 +301,7 @@ public class GithubWebController extends HttpServlet {
 		String userid=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userid && !(userid.equals(""))){
 			Users userinfo=buildonservice.getEmailForUser(userid);
-			content=GitOperations.getJenkinsFile(project,branch,userinfo.getEmail(),session);
+			content=GitOperations.getJenkinsFile(project,branch,userinfo.getEmail(),session,type);
 			if(content==null){
 				content=Constants.NO_JENKINS;
 			}
@@ -311,23 +309,12 @@ public class GithubWebController extends HttpServlet {
 			response.getWriter().write(content);
 			
 		}else{
-			deleteCookies(response, cookie);
+			buildonservice.deleteCookies(response, cookie);
 			content=Constants.INVALID;
 			response.getWriter().write(content);
 		}
 		
 		
-	}
-	
-	private void deleteCookies(HttpServletResponse response, Cookie[] cookie) {
-		if (cookie != null) {
-			for (Cookie cookiedel : cookie) {
-				cookiedel.setValue(null);
-				cookiedel.setMaxAge(0);
-				response.addCookie(cookiedel);
-
-			}
-		}
 	}
 
 }
