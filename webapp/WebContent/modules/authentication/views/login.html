@@ -45,7 +45,7 @@
                                 <md-icon class="actvIcoCss disableIcon" layout md-svg-src="dist/icons/svg/login/user_icon.svg" ng-style="{height: '17px', width: '17px', top: '5px'}"></md-icon>
                                 <md-icon class="actvIcoCss" ng-if="username" layout md-svg-src="dist/icons/svg/login/user_icon_active.svg" ng-style="{height: '17px', width: '17px', top: '5px'}"></md-icon>
                                 <input class="inputGreyTextCss" ng-class="{'activeCss': username != '', 'inactiveCss': username == null}" ng-model="username"
-                                    type="email" name="username" value="username" required ng-pattern="/^[a-zA-Z_0-9@.$]*$/" placeholder="Email">
+                                    type="email" name="username" value="username" required ng-pattern="/^[a-zA-Z_0-9@.$.#.!]*$/" placeholder="Email">
                                 <md-icon class="tckCss" ng-if="username" layout md-svg-src="dist/icons/svg/login/tick_icon.svg" ng-style="{height: '20px', width: '20px'}"></md-icon>
                                 <div ng-messages="loginForm.username.$error">
                                     <div class="wrnTxt" ng-message="required">Please enter valid username.</div>

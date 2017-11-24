@@ -228,6 +228,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LDAPAuthentication {
 	private static  final Logger logger=LoggerFactory.getLogger(LDAPAuthentication.class);
+	
 
 	/**
 	 * @param username
@@ -242,8 +243,19 @@ public class LDAPAuthentication {
 		String ldapSearchBase =props.getProperty("ldap.searchbase");
 		String ldapUsername = props.getProperty("ldap.user");
 		String ldapPassword = props.getProperty("ldap.password");
-		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername.trim(), ldapPassword.trim());
-		String searchFilter =Constants.SEARCH_FILTER_MAIL + email + "))";
+		boolean isOpenLDAP = Boolean.parseBoolean( props.getProperty("ldap.isopenLDAP"));
+		LdapContext ctx=null;
+		
+		String searchFilter =null;
+		if(isOpenLDAP){
+			 ctx = intializeEnvForOpenLDAP(ldapAdServer,ldapUsername, ldapPassword);
+			 searchFilter = "(mail=" + email + ")";
+			 
+		}else{
+			 ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername.trim(), ldapPassword.trim());
+			 searchFilter =Constants.SEARCH_FILTER_MAIL + email + "))";
+		}
+		
 		SearchControls searchControls = new SearchControls();
 		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		NamingEnumeration<SearchResult> results=null;
@@ -260,23 +272,33 @@ public class LDAPAuthentication {
 				Constants.LDAP_GN_NAME,Constants.LDAP_MAIL,Constants.ACCOUNT_NAME
 		};
 		searchControls.setReturningAttributes(attrIDs);
-		searchFilter=Constants.LDAP_MAIL+"="+ldapUsername;
 		try {
 
 			if(searchResult!=null ){
-				empID = searchResult.getAttributes().get(Constants.ACCOUNT_NAME).get().toString();
-				if(empID!=null){
-					boolean isvalid=authenticate(empID,password);
-					if(isvalid){
-						String uname=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
-						users.setEmail(email);
-						users.setUname(uname);
-						users.setId(Integer.parseInt(empID));
-					}else{
-						users.setEmail(Constants.NO_USER);	
-
+				
+				if(!isOpenLDAP){
+					empID = searchResult.getAttributes().get(Constants.ACCOUNT_NAME).get().toString();
+					if(empID!=null){
+						boolean isvalid=authenticate(empID,password);
+						if(isvalid){
+							String uname=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
+							users.setEmail(email);
+							users.setUname(uname);
+							users.setId(Integer.parseInt(empID));
+						}else{
+							users.setEmail(Constants.NO_USER);	
+	
+						}
 					}
+				}else{
+					empID = searchResult.getAttributes().get("uidnumber").get().toString();
+					String uname=searchResult.getAttributes().get(Constants.LDAP_GN_NAME).get().toString();
+					users.setEmail(email);
+					users.setUname(uname);
+					users.setId(Integer.parseInt(empID));
+					
 				}
+					
 			}else{
 				users.setEmail(Constants.NO_USER);	
 			}
@@ -291,6 +313,9 @@ public class LDAPAuthentication {
 		return users;
 
 	}
+
+
+
 
 
 	private static boolean authenticate(String empID, String password) {
@@ -349,6 +374,27 @@ public class LDAPAuthentication {
 		}
 		return ctx;
 	}
+	
+	private static LdapContext intializeEnvForOpenLDAP(String openLDAPserver, String user, String pass) {
+		LdapContext ctx=null;
+		Hashtable<String, Object> env = new Hashtable<String, Object>();
+		env.put(Context.SECURITY_AUTHENTICATION,"simple");
+		if(!user.isEmpty() && !pass.isEmpty())
+		{
+		String principalName="cn="+user;
+		env.put(Context.SECURITY_PRINCIPAL,principalName);
+		env.put(Context.SECURITY_CREDENTIALS,pass);
+		}
+		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+		env.put(Context.PROVIDER_URL,openLDAPserver);
+		
+		try {
+			ctx = new InitialLdapContext(env, null);
+		} catch (NamingException e1) {
+			logger.debug(e1.toString());
+		}
+		return ctx;
+	}
 
 	/**
 	 * @return
@@ -381,6 +427,7 @@ public class LDAPAuthentication {
 		String ldapSearchBase =props.getProperty("ldap.searchbase");
 		String ldapUsername = props.getProperty("ldap.user");
 		String ldapPassword = props.getProperty("ldap.password");
+		
 		LdapContext ctx = intializeEnvForLDAP(ldapAdServer, ldapUsername.trim(), ldapPassword);
 		String searchFilter = Constants.SEARCH_FILTER_ACCOUNT + id + "))";
 		SearchControls searchControls = new SearchControls();
@@ -420,7 +467,7 @@ public class LDAPAuthentication {
 
 	}
 
-		//check for distribution list 
+		//new feature yet to  integrate in UI
 		private boolean CheckDistributionList(String username,String password){
 		String ldapUsername = username.trim();
 		String ldapPassword = password.trim();
@@ -428,7 +475,7 @@ public class LDAPAuthentication {
 		boolean isMember=false;
 		String ldapAdServer = props.getProperty("ldap.server");
 		String ldapSearchBase =props.getProperty("ldap.searchbase");
-		LdapContext ctx = intializeEnvForLDAP(ldapAdServer,ldapUsername,ldapPassword);
+		LdapContext ctx = intializeEnvForLDAP(ldapAdServer,ldapUsername, ldapPassword);
 		String searchFilter = Constants.SEARCH_FILTER_ACCOUNT + ldapUsername + "))";
 		SearchControls searchControls = new SearchControls();
 		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -473,5 +520,10 @@ public class LDAPAuthentication {
 		return isMember;
 
 	}
+		
+		public static void main(String[] a){
+			getEmpId("Malarvizhi.C@cognizant.com","password123");
+			
+		}
 
 }

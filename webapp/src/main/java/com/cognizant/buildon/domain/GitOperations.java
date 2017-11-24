@@ -943,19 +943,27 @@ public class GitOperations {
 		boolean statusflag=false;
 		String podIP = null;
 		int stage_node_inc=0;
+		logger.debug("KubeClient Outside");
 		try(KubernetesClient client = new DefaultKubernetesClient(config)){
-			PodList podList = client.pods().inNamespace(Constants.DEFAULTPOD).list();
+			logger.debug("KubeClient Inside");			
+			logger.debug("KubeClient Insider 1");			
+			//PodList podList = client.pods().inNamespace(Constants.DEFAULTPOD).list();
+			PodList podList = client.pods().inNamespace("default").list();
 			KubernetesHelper.removeEmptyPods(podList);
+			logger.debug("KubeClient Insider 2");
 			for (Pod podname : podList.getItems()) {
+				logger.debug("KubeClient Insider 3");
 				podNameValue=podname.getMetadata().getName().toString();
+				logger.debug("getpodNameValue:"+podNameValue);
 				if(null!= podNameValue && podNameValue.contains(commitid) == true)
 				{	
+					logger.debug("Pod Name Match");
 					statusflag=false;
 					while(!statusflag)
 					{
-						String podStatus = client.pods().inNamespace(Constants.DEFAULTPOD).withName(podNameValue).get().getStatus().getPhase().toString();				
+						String podStatus = client.pods().inNamespace("default").withName(podNameValue).get().getStatus().getPhase().toString();				
 						if (podStatus.equalsIgnoreCase("running")) {
-							podIP = client.pods().inNamespace(Constants.DEFAULTPOD).withName(podNameValue).get().getStatus().getPodIP().toString();
+							podIP = client.pods().inNamespace("default").withName(podNameValue).get().getStatus().getPodIP().toString();
 							statusflag=true;
 						}
 					}

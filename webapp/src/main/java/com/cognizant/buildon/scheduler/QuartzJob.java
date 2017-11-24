@@ -242,8 +242,10 @@ public class QuartzJob  implements Job{
 	 */
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		HashMap<String,String> map=new HashMap<String,String>();
-		String  sql = ("select commitid,logdir,DATE(start_timestamp)  from buildon_reports   where start_timestamp < "
-				+ " (select  {fn TIMESTAMPADD(SQL_TSI_DAY,-15,DATE(CURRENT_TIMESTAMP))} from sysibm.sysdummy1)");
+		
+		//Postgres Query to remove record older than 15 days
+		//select commitid,logdir,DATE(start_timestamp)  from buildon_reports where DATE(start_timestamp) < ( SELECT CURRENT_DATE + INTERVAL '-15 day' )
+		String  sql = ("select commitid,logdir,DATE(start_timestamp)  from buildon_reports where DATE(start_timestamp) < ( SELECT CURRENT_DATE + INTERVAL '-30 day' )");
 		con=createConnection();
 		try(PreparedStatement statement=con.prepareStatement(sql)) {
 			try( ResultSet rs = statement.executeQuery()){
@@ -251,59 +253,66 @@ public class QuartzJob  implements Job{
 					commitid=rs.getString(1);
 					logdir=rs.getString(2);
 					map.put(commitid,logdir);
-					logger.info("commitid :logdir "+commitid+logdir);
+					logger.info("commitid: "+commitid+" logdir: "+logdir);					
 				}
-			}
-			logger.info("Map size:"+map.size());
+			}			
+			
 		} catch (SQLException e) {
 			logger.debug(e.toString());
 		}
 		for(Entry<String,String> e: map.entrySet()){
 			if(null!=e.getValue() && !e.getValue().equals("")){
+				//file=new File(logdir);
+				//delete(file);
+				//deleteReportsRec(e.getKey().toString());
+				logger.info("commitid: "+e.getKey().toString()+" logdir: "+e.getValue().toString());
+				file=new File(e.getValue().toString());
+				delete(file);
 				deleteReportsRec(e.getKey().toString());
-				file=new File(logdir.toString());
-				deleteLogFiles(file);
 			}
 		}
 	}
 
+	
 	/**
 	 * @param file
 	 */
-	private  void deleteLogFiles(File file) {
+	public static void delete(File file){
+		File fileDelete =null;
 		if(file.isDirectory()){
 			if(file.list().length==0){
+
 				file.delete();
 			}else{
 				String files[] = file.list();
 				for (String temp : files) {
-					File fileDelete = new File(file,temp);
-					deleteLogFiles(fileDelete);
+					fileDelete=new File(file, temp);
+					delete(fileDelete);
 				}
 				if(file.list().length==0){
 					file.delete();
-					logger.info("Directory is deleted : "+ file.getAbsolutePath());
+
 				}
 			}
+
 		}else{
 			file.delete();
 		}
-
 	}
 
 	/**
 	 * @param commitid
 	 */
 	private void deleteReportsRec(String commitid) {
-		String sql="delete from reports where commitid=?";
+		String sql="delete from buildon_reports where commitid=?";
 		con=createConnection();
 		try(PreparedStatement statement=con.prepareStatement(sql)) {
 			statement.setString(1,commitid);
 			statement.executeUpdate();
-
+			logger.info("commitid "+commitid+" row has been deleted");			
 		} catch (SQLException e) {
 			logger.debug(e.toString());
-		}
+		}		
 	}
 
 	private  Connection  createConnection(){
