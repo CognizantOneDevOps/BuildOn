@@ -384,8 +384,10 @@ public class LDAPAuthentication {
 		String principalName="cn="+user;
 		env.put(Context.SECURITY_PRINCIPAL,principalName);
 		env.put(Context.SECURITY_CREDENTIALS,pass);
-		}
+		}else{
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+		}
+		
 		env.put(Context.PROVIDER_URL,openLDAPserver);
 		
 		try {
@@ -521,9 +523,6 @@ public class LDAPAuthentication {
 
 	}
 		
-		public static void main(String[] a){
-			getEmpId("Malarvizhi.C@cognizant.com","password123");
-			
-		}
+		
 
 }
