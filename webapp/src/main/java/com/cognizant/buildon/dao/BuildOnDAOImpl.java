@@ -1230,7 +1230,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		ArrayList<String> list=new ArrayList<>();
 		Reports rep=null;
 		String query="select rep1 from Reports  rep1 where rep1.scmuser=:scmuser and  rep1.commitid=:commitid  "
-				+ "  and exists (select rep2 from Reports  rep2  where rep2.jobname = rep1.jobname and rep2.id <> rep1.id ) "
+				+ "  and exists (select rep2 from Reports  rep2  where rep2.jobname = rep1.jobname) "
 				+ "  order by  start_timestamp  desc ";
 		EntityManager em = factory.createEntityManager();
 		Query qry = em.createQuery(query);

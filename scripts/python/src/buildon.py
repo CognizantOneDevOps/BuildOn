@@ -75,7 +75,6 @@ class BuildOn(object):
                 self.webhookcheck = format(data['repository']['git_url'])
                 self.httpurl = format(data['repository']['clone_url'])
                 self.repohttpurl = self.httpurl.replace(".git","")
-                #self.jenkinsfileURL="https://raw.githubusercontent.com/"+self.repo_fullName + "/" + self.tuid + "/" + "webapp/Jenkinsfile"
                 self.jenkinsfileURL="https://raw.githubusercontent.com/"+self.repo_fullName + "/" + self.tuid + "/" + "Jenkinsfile"
 
                 print "Printing Paylaod data...***"
@@ -95,8 +94,8 @@ class BuildOn(object):
         os.environ['repoName'] = self.repo_name
         os.environ['branchName'] = self.tuid
 
-    def derbydbinsert(self):
-	    print "Inside self.derbydbinsert"
+    def dbinsert(self):
+	    print "Inside self.dbinsert"
             now = datetime.datetime.now()
             self.start_timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
             self.start_date = now.strftime("%Y-%m-%d")
@@ -109,8 +108,6 @@ class BuildOn(object):
 	    	con = pg8000.connect(user="postgres", password="postgres")
 	    	cur = con.cursor()
 	    	cur.execute("select webhook from buildon_preferences where email='"+self.scmuser+"' and REPOSITORY='"+self.repo_name+"'")
-            	#resulttemp=subprocess.check_output(['java', '-jar', 'derbyPreferencesHook.jar',self.scmuser,self.repo_name])
-            	#result = resulttemp.strip()
 	    	for row in cur:
 		    result =  row[0]
 	    except Exception as e:
@@ -135,12 +132,7 @@ class BuildOn(object):
             file = open(self.buildpath+"/Jenkinsfile").read().splitlines()
             try:
                 for index, line in enumerate(file):
-                        #if "stage" in line:
 			if "stage ('" in line or "stage('" in line:
-                                #line_temp = line
-                                #start = line_temp.index("'") + len("'")
-                                #end = line_temp.index( "'", start )
-                                #ci_jobname= line_temp[start:end]
 				ci_jobname =line.split("'")[1]
                                 print ci_jobname
 				con = pg8000.connect(user="postgres", password="postgres")
@@ -154,10 +146,9 @@ class BuildOn(object):
                                                 minutes1 = row[0] % 60000
                                                 seconds = int(minutes1 / 1000)
                                                 est_dur = str(minutes) + "Mins " + str(seconds) + "Sec"
-				cur.execute("insert into buildon_reports (BRANCH,COMMITID,JOBNAME,PROJECT,SCMUSER,STARTDATE,START_TIMESTAMP,CI_JOBNAME,STATUS,ESTIMATED_DURATION,TRIGGER_FROM)  values ('"+self.tuid+"','"+self.commitid+"','"+self.uid+"','"+self.repo_name+"','"+self.scmuser+"','"+self.start_date+"','"+self.start_timestamp+"','"+ci_jobname+"','NOTSTARTED','"+est_dur+"','"+trigger_from+"')")
+				cur.execute("insert into buildon_reports (BRANCH,COMMITID,JOBNAME,PROJECT,SCMUSER,STARTDATE,START_TIMESTAMP,CI_JOBNAME,STATUS,ESTIMATED_DURATION,TRIGGER_FROM,LOGDIR)  values ('"+self.tuid+"','"+self.commitid+"','"+self.uid+"','"+self.repo_name+"','"+self.scmuser+"','"+self.start_date+"','"+self.start_timestamp+"','"+ci_jobname+"','NOTSTARTED','"+est_dur+"','"+trigger_from+"','"+self.buildpath+"')")
 				con.commit()
 				con.close()
-				#subprocess.call(['java', '-jar', 'derbyInsert.jar',self.tuid,self.commit_id,self.uid,self.repo_name,self.scmuser,self.start_date,self.start_timestamp,ci_jobname,'NOTSTARTED',trigger_from],stdout=open('/root/buildlog/'+self.commit_id+'/other.log', 'a'),stderr=open('/root/buildlog/'+self.commit_id+'/other.log', 'a'))
             except Exception as e:
 		print 'Insert Error Occurs'
                 print e
@@ -180,12 +171,11 @@ class BuildOn(object):
 	    except Exception as e:
                	print e
             try:
-                #self.replacestring(self.buiildpath + "/Jenkinsfile", "<appndid>", self.uid)
-		##DerbyDB insert function call 
-		hook = self.derbydbinsert()
+		##DB insert function call 
+		hook = self.dbinsert()
                 if ( hook == 0 ):
                     return 0
-                subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+',branchName='+self.tuid+',gitURL='+self.httpurl+',KUBEMASTER='+self.host_ip+',UPLOADPORT='+self.upload_port+'"'], shell=True) #, stdout=open('/root/buildlog/'+self.commit_id+'/other.log', 'a'),stderr=open('/root/buildlog/'+self.commit_id+'/other.log', 'a'))
+                subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+',branchName='+self.tuid+',gitURL='+self.httpurl+',KUBEMASTER='+self.host_ip+',UPLOADPORT='+self.upload_port+'"'], shell=True) 
             except NameError as ne:
 		print ne
                 raise BuildOn(

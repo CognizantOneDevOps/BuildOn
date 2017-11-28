@@ -46,13 +46,6 @@ def upload():
 	if not os.path.exists(uploadPath+commitid):
 		os.makedirs(uploadPath+commitid)
         file.save(os.path.join(uploadPath+commitid, filename))
-	LOGDIR=uploadPath+commitid
-        #resulttemp=subprocess.check_output(['java', '-jar', 'derbyReportsLogUpdate.jar', commitid,LOGDIR])
-	con = pg8000.connect(user="postgres", password="postgres") 
-	cur = con.cursor()
-	cur.execute("UPDATE buildon_reports set LOGDIR='" +LOGDIR+"' WHERE COMMITID ='" +commitid+"'")
-	con.commit()
-	con.close()
     return 'ok'
 
 @app.route('/setup', methods=['POST'])
@@ -65,7 +58,5 @@ def setup():
 	##To forward logs to ElasticSearch. If required enable the below line and copy this script from backup folder
 	#pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/LogsForwarding.py"]) 
 	##To update jenkins job's live status in root.reports table
-	pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/dbupdate.py"]) #,stdout=f, stderr=f)
+	pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/dbupdate.py"]) 
     return "ok"
-
-#app.run(host='0.0.0.0',port=5000, debug='TRUE')
