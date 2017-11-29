@@ -175,7 +175,11 @@ class BuildOn(object):
 		hook = self.dbinsert()
                 if ( hook == 0 ):
                     return 0
-                subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+',branchName='+self.tuid+',gitURL='+self.httpurl+',KUBEMASTER='+self.host_ip+',UPLOADPORT='+self.upload_port+'"'], shell=True) 
+		   ##uncomment the below line for kubernetes version < = 1.7.x. Please note the change in --env
+                   ##subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+',branchName='+self.tuid+',gitURL='+self.httpurl+',KUBEMASTER='+self.host_ip+',UPLOADPORT='+self.upload_port+'"'], shell=True)		
+ 		   ##Below line supports kubernetes v1.8.x. Please note the change in --env
+		   subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+'" --env="branchName='+self.tuid+'" --env="gitURL='+self.httpurl+'" --env="KUBEMASTER='+self.host_ip+'" --env="UPLOADPORT='+self.upload_port+'"'], shell=True) 
+		
             except NameError as ne:
 		print ne
                 raise BuildOn(
