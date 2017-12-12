@@ -28,6 +28,11 @@ class BuildOn(object):
         self.host_ip=config['server']['kubemaster_ip']
         self.upload_port=config['server']['framework_port']
         self.gitlabtoken=config['server']['serviceaccount']
+        self.pghost=config['server']['pghost']
+        self.pgport=config['server']['pgport']
+        self.pgdatabase=config['server']['pgdatabase']
+        self.pguser=config['server']['pguser']
+        self.pgupass=config['server']['pgupass']
         print "Printing Payload Data ......"
         print data
 
@@ -91,8 +96,11 @@ class BuildOn(object):
                 print "jenkisnfileURL..." + self.jenkinsfileURL
 
 	os.environ['commit_id'] = self.commitid
-        os.environ['repoName'] = self.repo_name
-        os.environ['branchName'] = self.tuid
+        os.environ['pghost'] = self.pghost
+        os.environ['pgport'] = self.pgport
+        os.environ['pgdatabase'] = self.pgdatabase
+        os.environ['pguser'] = self.pguser
+        os.environ['pgupass'] = self.pgupass
 
     def dbinsert(self):
 	    print "Inside self.dbinsert"
@@ -105,7 +113,7 @@ class BuildOn(object):
 	    result = ''
             try:
 	    	##Check if WebHook is ON/OFF. If OFF exit the execution.Exit only if commit is from GitLab checkin and Webhook is OFF.
-	    	con = pg8000.connect(user="postgres", password="postgres")
+	    	con = pg8000.connect(host=self.pghost, port=int(self.pgport), user=self.pguser, password=self.pgupass, database=self.pgdatabase)
 	    	cur = con.cursor()
 	    	cur.execute("select webhook from buildon_preferences where email='"+self.scmuser+"' and REPOSITORY='"+self.repo_name+"'")
 	    	for row in cur:
@@ -135,7 +143,7 @@ class BuildOn(object):
 			if "stage ('" in line or "stage('" in line:
 				ci_jobname =line.split("'")[1]
                                 print ci_jobname
-				con = pg8000.connect(user="postgres", password="postgres")
+				con = pg8000.connect(host=self.pghost, port=int(self.pgport), user=self.pguser, password=self.pgupass, database=self.pgdatabase)
 				cur = con.cursor()
 				est_dur = ''
 				cur.execute("select jobname from buildon_reports where STATUS='SUCCESS' and BRANCH='"+self.tuid+"' group by jobname;")
@@ -174,12 +182,8 @@ class BuildOn(object):
 		##DB insert function call 
 		hook = self.dbinsert()
                 if ( hook == 0 ):
-                    return 0
-		##uncomment the below line for kubernetes version < = 1.7.x. Please note the change in --env
-                ##subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+',branchName='+self.tuid+',gitURL='+self.httpurl+',KUBEMASTER='+self.host_ip+',UPLOADPORT='+self.upload_port+'"'], shell=True)		
- 		##Below line supports kubernetes v1.8.x. Please note the change in --env
-		subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+'" --env="branchName='+self.tuid+'" --env="gitURL='+self.httpurl+'" --env="KUBEMASTER='+self.host_ip+'" --env="UPLOADPORT='+self.upload_port+'"'], shell=True) 
-		
+                    return 0                
+                subprocess.Popen(['kubectl run '+ self.uid +' -i --tty --rm --restart=Never --image='+imagename+ ' --env="commitID='+self.uid+'" --env="branchName='+self.tuid+'" --env="gitURL='+self.httpurl+'" --env="KUBEMASTER='+self.host_ip+'" --env="UPLOADPORT='+self.upload_port+'"'], shell=True)
             except NameError as ne:
 		print ne
                 raise BuildOn(

@@ -1275,13 +1275,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	@Override
 	public String getJsonData(String commitid) {
 		logger.info("commitid:"+commitid);
-		String json="0";
+		String json=null;
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitid");
 		query.setParameter("commitid",commitid);
 		List<Service> list = query.getResultList();
 		if(list.isEmpty()){
-			json="0";	
+			json=null;	
 		}else{
 			json=list.get(0).getJson();
 		}
@@ -1295,13 +1295,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 */
 	@Override
 	public  String getPodname(String commitId) {
-		String pod="0";
+		String pod=null;
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitid");
 		query.setParameter("commitid",commitId);
 		List<Service> list = query.getResultList();
 		if(list.isEmpty()){
-			pod="0";	
+			pod=null;	
 		}else{
 			pod=list.get(0).getPodname();
 		}
@@ -1316,7 +1316,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 */
 	@Override
 	public  String getServiceCommitId(String commitId) {
-		String commitidresult="0";
+		String commitidresult=null;
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitId");
 		query.setParameter("commitId", commitId);
@@ -1429,14 +1429,14 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 */
 	@Override
 	public String getReportsStatus(String commitId,String cijobname) {
-		String status="0";
+		String status=null;
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select report from  Reports  report where report.commitid=:commitId  and  report.ci_jobname=:cijobname ");
 		query.setParameter("commitId", commitId);
 		query.setParameter("cijobname",cijobname);
 		List<Reports>  list = query.getResultList();
 		if(list.isEmpty()){
-			status="0";
+			status=null;
 		}else{
 			status=list.get(0).getStatus();
 
@@ -1453,13 +1453,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	@Override
 	public String getReportTriggerData(String commitid) {
 		logger.debug("commitid:"+commitid);		
-		String trigger="0";		
+		String trigger=null;		
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select report from  Reports  report where report.commitid=:commitid");
 		query.setParameter("commitid", commitid);
 		List<Reports>  list = query.getResultList();
 		if(list.isEmpty()){
-			trigger="0";
+			trigger=null;
 		}else{
 			trigger=list.get(0).getTRIGGER_FROM();
 		}

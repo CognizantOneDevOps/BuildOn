@@ -9,13 +9,12 @@ import subprocess
 import pg8000
 
 commit_id = (os.environ['commit_id'])
-repoName = (os.environ['repoName'])
-branchName= (os.environ['branchName'])
-#sys.stdout = open('/home/ubuntu/logs/'+commit_id+'.log', 'a')
-#sys.stdout = open('/root/buildlog/'+commit_id+'/framework.log', 'a')
-print "Inside DerbyUpdate.py"
-print commit_id
-print repoName + branchName
+pghost = (os.environ['pghost'])
+pgport = (os.environ['pgport'])
+pgdatabase = (os.environ['pgdatabase'])
+pguser = (os.environ['pguser'])
+pgupass = (os.environ['pgupass'])
+print "Inside dbupdate.py"
 
 pod_name = ''
 result = os.popen("curl -k -s `(kubectl config view | grep server | cut -f 2- -d \":\" | tr -d \" \")`/api/v1/namespaces/default/pods --header \"Authorization: Bearer `(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')`\"").read()
@@ -58,14 +57,14 @@ for index, line in enumerate(file):
 				if cjob in buildStatusJson["stages"][i]["name"]:
 					if "IN_PROGRESS" in buildStatusJson["stages"][i]["status"]:
 						if 'false' in inprogress_flag:
-							con = pg8000.connect(user="postgres", password="postgres")
+							con = pg8000.connect(host=pghost, port=int(pgport), user=pguser, password=pgupass, database=pgdatabase)
         	                			cur = con.cursor()
 							cur.execute("UPDATE buildon_reports set STATUS='INPROGRESS', DURATION=0 , ENDDATE='"+now.strftime("%Y-%m-%d")+"'"+" WHERE COMMITID =" +"'" +commit_id+"' AND CI_JOBNAME ="+"'" +cjob+"'")
 							con.commit()
 							con.close()
 							inprogress_flag = 'true'
 					else:
-						con = pg8000.connect(user="postgres", password="postgres")
+						con = pg8000.connect(host=pghost, port=int(pgport), user=pguser, password=pgupass, database=pgdatabase)
                                                 cur = con.cursor()
 						if "FAILED" in buildStatusJson["stages"][i]["status"]:
 							cur.execute("UPDATE buildon_reports set STATUS='FAILURE', DURATION='"+str(buildStatusJson["stages"][i]["durationMillis"])+"' , ENDDATE='"+now.strftime("%Y-%m-%d")+"', END_TIMESTAMP='"+now.strftime("%Y-%m-%d %H:%M:%S")+"', CI_JOB_TIMESTAMP='"+time.strftime('%Y-%m-%d %H:%M:%S',  time.gmtime(int(buildStatusJson["stages"][i]["startTimeMillis"])/1000.))+"' WHERE COMMITID =" +"'" +commit_id+"' AND CI_JOBNAME ="+"'" +cjob+"'")

@@ -8,7 +8,6 @@ import sys
 import string
 app = Flask(__name__)
 import time
-import pg8000
 # This is the path to the upload directory
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['log', 'yaml', 'yml', 'json', 'xml', 'txt'])
@@ -60,3 +59,4 @@ def setup():
 	##To update jenkins job's live status in root.reports table
 	pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/dbupdate.py"]) 
     return "ok"
+
