@@ -5,19 +5,24 @@
 			<form name="historicalform"  ng-submit="submitForm()"></form>
 			<div layout="row" style="height: 70px;">
 				<md-input-container class="hits_input_container">									
-				 <md-datepicker ng-model="startDate" md-placeholder="Enter date"  readonly></md-datepicker>
+				 <md-datepicker ng-model="startDate" md-placeholder="Enter date"  md-max-date="endDate" readonly></md-datepicker>
 				 <label style="right:70px;">Start Date</label>		
 				</md-input-container>	
 				<md-input-container class="hits_input_container" style="margin-left:60px;">
 				<label style="right:70px;">End Date</label>				
-				 <md-datepicker ng-model="endDate" md-placeholder="Enter date" ></md-datepicker>
+				 <md-datepicker ng-model="endDate" md-placeholder="Enter date" md-max-date="today" ng-change="checkError(startDate,endDate)"></md-datepicker>
 				</md-input-container>			
 				<md-input-container  class="hits_input_container" style="margin-left:60px; width: 30%"> 
 				<span>Project Lists</span>
 				<md-select ng-model="formData.selectedproject" style="margin-top: -29px;  float: left;  margin-left: 97px; width: 95%;" placeholder="Please select a project from list" class="inputBoxCont">
-					<md-option ng-value="project" ng-repeat="project in projects" ng-click="selectval(project,'selproject')">{{project}}</md-option> 
+				<md-option><em>None</em></md-option>
+				<!--<md-option ng-value="project" ng-repeat="project in projects" ng-click="selectval(project,'selproject')">{{project}}</md-option>-->
+				<md-option ng-value="project" ng-repeat="project in projects">{{project}}</md-option>
 				</md-select> 
 			</md-input-container>			
+			</div>
+			<div layout="row" style="height: 5px;">
+			<font color="red">{{errMessage}}</font>
 			</div>
 			<div layout="row" style="height: 70px;">		
 			<md-card-content class="hits_input_container">						
@@ -27,13 +32,14 @@
 				<md-radio-button flex="15" class="radioBtn" value="all">All</md-radio-button>
 			</md-radio-group>			
 			</md-card-content>
-			<md-input-container  class="hits_input_container" style="margin-left:50px; width: 35%"> 
+			<!-- <md-input-container  class="hits_input_container" style="margin-left:50px; width: 35%"> 
 				<span>Branch</span>
 				<md-select id="brnachselect" ng-model="formData.selectedbranch" style="margin-top: -10px; float: right; margin-right: 98px; width: 60%;" placeholder="Please Select a branch" class="inputBoxCont">
 					<md-option ng-value="branch" ng-repeat="branch in branches track by $index" ng-click="selectval(branch,'selbranch')">{{branch}}</md-option> 
 				</md-select> 
 			</md-input-container>
-			<md-dialog-actions layout-align="end center">
+			 -->
+			 <md-dialog-actions layout-align="end center">
 			<md-button type="submit" class="md-raised md-primary histBtnCss" ng-click="submitForm(startDate,endDate)" >Search</md-button> 
 			</md-dialog-actions>	
 			

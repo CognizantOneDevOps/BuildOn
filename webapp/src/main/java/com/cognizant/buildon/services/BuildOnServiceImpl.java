@@ -260,8 +260,8 @@ public class BuildOnServiceImpl implements BuildOnService {
 	}
 
 	@Override
-	public List<Reports> getresults(Date startdate, Date enddate, String project, String branch,String intiatedBy,String userId) {
-		return buildOnDao.getresults(startdate,enddate,project,branch,intiatedBy,userId);	
+	public List<Reports> getresults(Date startdate, Date enddate, String project, String intiatedBy,String userId) {
+		return buildOnDao.getresults(startdate,enddate,project,intiatedBy,userId);	
 	}
 
 	@Override

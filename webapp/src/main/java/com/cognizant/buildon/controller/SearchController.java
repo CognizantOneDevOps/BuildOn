@@ -289,8 +289,7 @@ public class SearchController extends HttpServlet {
 		List<Reports> list=new ArrayList<>();
 
 		String userId=request.getParameter("userId");
-		String project=request.getParameter("project");
-		String branch=request.getParameter("branch");
+		String project=request.getParameter("project");		
 		String intiatedBy=request.getParameter("intiatedby");
 		String srtdate=request.getParameter("sdate");
 		String enddate=request.getParameter("edate");
@@ -321,14 +320,13 @@ public class SearchController extends HttpServlet {
 		userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
 		if(null!=userId && !(userId.equals(""))){
 			Users userinfo=buildonservice.getEmailForUser(userId);
-			list=buildonservice.getresults(startDate,endDate,project,branch,intiatedBy,userinfo.getEmail());
+			list=buildonservice.getresults(startDate,endDate,project,intiatedBy,userinfo.getEmail());
 			for(Reports report:list){
 				json=new JSONObject();
 				try {
 					json.put("jobname",report.getJobname());
 					json.put("status",report.getStatus());
-					json.put("project", report.getProject());
-					json.put("branch", report.getBranch());
+					json.put("project", report.getProject());					
 					calduration = calculateDuration(calduration, report);
 					json.put("duration",calduration);
 					json.put("commitid", report.getCommitid());

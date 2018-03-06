@@ -231,6 +231,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
@@ -256,6 +257,7 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.FS;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -264,6 +266,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cognizant.buildon.services.BuildOnFactory;
 import com.cognizant.buildon.services.BuildOnService;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
 import io.fabric8.kubernetes.api.KubernetesHelper;
@@ -353,28 +357,45 @@ public class GitOperations {
 	 * @return
 	 */
 	public static ArrayList<String> getBranchDetails(String email,String repo, String type) {
-
+		
 		BuildOnService buildonservice=BuildOnFactory.getInstance();
 		String userId=email.toLowerCase();
 		ArrayList<String> branches=new ArrayList<>();
+		Collection<Ref> refs;
 		List<ScmDetails> scmdetails=buildonservice.getUserScmDetails(userId,type);
 		ScmDetails scmdet=scmdetails.get(0);
 		String url=scmdet.getUrl();
 		int index=url.lastIndexOf('/');
 		String scmurl=url.substring(0,index);
 		scmurl=scmurl+"/"+repo+"."+Constants.GIT;
-		String username=Constants.OAUTH;
-		String pass=scmdet.getOauthtoken();
-		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
-		Collection<Ref> refs;
+		logger.debug("branches type"+type);
+		if(null!= type && (type.equals("github") || type.equals("gitlab"))){			
+			String username=Constants.OAUTH;
+			String pass=scmdet.getOauthtoken();
+			CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);		
+			try {
+				logger.debug("before list");
+				refs = Git.lsRemoteRepository().setTransportConfigCallback(getTransportConfigCallback())
+						.setUploadPack(Constants.GIT_UPLOAD)					
+						.setHeads(true)
+						.setTags(true)
+						.setRemote(scmurl)
+						.setCredentialsProvider(credentialsProvider)
+						.call();
+				for (Ref ref : refs) {
+					String repobranch= ref.getName().substring( ref.getName().lastIndexOf("/") + 1);
+					branches.add(repobranch);
+				}
+			} catch (GitAPIException e) {
+				logger.debug(e.toString());
+			}
+		
+		}
+		else if(null!= type && type.equals("bitbucket")){		
 		try {
 			logger.debug("before list");
-			refs = Git.lsRemoteRepository().setTransportConfigCallback(getTransportConfigCallback())
-					.setUploadPack(Constants.GIT_UPLOAD)					
-					.setHeads(true)
-					.setTags(true)
-					.setRemote(scmurl)
-					.setCredentialsProvider(credentialsProvider)
+			refs = Git.lsRemoteRepository().setTransportConfigCallback(getBBTransportConfigCallback())					
+					.setRemote(scmurl)				
 					.call();
 			for (Ref ref : refs) {
 				String repobranch= ref.getName().substring( ref.getName().lastIndexOf("/") + 1);
@@ -382,14 +403,12 @@ public class GitOperations {
 			}
 		} catch (GitAPIException e) {
 			logger.debug(e.toString());
-		} 
-
-
-
+		}
+		}
 		return branches;
 
 	}
-
+	
 	/**
 	 * @return
 	 */
@@ -399,6 +418,33 @@ public class GitOperations {
 			protected void configure(OpenSshConfig.Host host, Session session) {
 				// Do nothing  override method.
 			} 
+		}; 
+		return new TransportConfigCallback() { 
+			public void configure(Transport transport) { 
+				if (transport instanceof TransportHttp) return; 
+				SshTransport sshTransport = (SshTransport) transport; 
+				sshTransport.setSshSessionFactory(sshSessionFactory); 
+			} 
+		}; 
+	} 
+
+	/**
+	 * @return
+	 */
+	public static TransportConfigCallback getBBTransportConfigCallback() {
+		final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() { 
+			@Override 
+			protected void configure(OpenSshConfig.Host host, Session session) {
+				// Do nothing  override method.
+				//session.setPassword( "password" );
+				//session.setConfig("StrictHostKeyChecking", "no");
+			} 
+			@Override
+			protected JSch createDefaultJSch(FS fs ) throws JSchException {
+			  JSch defaultJSch = super.createDefaultJSch( fs );
+			  defaultJSch.addIdentity(Constants.BITBUCKET_PRIVATE_KEY);
+			  return defaultJSch;
+			}
 		}; 
 		return new TransportConfigCallback() { 
 			public void configure(Transport transport) { 
@@ -479,17 +525,29 @@ public class GitOperations {
 		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,password);                               
 		Collection<Ref> refs = null;
 		try {
-			refs = Git.lsRemoteRepository()
-					.setTransportConfigCallback(getTransportConfigCallback())
-					.setUploadPack(Constants.GIT_UPLOAD)                                                                   
-					.setHeads(true)
-					.setTags(true)
+			if(url != null && url.contains("ssh://")) {		 //bitbucket	
+				refs = Git.lsRemoteRepository()
+					.setTransportConfigCallback(getBBTransportConfigCallback())				
 					.setRemote(url)
-					.setCredentialsProvider(credentialsProvider)
 					.call();
 			for (Ref ref : refs) {
 				isSuccess =true;
 			} 
+			}
+			else if(url != null && (url.contains("http://") || url.contains("https://"))) { //gitlab or github
+				refs = Git.lsRemoteRepository()
+						.setTransportConfigCallback(getTransportConfigCallback())
+						.setUploadPack(Constants.GIT_UPLOAD)                                                                   
+						.setHeads(true)
+						.setTags(true)
+						.setRemote(url)
+						.setCredentialsProvider(credentialsProvider)
+						.call();
+				for (Ref ref : refs) {
+					isSuccess =true;
+				} 
+			}
+				
 
 		} catch (InvalidRemoteException e) {
 			logger.debug(e.toString());
@@ -647,21 +705,27 @@ public class GitOperations {
 		String url = config.getString("remote", "origin", "url");
 		logger.debug(url);
 		String[] urls = url.split("/", -1);
-		String user=urls[urls.length-2];
-		String full_name=user+"/"+repo;
+		
 		String id=RandomStringUtils.randomAlphanumeric(40);
 		Ref headref = repository.getRef(branch);
 		String ref=headref.getName();
-		String namespace=userId.toLowerCase(); 
+		String namespace=userId.toLowerCase();
+		
 		JSONObject jsonobject=new JSONObject();
 		JSONObject commitobject=new JSONObject();
+		JSONObject commitobjectappend=new JSONObject();
 		JSONArray commitarray=new JSONArray();
+		JSONObject repoobject=new JSONObject();		
+		JSONArray repoarray=new JSONArray();	
+		JSONObject projectkeyappend=new JSONObject();	
 		JSONObject jsonrepo=new JSONObject();
 		JSONObject jsonproject=new JSONObject(); 
 		JSONObject authorobject=new JSONObject();
 
 		if( null!= type && type.equals("gitlab")){
 			try {
+				String user=urls[urls.length-2];
+				String full_name=user+"/"+repo;
 				commitobject.put("id",id.toLowerCase());
 				authorobject.put("email",userId.toLowerCase());
 				commitobject.put("author",authorobject);
@@ -683,6 +747,8 @@ public class GitOperations {
 
 		}else if(null!= type && type.equals("github")){
 			try {
+				String user=urls[urls.length-2];
+				String full_name=user+"/"+repo;
 				JSONObject headcommit=new JSONObject();
 				commitobject.put("id",id.toLowerCase());
 				authorobject.put("email",userId.toLowerCase());
@@ -699,6 +765,28 @@ public class GitOperations {
 			} catch (JSONException e) {
 				logger.debug(e.toString());
 			}
+		}else if(null!= type && type.equals("bitbucket")){
+				try {
+					String projectkey=urls[urls.length-2];
+					JSONObject eventKey=new JSONObject();
+					commitobject.put("toHash",id.toLowerCase());
+					authorobject.put("emailAddress",userId.toLowerCase());				
+					commitobjectappend.put("id",ref);
+					commitobject.put("ref",commitobjectappend);
+					commitarray.put(commitobject);
+					repoobject.put("name",repo);
+					repoobject.put("scmId","");	//FRAMEWORK will send this value as git. UI should send empty to differentiate the trigger_from				 
+					projectkeyappend.put("key",projectkey);
+					repoobject.put("project",projectkeyappend);					
+					jsonobject.put("changes", commitarray);
+					jsonobject.put("actor", authorobject);
+					jsonobject.put("repository", repoobject);				
+					jsonobject.put("eventKey", Constants.EVENTKEY);
+					
+					 
+				} catch (JSONException e) {
+					logger.debug(e.toString());
+				}
 		}
 		logger.debug(jsonobject.toString());
 		Properties props = readPropertymethod();
@@ -763,9 +851,7 @@ public class GitOperations {
 		int index=url.lastIndexOf('/');
 		String scmurl=url.substring(0,index);
 		scmurl=scmurl+"/"+repo+".git";
-		String username=Constants.OAUTH;
-		String pass=scmdet.getOauthtoken();
-		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
+		
 		File localPath =null;
 		try {
 			localPath = File.createTempFile("TestGitRepository", "");
@@ -773,17 +859,31 @@ public class GitOperations {
 			if(!localPath.delete()) {
 				throw new IOException("Could not delete temporary file " + localPath);
 			}
-			try {
-				Git.cloneRepository() 
+			
+			if(null!= type && (type.equals("github") || type.equals("gitlab"))){				
+				String username=Constants.OAUTH;
+				String pass=scmdet.getOauthtoken();
+				CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
+				Git.cloneRepository().setTransportConfigCallback(getTransportConfigCallback()) 
 				.setURI(scmurl)
 				.setBranch(branch)
 				.setCredentialsProvider(credentialsProvider)
 				.setDirectory(localPath)
-				.call();
-			} catch (GitAPIException e) {
+				.call();			
+			}
+			else if(null!= type && type.equals("bitbucket")){
+				Git.cloneRepository().setTransportConfigCallback(getBBTransportConfigCallback())
+				.setURI(scmurl)
+				.setBranch(branch)				
+				.setDirectory(localPath)
+				.call();	
+				
+			}
+		}
+			catch (GitAPIException e) {
 				logger.debug(e.toString());
 			}
-		} catch (IOException e) {
+		catch (IOException e) {
 			logger.debug(e.toString());
 		}
 		return localPath;
@@ -1213,45 +1313,7 @@ public class GitOperations {
 		}
 		return statusupdate;
 	}
-
-	/**
-	 * @param email
-	 * @param repo
-	 * @return
-	 */
-	public static ArrayList<String> gethistoricalBranch(String email, String repo) {
-		BuildOnService buildonservice=BuildOnFactory.getInstance();
-		String userId=email.toLowerCase();
-		ArrayList<String> branches=new ArrayList<>();
-		String repobranch=null;
-		List<ScmDetails> scmdetails=buildonservice.getHistoricalURL(userId,repo);
-		ScmDetails scmdet=scmdetails.get(0);
-		String url=scmdet.getUrl();
-		int index=url.lastIndexOf('/');
-		String scmurl=url.substring(0,index);
-		scmurl=scmurl+"/"+repo+"."+Constants.GIT;
-		String username=Constants.OAUTH;
-		String pass=scmdet.getOauthtoken();
-		CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username,pass);
-		Collection<Ref> refs;
-		try {
-			refs = Git.lsRemoteRepository().setTransportConfigCallback(getTransportConfigCallback())
-					.setUploadPack(Constants.GIT_UPLOAD)					
-					.setHeads(true)
-					.setTags(true)
-					.setRemote(scmurl)
-					.setCredentialsProvider(credentialsProvider)
-					.call();
-			for (Ref ref : refs) {
-				repobranch = ref.getName().substring( ref.getName().lastIndexOf("/") + 1);
-				branches.add(repobranch);
-			}
-			return branches;
-		} catch (GitAPIException e) {
-			logger.debug(e.toString());
-		} 
-		return null;
-	}
+	
 
 
 }

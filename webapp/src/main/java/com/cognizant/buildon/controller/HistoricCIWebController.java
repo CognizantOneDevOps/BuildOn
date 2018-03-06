@@ -257,33 +257,8 @@ public class HistoricCIWebController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		BuildOnService buildonservice=BuildOnFactory.getInstance();
-	
-		String userid=request.getParameter("userId");
-		String repo=request.getParameter("repo");
-		String json =null;
-		Cookie[] cookie =request.getCookies();
-		String globalCookie=null;
-		if(cookie!=null ){
-			for (Cookie cookies : cookie) {
-				if (cookies.getName().equals("user")) {
-				globalCookie= cookies.getValue();
-				}
-			}
-		}
-		String userId=buildonservice.getCookiesDecrytpedvalue(globalCookie);
-		if(null!=userId && !(userId.equals(""))){
-		Users userinfo=buildonservice.getEmailForUser(userId);
-		ArrayList<String> listbranch=GitOperations.gethistoricalBranch(userinfo.getEmail(),repo);
-		json = new Gson().toJson(listbranch);
-		response.getWriter().write(json);
-		}else{
-			buildonservice.deleteCookies(response, cookie);
-			 json=Constants.INVALID;
-		response.getWriter().write(json);	
-		}
 		
-	}
+		}
 	
 	
 

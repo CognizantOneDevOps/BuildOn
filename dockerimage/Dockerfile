@@ -5,13 +5,13 @@ MAINTAINER BuildOnTeam
 VOLUME /var/jenkins_home
 
 # Update & Install misc tools
-RUN apt-get update
-RUN apt-get install -y wget curl zip tree && apt-get install -y software-properties-common
+RUN apt-get update && apt-get install -y wget curl zip tree && apt-get install -y software-properties-common
 
 # DEBUG Tools
 RUN apt-get install -y vim elinks
+
 # Install a basic SSH server
-RUN apt-get install -y openssh-server
+RUN apt-get install -y openssh-server openssh-client
 RUN sed -i 's|session required pam_loginuid.so|session optional pam_loginuid.so|g' /etc/pam.d/sshd
 RUN mkdir -p /var/run/sshd
 
@@ -23,20 +23,8 @@ RUN  chmod +x /bin/tini  && echo "$TINI_SHA /bin/tini"
 # GIT
 #####
 RUN apt-get install -y git
-
-# JAVA
-############
-RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
-
-# Define JAVA_HOME
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-
+#JAVA
+RUN apt-get install -y openjdk-8-jdk
 # MAVEN
 #######
 ENV MAVEN_VERSION 3.3.9
@@ -53,7 +41,7 @@ RUN rm -rf /usr/share/maven/conf/settings.xml
 COPY settings.xml /usr/share/maven/conf/settings.xml
 
 ########################################################### JENKINS  ###########################################################
-ENV JENKINS_VERSION 2.60.1
+ENV JENKINS_VERSION 2.60.3
 ##########################
 RUN curl -fsSL http://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war -o /opt/jenkins.war
 RUN chmod 644 /opt/jenkins.war
@@ -90,6 +78,7 @@ COPY install-plugins.sh /usr/local/bin/install-plugins.sh
 COPY jenkins-support /usr/local/bin/jenkins-support
 COPY plugins.txt /usr/local/bin/plugins.txt
 RUN chmod +x /usr/local/bin/install-plugins.sh
+
 
 # Tini as the entry point to manage zombie processes
 ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]

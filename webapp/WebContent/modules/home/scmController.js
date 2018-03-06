@@ -420,6 +420,7 @@ angular.module('Home')
 				$scope.saved=false;
 				$scope.num=0;
 				$scope.num = index;
+				$scope.msgSuccess=false;
 				console.log("$scope.rows[index].setDefault:"+$scope.rows[index].setDefault +"id :"+$scope.rows[index].id+"num:"+$scope.num);
 
 				var data = $.param({

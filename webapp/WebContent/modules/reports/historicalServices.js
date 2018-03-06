@@ -267,14 +267,13 @@ angular.module('Historical')
 
 			};
 			
-			service.getSearchresult = function (userId,project,branch,intiatedby,sdate,edate,callback) {
+			service.getSearchresult = function (userId,project,intiatedby,sdate,edate,callback) {
 				var response =$http({
 					url : 'SearchController',
 					method: "POST",
 					params: {
 						"userId":userId,
-						"project":project,
-						"branch":branch,
+						"project":project,					
 						"intiatedby":intiatedby,
 						"sdate":sdate,
 						"edate":edate

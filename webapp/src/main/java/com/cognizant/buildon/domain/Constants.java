@@ -277,6 +277,10 @@ public interface Constants {
 	String JOBNAME = "jobname";
 
 	String GIT = "git";
+	
+	String BITBUCKET_PRIVATE_KEY = "~/.ssh/id_rsa";
+	
+	String EVENTKEY = "repo:refs_changed";
 
 	String LDAP_FILTERS_NAME = "objectClass=user";
 

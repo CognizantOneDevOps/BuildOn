@@ -49,17 +49,19 @@
 			ng-show="scmSaveprogress == 'load' &&  num  == $index"></md-progress-circular>
 		<div layout="row" style="display: -webkit-inline-box; width: 50%;">
 			<md-input-container class="md-block gitInputcontainer">
-			<label class="labelCss">OAuth Token </label> <input type="password"
-				ng-model="r.oauthtoken" required md-no-asterisk style="width: 90%"
-				class="inputBoxCont scminputContTextCss"
-				placeholder="Please input OAuth Token"> </md-input-container>
+			<div ng-if="selection.value == 'github' || selection.value == 'gitlab'">
+				<label class="labelCss">OAuth Token </label> <input type="password"
+					ng-model="r.oauthtoken" required md-no-asterisk style="width: 90%"
+					class="inputBoxCont scminputContTextCss"
+					placeholder="Please input OAuth Token">
+			</div>
+			</md-input-container>
 
 			<md-input-container class="md-block gitInputcontainer">
 			<!--  <span ng-show="!password.length"><label class="labelCss">Password</label></span>
 		            <input type="password" ng-model="r.password"  required  md-no-asterisk style="width:90%" class="inputBoxCont scminputContTextCss" placeholder="Please input Password">
 		            --> </md-input-container>
-
-			<md-dialog-actions layout="row" class="" layout-align="center center"
+	<md-dialog-actions layout="row" class="" layout-align="center center"
 				style="margin-right:76px;"> <md-button
 				class="md-raised md-primary gitBtn"
 				ng-click="testConnection($index)">Test Connection</md-button> <md-button
@@ -86,7 +88,7 @@
 		</section>
 		<!-- </md-card-content> --> </md-card>
 		<!-- </md-list-item> -->
-		
+
 	</form>
 	</md-list>
 

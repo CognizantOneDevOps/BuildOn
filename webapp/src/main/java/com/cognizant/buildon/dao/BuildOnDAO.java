@@ -235,7 +235,7 @@ public interface BuildOnDAO {
 	 * @param userId
 	 * @return
 	 */
-	public List<Reports> getresults(Date startdate,Date enddate,String project,String branch,String intiatedBy,String userId);
+	public List<Reports> getresults(Date startdate,Date enddate,String project,String intiatedBy,String userId);
 
 
 	/**

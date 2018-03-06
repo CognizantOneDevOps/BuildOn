@@ -210,7 +210,8 @@ angular.module('Historical')
     function ($scope,$location, NgTableParams,HistoricalService,$rootScope,$mdDateLocale,$filter,$timeout,$interval) {
     	
     	$scope.startDate = new Date();
-    	 $scope.endDate = new Date();
+    	$scope.endDate = new Date();
+	$scope.today = new Date();
 
     	$scope.selection = { value: 'self'};
     	$rootScope.intiatedBy='self';
@@ -221,34 +222,20 @@ angular.module('Historical')
 			  $scope.projects=  $scope.details.projectlist;
     	});
     	
-
-		$scope.selectval = function(item,selected) {
-			if(selected =='selbranch'){
-				$rootScope.histselectedbranch=item;
-			}else if(selected =='selproject'){
-				$rootScope.histselectedproject=item;
-				$scope.isLoading = true;
-				console.log($rootScope.scmUser +":"+ $rootScope.histselectedproject);
-				HistoricalService.getBranchDetails($rootScope.scmUser,$rootScope.histselectedproject, function(response) {
-					$scope.branches=response.data;
-					console.log($scope.branches);
-					if($scope.branches !='invalid'){
-						$scope.isLoading = false;
-					}else{
-						
-						$location.path('/login');
-						
-					}
-					
-
-				});
-				
-				
-			}
-		};
 		$scope.newValue = function(selectedVal) {
 			$rootScope.intiatedBy=selectedVal;	
 		}
+
+ $scope.checkError = function(startDate,endDate) {
+        $scope.errMessage = '';
+        var curDate = new Date();
+        
+        if(new Date(startDate) > new Date(endDate)){
+          $scope.errMessage = '***End Date should be greater than Start date***';
+          return false;
+        }
+    };
+
      	$scope.submitForm = function(sdate,edate) {
      		var srtdate=sdate;
      		var enddate=edate;
@@ -257,28 +244,37 @@ angular.module('Historical')
 			$scope.selproj='';
 			$scope.selproj=$rootScope.histselectedproject;
 			if($rootScope.histselectedproject ==null ||$rootScope.histselectedproject ==' ' ||$rootScope.histselectedproject =='undefined'){
-				$rootScope.histselectedproject="null";
-			}
-			if($rootScope.histselectedbranch ==null ||$rootScope.histselectedbranch ==' ' ||$rootScope.histselectedbranch =='undefined'){
-				$rootScope.histselectedbranch="null";
-			}
-			console.log($rootScope.histselectedproject+"..." +$rootScope.histselectedbranch);
-			HistoricalService.getSearchresult($rootScope.scmUser,$rootScope.histselectedproject,$rootScope.histselectedbranch,$rootScope.intiatedBy,
+				$rootScope.histselectedproject=null;
+			}			
+			console.log($rootScope.histselectedproject+"..." );
+			HistoricalService.getSearchresult($rootScope.scmUser,$rootScope.histselectedproject,$rootScope.intiatedBy,
 				  newstartDate,newendDate,function(response) {
 				  $scope.details=response.data;
 				  if( $scope.details.length >0){
 					  $scope.tbshow=true;
+					  $scope.selproj='';
 				  }else{
 					  $scope.tbshow=false;
 				  }
 				var dataset =$scope.details
-				$scope.tableParams = new NgTableParams({
+			/*	$scope.tableParams = new NgTableParams({
 		 			count: 5
 		 		}, {
 		 			data: dataset
-		 		}); 
-				$rootScope.histselectedproject='';
-				$rootScope.histselectedbranch='';
+		 		}); */				
+				
+				$scope.tableParams = new NgTableParams({				
+					page: 1,
+					count: 5				
+				}, 
+				{ 
+					counts: [], // hide page counts control
+					total: 1,  // value less than count hide pagination				
+					data: dataset
+				}); 
+				
+				//$rootScope.histselectedproject='';
+				//$rootScope.histselectedbranch='';
 				
 				  
 	     	});
