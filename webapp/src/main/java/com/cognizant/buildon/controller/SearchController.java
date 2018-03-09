@@ -326,7 +326,8 @@ public class SearchController extends HttpServlet {
 				try {
 					json.put("jobname",report.getJobname());
 					json.put("status",report.getStatus());
-					json.put("project", report.getProject());					
+					json.put("project", report.getProject());
+					json.put("branch", report.getBranch());
 					calduration = calculateDuration(calduration, report);
 					json.put("duration",calduration);
 					json.put("commitid", report.getCommitid());
