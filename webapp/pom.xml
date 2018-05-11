@@ -204,7 +204,7 @@
                     		     <groupId>com.mchange</groupId>
                        		     <artifactId>c3p0</artifactId>
                      		</exclusion>
-               			 <exclusions>
+               			 </exclusions>
 		</dependency>
 	<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 	<dependency>
