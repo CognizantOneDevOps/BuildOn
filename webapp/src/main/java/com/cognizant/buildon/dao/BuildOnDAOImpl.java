@@ -1,206 +1,19 @@
 /*******************************************************************************
- * 								Apache License
- *                            Version 2.0, January 2004
- *                         http://www.apache.org/licenses/
- *  
- *    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
- *  
- *    1. Definitions.
- *  
- *       "License" shall mean the terms and conditions for use, reproduction,
- *       and distribution as defined by Sections 1 through 9 of this document.
- *  
- *       "Licensor" shall mean the copyright owner or entity authorized by
- *       the copyright owner that is granting the License.
- *  
- *       "Legal Entity" shall mean the union of the acting entity and all
- *       other entities that control, are controlled by, or are under common
- *       control with that entity. For the purposes of this definition,
- *       "control" means (i) the power, direct or indirect, to cause the
- *       direction or management of such entity, whether by contract or
- *       otherwise, or (ii) ownership of fifty percent (50%) or more of the
- *       outstanding shares, or (iii) beneficial ownership of such entity.
- *  
- *       "You" (or "Your") shall mean an individual or Legal Entity
- *       exercising permissions granted by this License.
- *  
- *       "Source" form shall mean the preferred form for making modifications,
- *       including but not limited to software source code, documentation
- *       source, and configuration files.
- *  
- *       "Object" form shall mean any form resulting from mechanical
- *       transformation or translation of a Source form, including but
- *       not limited to compiled object code, generated documentation,
- *       and conversions to other media types.
- *  
- *       "Work" shall mean the work of authorship, whether in Source or
- *       Object form, made available under the License, as indicated by a
- *       copyright notice that is included in or attached to the work
- *       (an example is provided in the Appendix below).
- *  
- *       "Derivative Works" shall mean any work, whether in Source or Object
- *       form, that is based on (or derived from) the Work and for which the
- *       editorial revisions, annotations, elaborations, or other modifications
- *       represent, as a whole, an original work of authorship. For the purposes
- *       of this License, Derivative Works shall not include works that remain
- *       separable from, or merely link (or bind by name) to the interfaces of,
- *       the Work and Derivative Works thereof.
- *  
- *       "Contribution" shall mean any work of authorship, including
- *       the original version of the Work and any modifications or additions
- *       to that Work or Derivative Works thereof, that is intentionally
- *       submitted to Licensor for inclusion in the Work by the copyright owner
- *       or by an individual or Legal Entity authorized to submit on behalf of
- *       the copyright owner. For the purposes of this definition, "submitted"
- *       means any form of electronic, verbal, or written communication sent
- *       to the Licensor or its representatives, including but not limited to
- *       communication on electronic mailing lists, source code control systems,
- *       and issue tracking systems that are managed by, or on behalf of, the
- *       Licensor for the purpose of discussing and improving the Work, but
- *       excluding communication that is conspicuously marked or otherwise
- *       designated in writing by the copyright owner as "Not a Contribution."
- *  
- *       "Contributor" shall mean Licensor and any individual or Legal Entity
- *       on behalf of whom a Contribution has been received by Licensor and
- *       subsequently incorporated within the Work.
- *  
- *    2. Grant of Copyright License. Subject to the terms and conditions of
- *       this License, each Contributor hereby grants to You a perpetual,
- *       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
- *       copyright license to reproduce, prepare Derivative Works of,
- *       publicly display, publicly perform, sublicense, and distribute the
- *       Work and such Derivative Works in Source or Object form.
- *  
- *    3. Grant of Patent License. Subject to the terms and conditions of
- *       this License, each Contributor hereby grants to You a perpetual,
- *       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
- *       (except as stated in this section) patent license to make, have made,
- *       use, offer to sell, sell, import, and otherwise transfer the Work,
- *       where such license applies only to those patent claims licensable
- *       by such Contributor that are necessarily infringed by their
- *       Contribution(s) alone or by combination of their Contribution(s)
- *       with the Work to which such Contribution(s) was submitted. If You
- *       institute patent litigation against any entity (including a
- *       cross-claim or counterclaim in a lawsuit) alleging that the Work
- *       or a Contribution incorporated within the Work constitutes direct
- *       or contributory patent infringement, then any patent licenses
- *       granted to You under this License for that Work shall terminate
- *       as of the date such litigation is filed.
- *  
- *    4. Redistribution. You may reproduce and distribute copies of the
- *       Work or Derivative Works thereof in any medium, with or without
- *       modifications, and in Source or Object form, provided that You
- *       meet the following conditions:
- *  
- *       (a) You must give any other recipients of the Work or
- *           Derivative Works a copy of this License; and
- *  
- *       (b) You must cause any modified files to carry prominent notices
- *           stating that You changed the files; and
- *  
- *       (c) You must retain, in the Source form of any Derivative Works
- *           that You distribute, all copyright, patent, trademark, and
- *           attribution notices from the Source form of the Work,
- *           excluding those notices that do not pertain to any part of
- *           the Derivative Works; and
- *  
- *       (d) If the Work includes a "NOTICE" text file as part of its
- *           distribution, then any Derivative Works that You distribute must
- *           include a readable copy of the attribution notices contained
- *           within such NOTICE file, excluding those notices that do not
- *           pertain to any part of the Derivative Works, in at least one
- *           of the following places: within a NOTICE text file distributed
- *           as part of the Derivative Works; within the Source form or
- *           documentation, if provided along with the Derivative Works; or,
- *           within a display generated by the Derivative Works, if and
- *           wherever such third-party notices normally appear. The contents
- *           of the NOTICE file are for informational purposes only and
- *           do not modify the License. You may add Your own attribution
- *           notices within Derivative Works that You distribute, alongside
- *           or as an addendum to the NOTICE text from the Work, provided
- *           that such additional attribution notices cannot be construed
- *           as modifying the License.
- *  
- *       You may add Your own copyright statement to Your modifications and
- *       may provide additional or different license terms and conditions
- *       for use, reproduction, or distribution of Your modifications, or
- *       for any such Derivative Works as a whole, provided Your use,
- *       reproduction, and distribution of the Work otherwise complies with
- *       the conditions stated in this License.
- *  
- *    5. Submission of Contributions. Unless You explicitly state otherwise,
- *       any Contribution intentionally submitted for inclusion in the Work
- *       by You to the Licensor shall be under the terms and conditions of
- *       this License, without any additional terms or conditions.
- *       Notwithstanding the above, nothing herein shall supersede or modify
- *       the terms of any separate license agreement you may have executed
- *       with Licensor regarding such Contributions.
- *  
- *    6. Trademarks. This License does not grant permission to use the trade
- *       names, trademarks, service marks, or product names of the Licensor,
- *       except as required for reasonable and customary use in describing the
- *       origin of the Work and reproducing the content of the NOTICE file.
- *  
- *    7. Disclaimer of Warranty. Unless required by applicable law or
- *       agreed to in writing, Licensor provides the Work (and each
- *       Contributor provides its Contributions) on an "AS IS" BASIS,
- *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- *       implied, including, without limitation, any warranties or conditions
- *       of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
- *       PARTICULAR PURPOSE. You are solely responsible for determining the
- *       appropriateness of using or redistributing the Work and assume any
- *       risks associated with Your exercise of permissions under this License.
- *  
- *    8. Limitation of Liability. In no event and under no legal theory,
- *       whether in tort (including negligence), contract, or otherwise,
- *       unless required by applicable law (such as deliberate and grossly
- *       negligent acts) or agreed to in writing, shall any Contributor be
- *       liable to You for damages, including any direct, indirect, special,
- *       incidental, or consequential damages of any character arising as a
- *       result of this License or out of the use or inability to use the
- *       Work (including but not limited to damages for loss of goodwill,
- *       work stoppage, computer failure or malfunction, or any and all
- *       other commercial damages or losses), even if such Contributor
- *       has been advised of the possibility of such damages.
- *  
- *    9. Accepting Warranty or Additional Liability. While redistributing
- *       the Work or Derivative Works thereof, You may choose to offer,
- *       and charge a fee for, acceptance of support, warranty, indemnity,
- *       or other liability obligations and/or rights consistent with this
- *       License. However, in accepting such obligations, You may act only
- *       on Your own behalf and on Your sole responsibility, not on behalf
- *       of any other Contributor, and only if You agree to indemnify,
- *       defend, and hold each Contributor harmless for any liability
- *       incurred by, or claims asserted against, such Contributor by reason
- *       of your accepting any such warranty or additional liability.
- *  
- *    END OF TERMS AND CONDITIONS
- *  
- *    APPENDIX: How to apply the Apache License to your work.
- *  
- *       To apply the Apache License to your work, attach the following
- *       boilerplate notice, with the fields enclosed by brackets "[]"
- *       replaced with your own identifying information. (Don't include
- *       the brackets!)  The text should be enclosed in the appropriate
- *       comment syntax for the file format. We also recommend that a
- *       file or class name and description of purpose be included on the
- *       same "printed page" as the copyright notice for easier
- *       identification within third-party archives.
- *  
- *    Copyright [yyyy] [name of copyright owner]
- *  
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *  
- *        http://www.apache.org/licenses/LICENSE-2.0
- *  
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- *******************************************************************************/
+* Copyright 2018 Cognizant Technology Solutions
+*  
+*  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+*  use this file except in compliance with the License.  You may obtain a copy
+*  of the License at
+*  
+*    http://www.apache.org/licenses/LICENSE-2.0
+*  
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+*  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+*  License for the specific language governing permissions and limitations under
+*  the License.
+ ******************************************************************************/
+
 package com.cognizant.buildon.dao;
 
 import java.io.FileNotFoundException;
@@ -289,35 +102,33 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 
 
 	/* (non-Javadoc)
-	 * @see com.dao.BuildOnDAO#getresults(java.util.Date, java.util.Date, java.lang.String, java.lang.String, java.lang.String)
+	 * @see com.dao.BuildOnDAO#getresults(java.util.Date, java.util.Date, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public List<Reports> getresults(Date startdate, Date enddate, String project, String intiatedBy,String email) {
+	public List<Reports> getresults(Date startdate, Date enddate, String project, String branch,String intiatedBy,String email) {
 		List<Reports> reports =new ArrayList<>();
 		String commitidChk="";
 		String userId=email.toLowerCase();
 		ArrayList<String> list=new ArrayList<>();
-		String sql=null;
-		logger.debug("project"+project);
 		if(intiatedBy.equalsIgnoreCase("self")){
-			logger.debug("project if"+project);		
-			if(null!=project && !(project.equals("")))
-			{
-			logger.debug("project if"+project);
-			sql=" (select   JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,SUM(DURATION) as DURATION,TRIGGER_FROM,start_timestamp,SCMUSER  from buildon_reports  "
-					+ " where  SCMUSER='"+userId+"'   and ((startDate >='"+new java.sql.Date(startdate.getTime())+"' and startDate <='"+new java.sql.Date(enddate.getTime())
-					+"')  or endDate='"+new java.sql.Date(enddate.getTime())+"')  and  PROJECT='"+project
-					+ "' group by JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,start_timestamp,SCMUSER ) order by start_timestamp,COMMITID  desc";
-			}
-			else
-			{
-				logger.debug("project else"+project);
-				sql=" (select JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,SUM(DURATION) as DURATION,TRIGGER_FROM,start_timestamp,SCMUSER  from buildon_reports  "
-						+ " where  SCMUSER='"+userId+"'   and ((startDate >='"+new java.sql.Date(startdate.getTime())+"' and startDate <='"+new java.sql.Date(enddate.getTime())
-						+"')  or endDate='"+new java.sql.Date(enddate.getTime())
-						+ "') group by JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,start_timestamp,SCMUSER ) order by start_timestamp,COMMITID  desc";
-			}
-			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {				
+			String sql=" (select   JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,SUM(DURATION) as DURATION,TRIGGER_FROM,start_timestamp,SCMUSER  from buildon_reports  "
+					+ " where  SCMUSER=?   and ( startDate=?   or endDate=?  or  PROJECT=?     or  BRANCH=?)  "
+					+ " group by JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,start_timestamp,SCMUSER ) order by start_timestamp,COMMITID  desc";
+
+			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
+				statement.setString(1,userId);
+				statement.setDate(2,new java.sql.Date(startdate.getTime()));
+				statement.setDate(3,new java.sql.Date(enddate.getTime()));
+				if (project!= null) {
+					statement.setString(4,project);
+				} else {
+					statement.setNull(4, java.sql.Types.VARCHAR);
+				}
+				if (branch!= null) {
+					statement.setString(5,branch);
+				} else {
+					statement.setNull(5, java.sql.Types.VARCHAR);
+				}
 				logger.info("sql"+sql);
 				Reports reporttemp=new Reports();
 				try (ResultSet rs = statement.executeQuery()) {
@@ -382,31 +193,15 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 				logger.debug(e.toString());
 			}
 		}else{
-			logger.debug("project else"+project);
-			if(null!=project && !(project.equals("")))
-			{
-			logger.debug("project if"+project);
-			sql =("(SELECT start_timestamp,JOBNAME,STATUS,PROJECT,BRANCH,SUM(DURATION) as DURATION,COMMITID,TRIGGER_FROM,scmuser  FROM  buildon_reports r "
-					+ " WHERE r.scmuser='"+userId+"' and r.project='"+project+"' and ((r.startDate >='"+new java.sql.Date(startdate.getTime())+"' and r.startDate <='"+new java.sql.Date(enddate.getTime())+"') or r.endDate='"+new java.sql.Date(enddate.getTime())					
-					+ "') group by start_timestamp,JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,scmuser) "
+			String  sql =("(SELECT start_timestamp,JOBNAME,STATUS,PROJECT,BRANCH,SUM(DURATION) as DURATION,COMMITID,TRIGGER_FROM,scmuser  FROM  buildon_reports r WHERE r.scmuser=?  "
+					+ "    and (  r.project =?   or r.branch= ?  or  r.startDate=?    or  r.endDate=?   ) group by start_timestamp,JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,scmuser) "
 					+ "  UNION "
-					+ " (SELECT  T.start_timestamp,T.JOBNAME,T.STATUS,T.PROJECT,T.BRANCH,SUM(T.DURATION)  as DURATION,T.COMMITID,T.TRIGGER_FROM,T.scmuser   FROM  buildon_reports  T "
-					+ "  WHERE T.scmuser <> '"+userId+"' AND T.project='"+project+"'  and ((T.startDate >='"+new java.sql.Date(startdate.getTime())+"' and T.startDate <='"+new java.sql.Date(enddate.getTime())+"') or T.endDate='"+new java.sql.Date(enddate.getTime())
-					+ "') group by T.start_timestamp,T.JOBNAME,T.STATUS,T.BRANCH,T.PROJECT,T.COMMITID,T.TRIGGER_FROM,T.scmuser) ORDER BY start_timestamp,COMMITID desc");
-			}
-			else
-			{
-				logger.debug("else project else"+project);
-				sql =("(SELECT start_timestamp,JOBNAME,STATUS,PROJECT,BRANCH,SUM(DURATION) as DURATION,COMMITID,TRIGGER_FROM,scmuser  FROM  buildon_reports r "
-						+ "WHERE r.scmuser='"+userId+"' and ((r.startDate >='"+new java.sql.Date(startdate.getTime())+"' and r.startDate <='"+new java.sql.Date(enddate.getTime())+"') or r.endDate='"+new java.sql.Date(enddate.getTime())
-						+ "') group by start_timestamp,JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,scmuser) "
-						+ "  UNION "
-						+ " (SELECT  T.start_timestamp,T.JOBNAME,T.STATUS,T.PROJECT,T.BRANCH,SUM(T.DURATION)  as DURATION,T.COMMITID,T.TRIGGER_FROM,T.scmuser   FROM  buildon_reports  T "
-						+ "WHERE T.scmuser <> '"+userId+"' AND ((T.startDate >='"+new java.sql.Date(startdate.getTime())+"' and T.startDate <='"+new java.sql.Date(enddate.getTime())+"') or T.endDate='"+new java.sql.Date(enddate.getTime())
-						+ "') group by T.start_timestamp,T.JOBNAME,T.STATUS,T.BRANCH,T.PROJECT,T.COMMITID,T.TRIGGER_FROM,T.scmuser) ORDER BY start_timestamp,COMMITID desc");				
-			}
+					+ " (SELECT  T.start_timestamp,T.JOBNAME,T.STATUS,T.PROJECT,T.BRANCH,SUM(T.DURATION)  as DURATION,T.COMMITID,T.TRIGGER_FROM,T.scmuser   FROM  buildon_reports  T WHERE T.scmuser <> ?  "
+					+ "  AND (T.project = ?   or  T.branch= ?   or  T.startDate=?    or  T.endDate=?  )"
+					+ " group by T.start_timestamp,T.JOBNAME,T.STATUS,T.BRANCH,T.PROJECT,T.COMMITID,T.TRIGGER_FROM,T.scmuser) ORDER BY start_timestamp,COMMITID desc");
+
 			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
-				/*statement.setString(1,userId);
+				statement.setString(1,userId);
 				statement.setString(2,project);
 				statement.setString(3,branch);
 				statement.setDate(4,new java.sql.Date(startdate.getTime()));
@@ -415,7 +210,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 				statement.setString(7,project);
 				statement.setString(8,branch);
 				statement.setDate(9,new java.sql.Date(startdate.getTime()));
-				statement.setDate(10,new java.sql.Date(enddate.getTime()));*/
+				statement.setDate(10,new java.sql.Date(enddate.getTime()));
 				Reports reporttemp=new Reports();
 				try (ResultSet rs = statement.executeQuery()) {
 					while (rs.next()) {
@@ -1293,13 +1088,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	@Override
 	public String getJsonData(String commitid) {
 		logger.info("commitid:"+commitid);
-		String json=null;
+		String json="0";
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitid");
 		query.setParameter("commitid",commitid);
 		List<Service> list = query.getResultList();
 		if(list.isEmpty()){
-			json=null;	
+			json="0";	
 		}else{
 			json=list.get(0).getJson();
 		}
@@ -1313,13 +1108,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 */
 	@Override
 	public  String getPodname(String commitId) {
-		String pod=null;
+		String pod="0";
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitid");
 		query.setParameter("commitid",commitId);
 		List<Service> list = query.getResultList();
 		if(list.isEmpty()){
-			pod=null;	
+			pod="0";	
 		}else{
 			pod=list.get(0).getPodname();
 		}
@@ -1334,7 +1129,7 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 */
 	@Override
 	public  String getServiceCommitId(String commitId) {
-		String commitidresult=null;
+		String commitidresult="0";
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select service from  Service  service where service.commitid=:commitId");
 		query.setParameter("commitId", commitId);
@@ -1447,14 +1242,14 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	 */
 	@Override
 	public String getReportsStatus(String commitId,String cijobname) {
-		String status=null;
+		String status="0";
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select report from  Reports  report where report.commitid=:commitId  and  report.ci_jobname=:cijobname ");
 		query.setParameter("commitId", commitId);
 		query.setParameter("cijobname",cijobname);
 		List<Reports>  list = query.getResultList();
 		if(list.isEmpty()){
-			status=null;
+			status="0";
 		}else{
 			status=list.get(0).getStatus();
 
@@ -1471,13 +1266,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 	@Override
 	public String getReportTriggerData(String commitid) {
 		logger.debug("commitid:"+commitid);		
-		String trigger=null;		
+		String trigger="0";		
 		EntityManager em = factory.createEntityManager();
 		Query query = em.createQuery("select report from  Reports  report where report.commitid=:commitid");
 		query.setParameter("commitid", commitid);
 		List<Reports>  list = query.getResultList();
 		if(list.isEmpty()){
-			trigger=null;
+			trigger="0";
 		}else{
 			trigger=list.get(0).getTRIGGER_FROM();
 		}

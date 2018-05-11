@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+        <pluginGroups>
+                <pluginGroup>org.sonarsource.scanner.maven</pluginGroup>
+				<pluginGroup>org.sonatype.plugins</pluginGroup>
+        </pluginGroups>
+
+        <proxies></proxies>
+
+       <servers>
+		<server>
+		<!--NEXUS-ID - this id will be used in Nexus profile -->
+			<id>NEXUS-ID</id>
+			<username>ENTER-NEXUS-USER</username>
+			<password>ENTER-NEXUS-PASSWORD</password>
+		</server>
+
+                <server>
+				<!--TOMCAT-ID - this id will be used in tomcat profile -->
+                       <id>TOMCAT-ID</id>
+                       <username>ENTER-TOMCAT-USER</username>
+                       <password>ENTER-TOMCAT-PASSWORD</password>
+                </server>
+        </servers>
+        <mirrors>
+	</mirrors>
+
+<profiles>
+    <profile>
+        <id>SONAR-ID</id>
+		<activation>
+                  <activeByDefault>true</activeByDefault>
+        </activation>
+        <properties>
+        <!--<sonar.jdbc.url>ENTER-SONAR-CONNECTION-STRING</sonar.jdbc.url>
+          <sonar.jdbc.driver>ENTER-SONAR-DRIVER</sonar.jdbc.driver>
+          <sonar.jdbc.username>ENTER-SONAR-USER</sonar.jdbc.username>
+          <sonar.jdbc.password>ENTER-SONAR-PASSWORD</sonar.jdbc.password>-->
+          <!-- SERVER ON A REMOTE HOST -->
+          <sonar.host.url>ENTER-SONAR-URL</sonar.host.url>
+        </properties>
+    </profile>
+
+<profile>
+<id>NEXUS-ID</id>
+                <activation>
+                  <activeByDefault>true</activeByDefault>
+        </activation>
+        <properties>
+    <repositoryId>NEXUS-ID</repositoryId>
+	<!-- NEXUS-REPO-URL  http://NEXUS-IP:NEXUS-PORT/nexus/content/repositories/NEXUS-REPO-NAME/ -->
+        <url>http://NEXUS-IP:NEXUS-PORT/nexus/content/repositories/NEXUS-REPO-NAME/</url>
+      </properties>
+</profile>
+
+	
+  <profile>
+     <id>TOMCAT-ID</id>
+	 <activation>
+                  <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+	  <!-- TOMCAT-URL  http://TOMCAT-IP:TOMCAT-PORT/manager/text -->
+    <maven.tomcat.url>http://TOMCAT-IP:TOMCAT-PORT/manager/text</maven.tomcat.url>
+      </properties>
+  </profile>
+	
+  </profiles>
+
+</settings>

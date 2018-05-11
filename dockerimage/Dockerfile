@@ -8,16 +8,12 @@ VOLUME /var/jenkins_home
 RUN apt-get update && apt-get install -y wget curl zip tree && apt-get install -y software-properties-common
 
 # DEBUG Tools
-RUN apt-get install -y vim elinks
+RUN apt-get install -y vim
 
 # Install a basic SSH server
 RUN apt-get install -y openssh-server openssh-client
 RUN sed -i 's|session required pam_loginuid.so|session optional pam_loginuid.so|g' /etc/pam.d/sshd
 RUN mkdir -p /var/run/sshd
-
-# Use tini as subreaper in Docker container to adopt zombie processes
-COPY tini-static  /bin/tini
-RUN  chmod +x /bin/tini  && echo "$TINI_SHA /bin/tini"
 
 ######################################################## BUILD TOOLS #########################################################
 # GIT
@@ -35,10 +31,6 @@ RUN mkdir -p /usr/share/maven \
 
 # Define MAVEN_HOME
 ENV MAVEN_HOME /usr/share/maven
-
-# Copy Maven settings
-RUN rm -rf /usr/share/maven/conf/settings.xml
-COPY settings.xml /usr/share/maven/conf/settings.xml
 
 ########################################################### JENKINS  ###########################################################
 ENV JENKINS_VERSION 2.60.3
@@ -80,8 +72,8 @@ COPY plugins.txt /usr/local/bin/plugins.txt
 RUN chmod +x /usr/local/bin/install-plugins.sh
 
 
-# Tini as the entry point to manage zombie processes
-ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
+# entry point to manage zombie processes
+ENTRYPOINT ["/bin/bash","--","/usr/local/bin/jenkins.sh"]
 
 # Expose Ports for web access and slave agents
 EXPOSE 8080
