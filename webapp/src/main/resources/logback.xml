@@ -31,7 +31,7 @@
   <prudent>true</prudent>
 </appender>
 <!--Enable log level on demand - info, debug, error, trace, warn -->  	
-	<root level="debug">
+	<root level="error">
         <appender-ref ref="RollingFile-Appender" />
 	</root>
 </configuration>
