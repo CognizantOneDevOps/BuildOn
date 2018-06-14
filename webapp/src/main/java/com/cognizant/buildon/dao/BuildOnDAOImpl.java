@@ -112,22 +112,23 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 		ArrayList<String> list=new ArrayList<>();
 		if(intiatedBy.equalsIgnoreCase("self")){
 			String sql=" (select   JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,SUM(DURATION) as DURATION,TRIGGER_FROM,start_timestamp,SCMUSER  from buildon_reports  "
-					+ " where  SCMUSER=?   and ( startDate=?   or endDate=?  or  PROJECT=?     or  BRANCH=?)  "
+					+ " where  SCMUSER=?   and ( startDate>=?  and startDate<=? ) or endDate=? or  PROJECT=? or  BRANCH=? "
 					+ " group by JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,start_timestamp,SCMUSER ) order by start_timestamp,COMMITID  desc";
 
 			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
 				statement.setString(1,userId);
 				statement.setDate(2,new java.sql.Date(startdate.getTime()));
 				statement.setDate(3,new java.sql.Date(enddate.getTime()));
+				statement.setDate(4,new java.sql.Date(enddate.getTime()));
 				if (project!= null) {
-					statement.setString(4,project);
-				} else {
-					statement.setNull(4, java.sql.Types.VARCHAR);
-				}
-				if (branch!= null) {
-					statement.setString(5,branch);
+					statement.setString(5,project);
 				} else {
 					statement.setNull(5, java.sql.Types.VARCHAR);
+				}
+				if (branch!= null) {
+					statement.setString(6,branch);
+				} else {
+					statement.setNull(6, java.sql.Types.VARCHAR);
 				}
 				logger.info("sql"+sql);
 				Reports reporttemp=new Reports();
@@ -194,10 +195,10 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 			}
 		}else{
 			String  sql =("(SELECT start_timestamp,JOBNAME,STATUS,PROJECT,BRANCH,SUM(DURATION) as DURATION,COMMITID,TRIGGER_FROM,scmuser  FROM  buildon_reports r WHERE r.scmuser=?  "
-					+ "    and (  r.project =?   or r.branch= ?  or  r.startDate=?    or  r.endDate=?   ) group by start_timestamp,JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,scmuser) "
+					+ "    and (  r.project =?   or r.branch= ?  or  (r.startDate>=?  and r.startDate<=?) or r.endDate=? ) group by start_timestamp,JOBNAME,STATUS,BRANCH,PROJECT,COMMITID,TRIGGER_FROM,scmuser) "
 					+ "  UNION "
 					+ " (SELECT  T.start_timestamp,T.JOBNAME,T.STATUS,T.PROJECT,T.BRANCH,SUM(T.DURATION)  as DURATION,T.COMMITID,T.TRIGGER_FROM,T.scmuser   FROM  buildon_reports  T WHERE T.scmuser <> ?  "
-					+ "  AND (T.project = ?   or  T.branch= ?   or  T.startDate=?    or  T.endDate=?  )"
+					+ "  AND (T.project = ?   or  T.branch= ?   or  (T.startDate>=?    and  T.startDate<=? ) or T.endDate=? )"
 					+ " group by T.start_timestamp,T.JOBNAME,T.STATUS,T.BRANCH,T.PROJECT,T.COMMITID,T.TRIGGER_FROM,T.scmuser) ORDER BY start_timestamp,COMMITID desc");
 
 			try(Connection con=createConnection();PreparedStatement statement=con.prepareStatement(sql)) {
@@ -206,11 +207,13 @@ public class BuildOnDAOImpl  implements BuildOnDAO  {
 				statement.setString(3,branch);
 				statement.setDate(4,new java.sql.Date(startdate.getTime()));
 				statement.setDate(5,new java.sql.Date(enddate.getTime()));
-				statement.setString(6,userId);
-				statement.setString(7,project);
-				statement.setString(8,branch);
-				statement.setDate(9,new java.sql.Date(startdate.getTime()));
-				statement.setDate(10,new java.sql.Date(enddate.getTime()));
+				statement.setDate(6,new java.sql.Date(enddate.getTime()));
+				statement.setString(7,userId);
+				statement.setString(8,project);
+				statement.setString(9,branch);
+				statement.setDate(10,new java.sql.Date(startdate.getTime()));
+				statement.setDate(11,new java.sql.Date(enddate.getTime()));
+				statement.setDate(12,new java.sql.Date(enddate.getTime()));
 				Reports reporttemp=new Reports();
 				try (ResultSet rs = statement.executeQuery()) {
 					while (rs.next()) {
