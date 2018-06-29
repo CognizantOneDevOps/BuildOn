@@ -60,28 +60,27 @@ def upload():
     if file and allowed_file(file.filename):
         # Make the filename safe, remove unsupported chars
         filename = file.filename
-	file_temp = filename.split(".log")[0]
+        file_temp = filename.split(".log")[0]
         commitid = file_temp[-7:]
-	print "COMMIT: " +  commitid
+        print ("COMMIT: " +  commitid)
 	
 
 	##Uplaod folder for Jenkins and Kube logs
-	uploadPath=logbasepath
-	if not os.path.exists(uploadPath+commitid):
-		os.makedirs(uploadPath+commitid)
+        uploadPath=logbasepath
+        if not os.path.exists(uploadPath+commitid):
+                os.makedirs(uploadPath+commitid)
         file.save(os.path.join(uploadPath+commitid, filename))
     return 'ok'
 
 @app.route('/setup', methods=['POST'])
 def setup():
-    print request.data
+    print (request.data)
     build = BuildOn(request.data)
     buildon = build.setup(request.data)
-    print buildon
+    print (buildon)
     if (buildon != 0):
 	##To forward logs to ElasticSearch. If required enable the below line and copy this script from backup folder
 	#pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/LogsForwarding.py"]) 
 	##To update jenkins job's live status in root.reports table
-	pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/dbupdate.py"]) 
+        pid = subprocess.Popen([sys.executable, "/home/ubuntu/BuildOn/dbupdate.py"]) 
     return "ok"
-
