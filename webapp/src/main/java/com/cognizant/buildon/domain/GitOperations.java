@@ -700,7 +700,9 @@ public class GitOperations {
 	 * @return
 	 */
 	public static String getHistoricKube(String commitId) {
-		String path = FilenameUtils.normalize("/root/buildlog/"+commitId+"/kube-"+commitId+".log");
+		Properties props = readPropertymethod();
+                String basepath=props.getProperty("kubernetes.logbasepath");
+                String path = FilenameUtils.normalize(basepath+commitId+"/kube-"+commitId+".log");	
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader reader = new BufferedReader(new FileReader(path))) {
 			String line = null;         
@@ -718,7 +720,9 @@ public class GitOperations {
 	 * @return
 	 */
 	public static String getHistoricCILogs(String commitId) {
-		String path = FilenameUtils.normalize("/root/buildlog/"+commitId+"/jenkins-"+commitId+".log");
+		Properties props = readPropertymethod();
+                String basepath=props.getProperty("kubernetes.logbasepath");
+                String path = FilenameUtils.normalize(basepath+commitId+"/jenkins-"+commitId+".log");
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader reader = new BufferedReader(new FileReader(path))) {
 			String line = null;         
