@@ -36,6 +36,7 @@ k8s_namespace = (os.environ['k8s_namespace'])
 k8s_serviceaccount = (os.environ['k8s_serviceaccount'])
 CustomMavenSettings = (os.environ['CustomMavenSettings'])
 SettingsXmlPath = (os.environ['SettingsXmlPath'])
+logbasepath = (os.environ['logbasepath'])
 print ("Inside dbupdate.py")
 
 pod_name = ''
@@ -66,7 +67,7 @@ podport = '8080'
 failureflag = 'false'
 abortflag = 'false'
 buildStatusJson = ''
-file = open("/root/buildlog/"+commit_id+"/Jenkinsfile").read().splitlines()
+file = open(logbasepath+commit_id+"/Jenkinsfile").read().splitlines()
 i = 0
 for index, line in enumerate(file):
 	line1 = line.replace(" ","")
